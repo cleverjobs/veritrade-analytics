@@ -1,0 +1,32 @@
+[project]
+name = "veritrade-backend"
+version = "0.1.0"
+description = "Low-latency financial news summary and sentiment API"
+requires-python = ">=3.13,<3.14"
+license = "MIT"
+dependencies = [
+    "fastapi>=0.143",
+    "uvicorn[standard]>=0.34",
+    "httpx[http2]>=0.28",
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+    "selectolax>=1.0",
+    "lxml>=5.3",
+    "lxml-html-clean>=0.4",
+    "cssselect>=1.2",
+    "beautifulsoup4>=4.12",
+    "trafilatura>=2.3",
+    "readability-lxml>=0.8",
+    "newspaper4k>=0.9",
+    "justext>=3.0",
+]
+
+[project.scripts]
+veritrade-healthcheck = "veritrade.healthcheck:main"
+
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/veritrade"]

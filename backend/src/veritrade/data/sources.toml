@@ -1,0 +1,87 @@
+# Source registry shared by the fetcher, extractors, probe, Opus discovery and live smoke.
+# `status` is set by scripts/probe_sources.py: candidate | primary | backup | rejected.
+# [sources.<key>.profile] holds per-domain extraction selectors (filled from probe output).
+
+[sources.yahoo]
+name = "Yahoo Finance"
+domains = ["finance.yahoo.com"]
+kind = "news"
+status = "candidate"
+
+[sources.cnbc]
+name = "CNBC"
+domains = ["www.cnbc.com", "cnbc.com"]
+kind = "news"
+status = "candidate"
+
+[sources.apnews]
+name = "AP News"
+domains = ["apnews.com"]
+kind = "news"
+status = "candidate"
+
+[sources.investing]
+name = "Investing.com"
+domains = ["www.investing.com", "investing.com"]
+kind = "news"
+status = "candidate"
+
+[sources.fool]
+name = "The Motley Fool"
+domains = ["www.fool.com", "fool.com"]
+kind = "news"
+status = "candidate"
+
+[sources.benzinga]
+name = "Benzinga"
+domains = ["www.benzinga.com", "benzinga.com"]
+kind = "news"
+status = "candidate"
+
+[sources.prnewswire]
+name = "PR Newswire"
+domains = ["www.prnewswire.com", "prnewswire.com"]
+kind = "press-release"
+status = "candidate"
+
+[sources.globenewswire]
+name = "GlobeNewswire"
+domains = ["www.globenewswire.com", "globenewswire.com"]
+kind = "press-release"
+status = "candidate"
+
+[sources.sec]
+name = "SEC EDGAR 8-K EX-99.1"
+domains = ["www.sec.gov", "sec.gov"]
+kind = "filing"
+status = "candidate"
+
+[sources.cnn]
+name = "CNN Business"
+domains = ["www.cnn.com", "edition.cnn.com", "cnn.com"]
+kind = "news"
+status = "candidate"
+
+[sources.fortune]
+name = "Fortune"
+domains = ["fortune.com"]
+kind = "news"
+status = "candidate"
+
+[sources.businesswire]
+name = "Business Wire"
+domains = ["www.businesswire.com", "businesswire.com"]
+kind = "press-release"
+status = "candidate"
+
+[sources.guardian]
+name = "The Guardian Business"
+domains = ["www.theguardian.com", "theguardian.com"]
+kind = "news"
+status = "candidate"
+
+[sources.bbc]
+name = "BBC Business"
+domains = ["www.bbc.com", "www.bbc.co.uk", "bbc.com"]
+kind = "news"
+status = "candidate"

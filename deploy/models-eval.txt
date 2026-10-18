@@ -1,0 +1,11 @@
+# Native eval/serve roster (pulled sequentially by scripts/dev_setup.py pull --set eval)
+qwen3.5:0.8b-q8_0
+qwen3.5:2b-q4_K_M
+qwen3.5:4b-q4_K_M
+qwen3:4b-instruct-2507-q4_K_M
+ministral-3:3b
+qwen3-embedding:0.6b
+tev1:0.8b-q8_0
+nimble:9b-q4_K_M
+clef-flash:9b-q8_0
+qwen3.5:9b-q4_K_M

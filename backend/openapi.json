@@ -1,0 +1,1412 @@
+{
+  "components": {
+    "schemas": {
+      "AnalyzeRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "extractor": {
+            "default": "cascade",
+            "enum": [
+              "cascade",
+              "jsonld",
+              "profile",
+              "density",
+              "trafilatura",
+              "trafilatura-precision",
+              "readability",
+              "newspaper",
+              "justext",
+              "strip-tags"
+            ],
+            "title": "Extractor",
+            "type": "string"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Allowlisted Ollama tag; endpoint default when omitted.",
+            "title": "Model"
+          },
+          "no_cache": {
+            "default": false,
+            "description": "Bypass fetch and result caches (used by latency benchmarks).",
+            "title": "No Cache",
+            "type": "boolean"
+          },
+          "parser": {
+            "default": "selectolax",
+            "enum": [
+              "selectolax",
+              "lxml",
+              "bs4",
+              "bs4-lxml"
+            ],
+            "title": "Parser",
+            "type": "string"
+          },
+          "scope": {
+            "default": "full",
+            "enum": [
+              "lede",
+              "full"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "minLength": 1,
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "AnalyzeRequest",
+        "type": "object"
+      },
+      "AnalyzeResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "entity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ArticleMeta"
+          },
+          "signal": {
+            "$ref": "#/components/schemas/SignalResult"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "timings": {
+            "$ref": "#/components/schemas/Timings"
+          }
+        },
+        "required": [
+          "meta",
+          "signal",
+          "summary",
+          "timings"
+        ],
+        "title": "AnalyzeResponse",
+        "type": "object"
+      },
+      "ArticleMeta": {
+        "additionalProperties": false,
+        "properties": {
+          "backend": {
+            "description": "Inference backend label, e.g. native-metal or docker-cpu.",
+            "title": "Backend",
+            "type": "string"
+          },
+          "cached": {
+            "title": "Cached",
+            "type": "boolean"
+          },
+          "endpoint": {
+            "enum": [
+              "signal",
+              "summary",
+              "analyze"
+            ],
+            "title": "Endpoint",
+            "type": "string"
+          },
+          "extraction_method": {
+            "description": "Strategy that produced the body (cascade resolves to one).",
+            "title": "Extraction Method",
+            "type": "string"
+          },
+          "extractor": {
+            "enum": [
+              "cascade",
+              "jsonld",
+              "profile",
+              "density",
+              "trafilatura",
+              "trafilatura-precision",
+              "readability",
+              "newspaper",
+              "justext",
+              "strip-tags"
+            ],
+            "title": "Extractor",
+            "type": "string"
+          },
+          "field_order": {
+            "anyOf": [
+              {
+                "enum": [
+                  "sentiment-first",
+                  "summary-first"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field Order"
+          },
+          "final_url": {
+            "title": "Final Url",
+            "type": "string"
+          },
+          "input_chars": {
+            "title": "Input Chars",
+            "type": "integer"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "model_kind": {
+            "enum": [
+              "generative",
+              "decision"
+            ],
+            "title": "Model Kind",
+            "type": "string"
+          },
+          "parser": {
+            "enum": [
+              "selectolax",
+              "lxml",
+              "bs4",
+              "bs4-lxml"
+            ],
+            "title": "Parser",
+            "type": "string"
+          },
+          "prompt_version": {
+            "title": "Prompt Version",
+            "type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "scope": {
+            "enum": [
+              "lede",
+              "full"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Key from sources.toml when the domain is a known source.",
+            "title": "Source"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "word_count": {
+            "title": "Word Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "url",
+          "final_url",
+          "title",
+          "endpoint",
+          "model",
+          "model_kind",
+          "prompt_version",
+          "parser",
+          "extractor",
+          "extraction_method",
+          "scope",
+          "input_chars",
+          "word_count",
+          "cached",
+          "backend"
+        ],
+        "title": "ArticleMeta",
+        "type": "object"
+      },
+      "CacheInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "fetch": {
+            "enum": [
+              "hit",
+              "miss",
+              "joined",
+              "bypass"
+            ],
+            "title": "Fetch",
+            "type": "string"
+          },
+          "result": {
+            "enum": [
+              "hit",
+              "miss",
+              "bypass"
+            ],
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fetch",
+          "result"
+        ],
+        "title": "CacheInfo",
+        "type": "object"
+      },
+      "ErrorBody": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/ErrorCode"
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hint"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "retryable": {
+            "default": false,
+            "title": "Retryable",
+            "type": "boolean"
+          },
+          "upstream_status": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Upstream Status"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorBody",
+        "type": "object"
+      },
+      "ErrorCode": {
+        "enum": [
+          "invalid_url",
+          "blocked_destination",
+          "model_not_allowed",
+          "paywalled",
+          "consent_required",
+          "extraction_empty",
+          "unsupported_content",
+          "too_large",
+          "source_blocked",
+          "upstream_http",
+          "schema_violation",
+          "model_unavailable",
+          "llm_unreachable",
+          "upstream_timeout",
+          "inference_timeout"
+        ],
+        "title": "ErrorCode",
+        "type": "string"
+      },
+      "ErrorResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorBody"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "ErrorResponse",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "backend": {
+            "title": "Backend",
+            "type": "string"
+          },
+          "ollama_reachable": {
+            "title": "Ollama Reachable",
+            "type": "boolean"
+          },
+          "ollama_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ollama Version"
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "degraded"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "ollama_reachable",
+          "backend",
+          "version"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "InferenceTimings": {
+        "additionalProperties": false,
+        "properties": {
+          "eval_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eval Ms"
+          },
+          "eval_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eval Tokens"
+          },
+          "load_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Load Ms"
+          },
+          "prompt_eval_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Eval Ms"
+          },
+          "prompt_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Tokens"
+          },
+          "ttft_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ttft Ms"
+          },
+          "wall_ms": {
+            "title": "Wall Ms",
+            "type": "number"
+          }
+        },
+        "required": [
+          "wall_ms"
+        ],
+        "title": "InferenceTimings",
+        "type": "object"
+      },
+      "ModelInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "endpoints": {
+            "items": {
+              "enum": [
+                "signal",
+                "summary",
+                "analyze"
+              ],
+              "type": "string"
+            },
+            "title": "Endpoints",
+            "type": "array"
+          },
+          "evaluated": {
+            "default": true,
+            "description": "False for plumbing-only models (e.g. the CI decision model).",
+            "title": "Evaluated",
+            "type": "boolean"
+          },
+          "installed": {
+            "title": "Installed",
+            "type": "boolean"
+          },
+          "kind": {
+            "enum": [
+              "generative",
+              "decision"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "size_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size Bytes"
+          }
+        },
+        "required": [
+          "name",
+          "kind",
+          "endpoints",
+          "installed"
+        ],
+        "title": "ModelInfo",
+        "type": "object"
+      },
+      "ModelsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "defaults": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "enum": [
+                "signal",
+                "summary",
+                "analyze"
+              ]
+            },
+            "title": "Defaults",
+            "type": "object"
+          },
+          "extractors": {
+            "items": {
+              "enum": [
+                "cascade",
+                "jsonld",
+                "profile",
+                "density",
+                "trafilatura",
+                "trafilatura-precision",
+                "readability",
+                "newspaper",
+                "justext",
+                "strip-tags"
+              ],
+              "type": "string"
+            },
+            "title": "Extractors",
+            "type": "array"
+          },
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/ModelInfo"
+            },
+            "title": "Models",
+            "type": "array"
+          },
+          "parsers": {
+            "items": {
+              "enum": [
+                "selectolax",
+                "lxml",
+                "bs4",
+                "bs4-lxml"
+              ],
+              "type": "string"
+            },
+            "title": "Parsers",
+            "type": "array"
+          },
+          "scopes": {
+            "items": {
+              "enum": [
+                "lede",
+                "full"
+              ],
+              "type": "string"
+            },
+            "title": "Scopes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "models",
+          "defaults",
+          "parsers",
+          "extractors",
+          "scopes"
+        ],
+        "title": "ModelsResponse",
+        "type": "object"
+      },
+      "SignalRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "extractor": {
+            "default": "cascade",
+            "enum": [
+              "cascade",
+              "jsonld",
+              "profile",
+              "density",
+              "trafilatura",
+              "trafilatura-precision",
+              "readability",
+              "newspaper",
+              "justext",
+              "strip-tags"
+            ],
+            "title": "Extractor",
+            "type": "string"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Allowlisted Ollama tag; endpoint default when omitted.",
+            "title": "Model"
+          },
+          "no_cache": {
+            "default": false,
+            "description": "Bypass fetch and result caches (used by latency benchmarks).",
+            "title": "No Cache",
+            "type": "boolean"
+          },
+          "parser": {
+            "default": "selectolax",
+            "enum": [
+              "selectolax",
+              "lxml",
+              "bs4",
+              "bs4-lxml"
+            ],
+            "title": "Parser",
+            "type": "string"
+          },
+          "scope": {
+            "default": "lede",
+            "description": "lede = headline + opening paragraphs; full = whole article.",
+            "enum": [
+              "lede",
+              "full"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "minLength": 1,
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "SignalRequest",
+        "type": "object"
+      },
+      "SignalResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/ArticleMeta"
+          },
+          "signal": {
+            "$ref": "#/components/schemas/SignalResult"
+          },
+          "timings": {
+            "$ref": "#/components/schemas/Timings"
+          }
+        },
+        "required": [
+          "meta",
+          "signal",
+          "timings"
+        ],
+        "title": "SignalResponse",
+        "type": "object"
+      },
+      "SignalResult": {
+        "additionalProperties": false,
+        "properties": {
+          "abstained": {
+            "description": "True when the call fell below the frozen confidence threshold.",
+            "title": "Abstained",
+            "type": "boolean"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "policy": {
+            "enum": [
+              "probability",
+              "label-logprob",
+              "ordinal"
+            ],
+            "title": "Policy",
+            "type": "string"
+          },
+          "probabilities": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "propertyNames": {
+                  "enum": [
+                    "bullish",
+                    "bearish",
+                    "neutral"
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Probabilities"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "maximum": 2.0,
+                "minimum": -2.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "sentiment": {
+            "enum": [
+              "bullish",
+              "bearish",
+              "neutral"
+            ],
+            "title": "Sentiment",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sentiment",
+          "abstained",
+          "policy"
+        ],
+        "title": "SignalResult",
+        "type": "object"
+      },
+      "SummaryRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "extractor": {
+            "default": "cascade",
+            "enum": [
+              "cascade",
+              "jsonld",
+              "profile",
+              "density",
+              "trafilatura",
+              "trafilatura-precision",
+              "readability",
+              "newspaper",
+              "justext",
+              "strip-tags"
+            ],
+            "title": "Extractor",
+            "type": "string"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Allowlisted Ollama tag; endpoint default when omitted.",
+            "title": "Model"
+          },
+          "no_cache": {
+            "default": false,
+            "description": "Bypass fetch and result caches (used by latency benchmarks).",
+            "title": "No Cache",
+            "type": "boolean"
+          },
+          "parser": {
+            "default": "selectolax",
+            "enum": [
+              "selectolax",
+              "lxml",
+              "bs4",
+              "bs4-lxml"
+            ],
+            "title": "Parser",
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "minLength": 1,
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "SummaryRequest",
+        "type": "object"
+      },
+      "SummaryResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/ArticleMeta"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "timings": {
+            "$ref": "#/components/schemas/Timings"
+          }
+        },
+        "required": [
+          "meta",
+          "summary",
+          "timings"
+        ],
+        "title": "SummaryResponse",
+        "type": "object"
+      },
+      "Timings": {
+        "additionalProperties": false,
+        "properties": {
+          "cache": {
+            "$ref": "#/components/schemas/CacheInfo"
+          },
+          "consent_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consent Ms"
+          },
+          "extract_ms": {
+            "title": "Extract Ms",
+            "type": "number"
+          },
+          "fetch_ms": {
+            "title": "Fetch Ms",
+            "type": "number"
+          },
+          "inference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InferenceTimings"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "parse_ms": {
+            "title": "Parse Ms",
+            "type": "number"
+          },
+          "total_ms": {
+            "title": "Total Ms",
+            "type": "number"
+          }
+        },
+        "required": [
+          "total_ms",
+          "fetch_ms",
+          "parse_ms",
+          "extract_ms",
+          "cache"
+        ],
+        "title": "Timings",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "VeriTrade Analytics",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/analyze": {
+      "post": {
+        "operationId": "analyze_api_analyze_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyzeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "summary": "Analyze"
+      }
+    },
+    "/api/analyze/stream": {
+      "post": {
+        "operationId": "analyze_stream_api_analyze_stream_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "itemSchema": {
+                  "properties": {
+                    "data": {
+                      "type": "string"
+                    },
+                    "event": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "retry": {
+                      "minimum": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "502": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "summary": "Analyze Stream"
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/api/models": {
+      "get": {
+        "operationId": "models_api_models_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Models"
+      }
+    },
+    "/api/signal": {
+      "post": {
+        "operationId": "signal_api_signal_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignalResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "summary": "Signal"
+      }
+    },
+    "/api/summary": {
+      "post": {
+        "operationId": "summary_api_summary_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SummaryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummaryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "summary": "Summary"
+      }
+    },
+    "/api/summary/stream": {
+      "post": {
+        "operationId": "summary_stream_api_summary_stream_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SummaryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "itemSchema": {
+                  "properties": {
+                    "data": {
+                      "type": "string"
+                    },
+                    "event": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "retry": {
+                      "minimum": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "502": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "503": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "summary": "Summary Stream"
+      }
+    }
+  }
+}

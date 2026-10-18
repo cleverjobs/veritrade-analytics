@@ -1,0 +1,36 @@
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Ephemeral working files
+.temp/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Node / frontend
+node_modules/
+frontend/.next/
+frontend/out/
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+frontend/src/data/benchmarks.json
+frontend/next-env.d.ts
+
+# Publisher content, dataset text and caches (never committed)
+evals/data/private/
+evals/.cache/
+
+# Local env
+.env
+.env.local

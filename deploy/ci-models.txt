@@ -1,0 +1,3 @@
+# Tiny models for CI e2e (bundled profile)
+qwen3.5:0.8b-q8_0
+tev1:0.8b-q8_0

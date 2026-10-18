@@ -1,0 +1,99 @@
+# Serving config: allowlist, per-endpoint defaults, decoding options and frozen thresholds.
+# Provisional values until `veritrade_evals freeze` / `select --write` rewrite them from eval results.
+#
+# kind        generative (/api/chat) | decision (/v1/systemone)
+# endpoints   endpoints the model may serve
+# signal_schema   generative signal output: "label" (one of 3 labels) | "ordinal" (score -2..2)
+# policy      probability | label-logprob | ordinal  (streaming and /analyze always use ordinal)
+# min_p       decision/label-logprob threshold on the winning class probability
+# ordinal_t   directional call only when |score| >= ordinal_t (always set: streaming fallback)
+
+[defaults]
+signal = "nimble:9b-q4_K_M"
+summary = "qwen3.5:4b-q4_K_M"
+analyze = "qwen3.5:4b-q4_K_M"
+
+[models."clef-flash:9b-q8_0"]
+kind = "decision"
+endpoints = ["signal"]
+max_input_tokens = 2000
+policy = "probability"
+min_p = 0.5
+ordinal_t = 1
+
+[models."nimble:9b-q4_K_M"]
+kind = "decision"
+endpoints = ["signal"]
+max_input_tokens = 6000
+policy = "probability"
+min_p = 0.5
+ordinal_t = 1
+
+[models."tev1:0.8b-q8_0"]
+kind = "decision"
+endpoints = ["signal"]
+max_input_tokens = 1500
+policy = "probability"
+min_p = 0.5
+ordinal_t = 1
+evaluated = false  # CI plumbing model only
+
+[models."qwen3.5:0.8b-q8_0"]
+kind = "generative"
+endpoints = ["signal", "summary", "analyze"]
+num_ctx = 8192
+max_input_tokens = 3000
+num_predict = { signal = 16, summary = 160, analyze = 200 }
+signal_schema = "label"
+policy = "label-logprob"
+min_p = 0.5
+ordinal_t = 1
+
+[models."qwen3.5:2b-q4_K_M"]
+kind = "generative"
+endpoints = ["summary"]
+num_ctx = 8192
+max_input_tokens = 3000
+num_predict = { summary = 160 }
+policy = "ordinal"
+ordinal_t = 1
+
+[models."qwen3.5:4b-q4_K_M"]
+kind = "generative"
+endpoints = ["summary", "analyze"]
+num_ctx = 8192
+max_input_tokens = 3000
+num_predict = { summary = 160, analyze = 200 }
+policy = "ordinal"
+ordinal_t = 1
+field_order = "sentiment-first"
+
+[models."qwen3:4b-instruct-2507-q4_K_M"]
+kind = "generative"
+endpoints = ["analyze"]
+num_ctx = 8192
+max_input_tokens = 3000
+num_predict = { analyze = 200 }
+policy = "ordinal"
+ordinal_t = 1
+field_order = "sentiment-first"
+
+[models."ministral-3:3b"]
+kind = "generative"
+endpoints = ["analyze"]
+num_ctx = 8192
+max_input_tokens = 3000
+num_predict = { analyze = 200 }
+policy = "ordinal"
+ordinal_t = 1
+field_order = "sentiment-first"
+
+[models."qwen3.5:9b-q4_K_M"]
+kind = "generative"
+endpoints = ["analyze"]
+num_ctx = 8192
+max_input_tokens = 3000
+num_predict = { analyze = 200 }
+policy = "ordinal"
+ordinal_t = 1
+field_order = "sentiment-first"

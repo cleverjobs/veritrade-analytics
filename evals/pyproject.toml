@@ -1,0 +1,19 @@
+[project]
+name = "veritrade-evals"
+version = "0.1.0"
+description = "Evaluation and benchmarking harness for the VeriTrade backend"
+requires-python = ">=3.13,<3.14"
+license = "MIT"
+dependencies = [
+    "veritrade-backend",
+    "huggingface-hub>=0.27",
+    "pyarrow>=18.1",
+    "numpy>=2.1",
+]
+
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/veritrade_evals"]
