@@ -3,8 +3,24 @@ from __future__ import annotations
 import pytest
 
 from veritrade_evals import __main__ as cli
+from veritrade_evals import extraction_bench, finalists, freeze, grid, summary_eval
 from veritrade_evals.datasets import Example
 from veritrade_evals.splits import Split, SplitError, SplitName
+
+
+@pytest.mark.parametrize(
+    ("argv", "module"),
+    [
+        (["grid", "list"], grid),
+        (["finalists", "list"], finalists),
+        (["freeze", "--dry-run"], freeze),
+        (["extraction", "list"], extraction_bench),
+        (["summary", "report", "--split", "dev"], summary_eval),
+    ],
+)
+def test_wired_commands_dispatch_to_their_module(argv: list[str], module: cli.Command) -> None:
+    assert cli.build_parser().parse_args(argv).func is module.run
+    assert argv[0] not in cli.PLANNED
 
 
 @pytest.mark.parametrize("command", sorted(cli.PLANNED))

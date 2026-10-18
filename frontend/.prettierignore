@@ -6,3 +6,4 @@ src/lib/api-schema.d.ts
 src/data/benchmarks.json
 playwright-report/
 test-results/
+.temp/

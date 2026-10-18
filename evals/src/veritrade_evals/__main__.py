@@ -1,12 +1,24 @@
-"""`uv run python -m veritrade_evals <command>`: dataset, split and (later) evaluation commands."""
+"""`uv run python -m veritrade_evals <command>`: dataset, split and evaluation commands."""
 
 from __future__ import annotations
 
 import argparse
 import sys
 from collections.abc import Sequence
+from typing import Any, Protocol
 
-from veritrade_evals import articles_cli
+from veritrade_evals import (
+    articles_cli,
+    extraction_bench,
+    finalists,
+    freeze,
+    grid,
+    holdout,
+    latency,
+    report,
+    select,
+    summary_eval,
+)
 from veritrade_evals.datasets import (
     SPECS,
     DatasetError,
@@ -19,16 +31,27 @@ from veritrade_evals.datasets import (
 )
 from veritrade_evals.splits import SPLIT_NAMES, SplitError, load_split, make_splits, read_split_file
 
+
+class Command(Protocol):
+    """A module that registers one subcommand and dispatches its parsed arguments."""
+
+    def add_parser(self, subparsers: Any) -> argparse.ArgumentParser: ...
+    def run(self, args: argparse.Namespace) -> int: ...
+
+
+COMMANDS: tuple[Command, ...] = (
+    grid,
+    finalists,
+    freeze,
+    extraction_bench,
+    summary_eval,
+    latency,
+    select,
+    holdout,
+    report,
+)
 PLANNED = {
     "signal": "signal accuracy run over a split",
-    "grid": "prompt grid per model",
-    "freeze": "write frozen prompt versions and thresholds into models.toml",
-    "extraction": "parser x extractor matrix",
-    "latency": "latency suite",
-    "summary": "summary evaluation",
-    "select": "pick per-endpoint winners",
-    "holdout": "one-shot holdout run",
-    "report": "benchmarks.json and results README",
     "opus": "Opus subagent prompts and judgements",
 }
 
@@ -105,6 +128,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     articles_cli.register(commands)
+    for module in COMMANDS:
+        module.add_parser(commands).set_defaults(func=module.run)
 
     for name, help_text in PLANNED.items():
         planned = commands.add_parser(name, help=f"{help_text} (not implemented yet)")
