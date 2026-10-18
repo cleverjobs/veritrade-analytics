@@ -116,7 +116,7 @@ kind = "press-release"
 status = "primary"
 rank = 5
 feeds = ["https://www.globenewswire.com/RssFeed/orgclass/1/feedTitle/GlobeNewswire%20-%20News%20about%20Public%20Companies"]
-article_pattern = '^https://www\.globenewswire\.com/news-release/20\d\d/\d\d/\d\d/\d+/0/en/[^/]+\.html$'
+article_pattern = '^https://www\.globenewswire\.com/news-release/20\d\d/\d\d/\d\d/\d+/\d+/en/[^/]+\.html$'
 
 [sources.globenewswire.profile]
 body = "div#main-body-container p, div#main-body-container li"

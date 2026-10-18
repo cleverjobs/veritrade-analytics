@@ -389,7 +389,6 @@ class Request:
     day: date | None = None
 
 
-GNW_PATTERN = r"^https://www\.globenewswire\.com/news-release/20\d\d/\d\d/\d\d/\d+/\d+/en/[^/]+\.html$"
 # Archive pages link to sibling day pages and other nav that the article pattern would accept.
 ARCHIVE_EXCLUDE = re.compile(r"/(?:all|altdate)$")
 
@@ -448,8 +447,6 @@ ARCHIVES: dict[str, tuple[Archive, ...]] = {
     "guardian": (Archive("daily", "https://www.theguardian.com/business/{yyyy}/{mon}/{dd}/all"),),
     "bbc": (Archive("paged", "https://www.bbc.co.uk/news/business?page={page}", pages=40),),
 }
-# The feed links releases under org id 0, the sitemaps under the issuer's id; both resolve.
-PATTERN_OVERRIDES: dict[str, str] = {"globenewswire": GNW_PATTERN}
 
 
 def load_sources() -> dict[str, dict[str, Any]]:
@@ -678,7 +675,7 @@ class Discoverer:
         self._sources = sources if sources is not None else load_sources()
 
     def pattern(self, key: str) -> re.Pattern[str]:
-        return re.compile(PATTERN_OVERRIDES.get(key) or self._sources[key]["article_pattern"])
+        return re.compile(self._sources[key]["article_pattern"])
 
     def keep(self, key: str, url: str) -> bool:
         cfg = self._sources[key]
