@@ -1,0 +1,21 @@
+{
+  "source": "yahoo",
+  "slug": "article-1",
+  "captured_at": "2026-10-18T13:29:45+00:00",
+  "url_sha256": "88136d4215634bd483ccf099695ebbd38de8fd8c117fd71b25c4a7dd9b84a634",
+  "fixture_url": "https://finance.yahoo.com/vt-skeleton/article-1",
+  "title_marker": "VTX-272",
+  "body_markers": [
+    "VTB-1",
+    "VTB-2",
+    "VTB-3",
+    "VTB-4",
+    "VTB-5",
+    "VTB-6",
+    "VTB-7",
+    "VTB-8"
+  ],
+  "jsonld_body": false,
+  "stop_marker": null,
+  "bytes": 136904
+}

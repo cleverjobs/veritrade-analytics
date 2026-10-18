@@ -12,7 +12,8 @@ FRONTEND = ROOT / "frontend"
 
 
 def backend_steps(full: bool) -> list[tuple[str, list[str], Path]]:
-    tests = ["backend/tests", "evals/tests"] if full else ["backend/tests/unit", "evals/tests"]
+    backend_tests = "backend/tests" if full else "backend/tests/unit"
+    tests = [backend_tests, "evals/tests", "scripts/tests"]
     steps = [
         ("ruff", ["uv", "run", "ruff", "check", "."], ROOT),
         ("ruff-format", ["uv", "run", "ruff", "format", "--check", "."], ROOT),

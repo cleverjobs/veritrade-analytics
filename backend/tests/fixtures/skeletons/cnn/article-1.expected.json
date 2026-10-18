@@ -1,0 +1,30 @@
+{
+  "source": "cnn",
+  "slug": "article-1",
+  "captured_at": "2026-10-18T13:29:45+00:00",
+  "url_sha256": "eb1d74dbe5894158ad1009e6fc0c5c5ae6f48487214a5a3647b91f9050246503",
+  "fixture_url": "https://www.cnn.com/vt-skeleton/article-1",
+  "title_marker": "VTX-202",
+  "body_markers": [
+    "VTB-1",
+    "VTB-2",
+    "VTB-3",
+    "VTB-4",
+    "VTB-5",
+    "VTB-6",
+    "VTB-7",
+    "VTB-8",
+    "VTB-9",
+    "VTB-10",
+    "VTB-11",
+    "VTB-12",
+    "VTB-13",
+    "VTB-14",
+    "VTB-15",
+    "VTB-16",
+    "VTB-17"
+  ],
+  "jsonld_body": true,
+  "stop_marker": null,
+  "bytes": 300113
+}

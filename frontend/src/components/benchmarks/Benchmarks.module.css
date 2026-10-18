@@ -1,0 +1,136 @@
+.page h2 {
+  font-size: 1.2rem;
+}
+
+.sampleBanner {
+  background: var(--warn-bg);
+  color: var(--warn);
+  border: 1px solid var(--warn);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+}
+
+.env {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.section {
+  margin-top: 2rem;
+}
+
+.lead {
+  color: var(--muted);
+  font-size: 0.9rem;
+  max-width: 80ch;
+}
+
+.selection {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+
+.pick {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.pickEndpoint {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.pickModel {
+  font-weight: 700;
+}
+
+.pickReason {
+  font-size: 0.9rem;
+}
+
+.scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.caption {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.table th,
+.table td {
+  padding: 0.4rem 0.5rem;
+  border-top: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th,
+.table .num {
+  white-space: nowrap;
+}
+
+.table th {
+  background: var(--surface-2);
+  font-weight: 600;
+}
+
+.table abbr {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+.table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.table tr[data-selected] td {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.sub {
+  display: block;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.selected {
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.flag[data-over] {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.emptyCell {
+  color: var(--muted);
+  text-align: center;
+}

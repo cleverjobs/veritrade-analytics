@@ -1,0 +1,17 @@
+.git
+.github
+.temp
+.context
+.venv
+**/__pycache__
+**/.mypy_cache
+**/.ruff_cache
+**/.pytest_cache
+frontend/node_modules
+frontend/.next
+frontend/out
+frontend/test-results
+frontend/playwright-report
+evals/data
+backend/tests
+**/.DS_Store

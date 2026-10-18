@@ -1249,8 +1249,10 @@ version = "0.1.0"
 source = { editable = "backend" }
 dependencies = [
     { name = "beautifulsoup4" },
+    { name = "brotli" },
     { name = "cssselect" },
     { name = "fastapi" },
+    { name = "httpcore" },
     { name = "httpx", extra = ["http2"] },
     { name = "justext" },
     { name = "lxml" },
@@ -1267,8 +1269,10 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.12" },
+    { name = "brotli", specifier = ">=1.2.0" },
     { name = "cssselect", specifier = ">=1.2" },
     { name = "fastapi", specifier = ">=0.143" },
+    { name = "httpcore", specifier = ">=1.0.9" },
     { name = "httpx", extras = ["http2"], specifier = ">=0.28" },
     { name = "justext", specifier = ">=3.0" },
     { name = "lxml", specifier = ">=5.3" },

@@ -1,0 +1,203 @@
+.wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.heading {
+  font-size: 1rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.caption {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.chart {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.75rem 0;
+}
+
+.lane,
+.axis {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.laneLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.track {
+  position: relative;
+  height: 1.5rem;
+  background: var(--surface-2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.segment {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  min-width: 1px;
+  border-right: 1px solid var(--surface);
+}
+
+.segment[data-stage="fetch"],
+.swatch[data-stage="fetch"] {
+  background: var(--seg-fetch);
+}
+.segment[data-stage="consent"],
+.swatch[data-stage="consent"] {
+  background: var(--seg-consent);
+}
+.segment[data-stage="parse"],
+.swatch[data-stage="parse"] {
+  background: var(--seg-parse);
+}
+.segment[data-stage="extract"],
+.swatch[data-stage="extract"] {
+  background: var(--seg-extract);
+}
+.segment[data-stage="load"],
+.swatch[data-stage="load"] {
+  background: var(--seg-load);
+}
+.segment[data-stage="prompt"],
+.swatch[data-stage="prompt"] {
+  background: var(--seg-prompt);
+}
+.segment[data-stage="generation"],
+.swatch[data-stage="generation"] {
+  background: var(--seg-generation);
+}
+.segment[data-stage="inference"],
+.swatch[data-stage="inference"] {
+  background: var(--seg-inference);
+}
+.segment[data-stage="other"],
+.swatch[data-stage="other"] {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--seg-other),
+    var(--seg-other) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+.mark {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 3px;
+  margin-left: -1px;
+}
+
+.mark[data-kind="signal"],
+.markSwatch[data-kind="signal"] {
+  background: var(--mark-signal);
+}
+
+.mark[data-kind="token"],
+.markSwatch[data-kind="token"] {
+  background: var(--mark-token);
+}
+
+.running {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.ticks {
+  position: relative;
+  height: 1.2rem;
+}
+
+.tick {
+  position: absolute;
+  top: 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.tick:first-child {
+  transform: none;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  list-style: none;
+  margin: 0.25rem 0 0.75rem;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.swatch {
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 2px;
+}
+
+.markSwatch {
+  display: inline-block;
+  width: 3px;
+  height: 0.9rem;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.detailHeading {
+  font-size: 0.9rem;
+}
+
+.values {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.values > div {
+  display: contents;
+}
+
+.values dt {
+  color: var(--muted);
+}
+
+.values dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

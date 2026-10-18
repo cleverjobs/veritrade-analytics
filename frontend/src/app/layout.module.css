@@ -1,0 +1,20 @@
+.main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.skip {
+  position: absolute;
+  left: 0.5rem;
+  top: -3rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--accent);
+  color: var(--accent-text);
+  border-radius: var(--radius);
+  z-index: 10;
+}
+
+.skip:focus {
+  top: 0.5rem;
+}

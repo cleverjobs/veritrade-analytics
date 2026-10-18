@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frontend
 
-## Getting Started
+Next.js 16 (App Router, strict TypeScript, CSS modules) built as a **static export**. In production FastAPI
+serves `out/` from the same origin as `/api`, so no Node process runs and the browser talks to the API with no
+proxy hop.
 
-First, run the development server:
+## Pages
+
+- `/` (Analyze): URL input, Split vs Combined mode, streaming on/off, model, parser, extractor and scope pickers
+  filled from `GET /api/models`. Split mode fires `/api/signal` and `/api/summary/stream` together so the
+  signal card renders as soon as it lands; Combined mode calls `/api/analyze` (or `/api/analyze/stream`). The
+  latency bar puts the server stage timings of each request on one client time axis (`performance.now()`
+  from submit), with time-to-signal and time-to-first-token marks. Resubmitting aborts the in-flight run.
+- `/benchmarks/`: renders `src/data/benchmarks.json`, which `scripts/copy-benchmarks.mjs` copies from
+  `evals/results/benchmarks.json`, falling back to the committed `benchmarks.sample.json` (shown with a
+  "sample data" banner).
+
+## Layout
+
+| Path                                 | Role                                                                                                                  |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `src/lib/api.ts`                     | Typed fetch helpers over the generated `api-schema.d.ts`; error envelope to `ApiError`                                |
+| `src/lib/sse.ts`                     | POST + `TextDecoderStream` SSE parser yielding typed `meta` / `sentiment` / `summary_delta` / `done` / `error` events |
+| `src/lib/run-state.ts`, `src/hooks/` | Run reducer (per-lane status and client timing marks) and the hooks that drive it                                     |
+| `src/components/`                    | `AnalyzeForm`, `SignalCard`, `SummaryPanel`, `ArticleMetaLine`, `LatencyBar`, `ErrorBanner`, benchmark tables         |
+| `src/mocks/`                         | MSW handlers and synthetic fixtures, shared by tests and any mocked dev run                                           |
+| `tests/unit`, `tests/integration`    | Vitest + Testing Library; integration tests run the real components against MSW                                       |
+| `e2e/`                               | Playwright specs for the docker compose stack                                                                         |
+
+## Commands
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev            # http://localhost:3000; set NEXT_PUBLIC_API_BASE=http://localhost:8000 for a local API
+pnpm lint && pnpm format:check && pnpm typecheck
+pnpm test           # unit + MSW integration tests, no backend needed
+pnpm build          # static export to out/
+pnpm gen:api        # regenerate src/lib/api-schema.d.ts from backend/openapi.json
+E2E_BASE_URL=http://localhost:8000 E2E_ARTICLE_URL=... pnpm e2e   # against a running stack
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`NEXT_PUBLIC_API_BASE` is inlined at build time; leave it unset for the production build so requests stay
+same-origin. In development the backend must allow the dev origin through `VT_CORS_ORIGINS`.

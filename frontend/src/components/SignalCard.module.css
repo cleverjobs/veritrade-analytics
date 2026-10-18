@@ -1,0 +1,144 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.heading {
+  font-size: 1rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.placeholder {
+  color: var(--muted);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border: 2px solid currentColor;
+}
+
+.badge[data-sentiment="bullish"] {
+  color: var(--bull);
+  background: var(--bull-bg);
+}
+
+.badge[data-sentiment="bearish"] {
+  color: var(--bear);
+  background: var(--bear-bg);
+}
+
+.badge[data-sentiment="neutral"] {
+  color: var(--neutral);
+  background: var(--neutral-bg);
+}
+
+.badge[data-abstained] {
+  border-style: dashed;
+}
+
+.abstainTag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--warn);
+  background: var(--warn-bg);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+}
+
+.entity {
+  font-weight: 600;
+}
+
+.abstainNote {
+  color: var(--warn);
+  background: var(--warn-bg);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.925rem;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem 1rem;
+  margin: 0.75rem 0;
+}
+
+.stats dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.stats dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+.probs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.prob {
+  display: grid;
+  grid-template-columns: 5rem 1fr 4rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.probLabel {
+  color: var(--muted);
+}
+
+.probTrack {
+  height: 0.6rem;
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.probFill {
+  display: block;
+  height: 100%;
+  background: var(--neutral);
+}
+
+.probFill[data-sentiment="bullish"] {
+  background: var(--bull);
+}
+
+.probFill[data-sentiment="bearish"] {
+  background: var(--bear);
+}
+
+.probValue {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

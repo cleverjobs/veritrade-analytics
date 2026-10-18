@@ -1,0 +1,23 @@
+{
+  "source": "sec",
+  "slug": "article-1",
+  "captured_at": "2026-10-18T13:29:45+00:00",
+  "url_sha256": "dd832783b9b2c5a71e9cc5b955b1abbfcc3f678c9a4f3e463beae23aa2db9e4c",
+  "fixture_url": "https://www.sec.gov/vt-skeleton/article-1",
+  "title_marker": null,
+  "body_markers": [
+    "VTB-1",
+    "VTB-2",
+    "VTB-3",
+    "VTB-4",
+    "VTB-5",
+    "VTB-6",
+    "VTB-7",
+    "VTB-8",
+    "VTB-9",
+    "VTB-10"
+  ],
+  "jsonld_body": false,
+  "stop_marker": "About ",
+  "bytes": 7078
+}

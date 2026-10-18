@@ -1,0 +1,3828 @@
+{
+  "generated_at": "2026-10-18T13:00:05+00:00",
+  "ollama_version": "0.40.6",
+  "backend": "native-metal",
+  "platform": "Darwin arm64",
+  "method": {
+    "inputs": "synthetic headlines and generated filler; no publisher or dataset text",
+    "latency_runs": 3,
+    "latency_warmup": 1,
+    "decoding": "think=false, temperature 0, seed 0, num_ctx and num_predict from models.toml"
+  },
+  "merged_models": [
+    "ministral-3:3b",
+    "qwen3.5:0.8b-q8_0",
+    "qwen3.5:4b-q4_K_M",
+    "qwen3:4b-instruct-2507-q4_K_M"
+  ],
+  "a_logprobs": {
+    "qwen3.5:0.8b-q8_0": {
+      "label": [
+        {
+          "headline": "bullish",
+          "content": "{\"label\": \"bullish\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "bull",
+            "ish",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "bull",
+            "chosen_classes": [
+              "bullish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "bull",
+                0.5182,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "neutral",
+                0.4526,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "bear",
+                0.0184,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "ne",
+                0.0035,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "b",
+                0.0028,
+                [
+                  "bearish",
+                  "bullish"
+                ]
+              ],
+              [
+                "positive",
+                0.0005,
+                []
+              ],
+              [
+                "mixed",
+                0.0004,
+                []
+              ],
+              [
+                "negative",
+                0.0002,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "bull": 0.5182,
+              "neutral": 0.4526,
+              "bear": 0.0184,
+              "ne": 0.0035,
+              "b": 0.0028,
+              "bul": 0.0001,
+              "bu": 0.0001
+            },
+            "grammar_invalid_mass": 0.002,
+            "ambiguous_mass": 0.0028,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.4593,
+            "bullish": 0.5222,
+            "bearish": 0.0185
+          }
+        },
+        {
+          "headline": "bearish",
+          "content": "{\"label\": \"neutral\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "neutral",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "neutral",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": false,
+            "top": [
+              [
+                "bear",
+                0.5941,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "neutral",
+                0.3483,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "bull",
+                0.0449,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "ne",
+                0.0061,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "negative",
+                0.0008,
+                []
+              ],
+              [
+                "b",
+                0.0006,
+                [
+                  "bearish",
+                  "bullish"
+                ]
+              ],
+              [
+                "neg",
+                0.0005,
+                []
+              ],
+              [
+                "burn",
+                0.0002,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "neutral": 0.3483,
+              "bear": 0.5941,
+              "bull": 0.0449,
+              "ne": 0.0061,
+              "b": 0.0006,
+              "be": 0.0001
+            },
+            "grammar_invalid_mass": 0.0026,
+            "ambiguous_mass": 0.0006,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.3567,
+            "bullish": 0.0452,
+            "bearish": 0.5981
+          }
+        },
+        {
+          "headline": "neutral",
+          "content": "{\"label\": \"neutral\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "neutral",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "neutral",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "neutral",
+                0.9719,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "ne",
+                0.0108,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "bull",
+                0.0078,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "bear",
+                0.0065,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "mixed",
+                0.0005,
+                []
+              ],
+              [
+                "none",
+                0.0002,
+                []
+              ],
+              [
+                "null",
+                0.0001,
+                []
+              ],
+              [
+                "un",
+                0.0001,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "neutral": 0.9719,
+              "ne": 0.0108,
+              "bull": 0.0078,
+              "bear": 0.0065,
+              "b": 0.0001,
+              "neu": 0.0001,
+              "bul": 0.0
+            },
+            "grammar_invalid_mass": 0.0013,
+            "ambiguous_mass": 0.0001,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.9856,
+            "bullish": 0.0079,
+            "bearish": 0.0065
+          }
+        },
+        {
+          "headline": "mixed",
+          "content": "{\"label\": \"neutral\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "neutral",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "neutral",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "neutral",
+                0.7873,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "bear",
+                0.1441,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "bull",
+                0.0479,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "ne",
+                0.0109,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "mixed",
+                0.0031,
+                []
+              ],
+              [
+                "b",
+                0.0007,
+                [
+                  "bearish",
+                  "bullish"
+                ]
+              ],
+              [
+                "negative",
+                0.0006,
+                []
+              ],
+              [
+                "balanced",
+                0.0003,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "neutral": 0.7873,
+              "bear": 0.1441,
+              "bull": 0.0479,
+              "ne": 0.0109,
+              "b": 0.0007,
+              "be": 0.0002,
+              "bul": 0.0001,
+              "neu": 0.0001
+            },
+            "grammar_invalid_mass": 0.0052,
+            "ambiguous_mass": 0.0007,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.8059,
+            "bullish": 0.0485,
+            "bearish": 0.1456
+          }
+        },
+        {
+          "headline": "bearish_2",
+          "content": "{\"label\": \"neutral\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "neutral",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "neutral",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "neutral",
+                0.5265,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "bear",
+                0.4187,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "bull",
+                0.04,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "ne",
+                0.008,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "negative",
+                0.0016,
+                []
+              ],
+              [
+                "b",
+                0.0007,
+                [
+                  "bearish",
+                  "bullish"
+                ]
+              ],
+              [
+                "neg",
+                0.0004,
+                []
+              ],
+              [
+                "bal",
+                0.0001,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "neutral": 0.5265,
+              "bear": 0.4187,
+              "bull": 0.04,
+              "ne": 0.008,
+              "b": 0.0007,
+              "be": 0.0001
+            },
+            "grammar_invalid_mass": 0.003,
+            "ambiguous_mass": 0.0007,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.5381,
+            "bullish": 0.0403,
+            "bearish": 0.4216
+          }
+        },
+        {
+          "headline": "bullish_2",
+          "content": "{\"label\": \"neutral\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "neutral",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "neutral",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "neutral",
+                0.5102,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "bull",
+                0.4641,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "bear",
+                0.0146,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "ne",
+                0.0036,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "b",
+                0.0027,
+                [
+                  "bearish",
+                  "bullish"
+                ]
+              ],
+              [
+                "positive",
+                0.0006,
+                []
+              ],
+              [
+                "mixed",
+                0.0006,
+                []
+              ],
+              [
+                "negative",
+                0.0002,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "neutral": 0.5102,
+              "bull": 0.4641,
+              "bear": 0.0146,
+              "ne": 0.0036,
+              "b": 0.0027,
+              "bul": 0.0001,
+              "bu": 0.0001
+            },
+            "grammar_invalid_mass": 0.0024,
+            "ambiguous_mass": 0.0027,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.5176,
+            "bullish": 0.4677,
+            "bearish": 0.0148
+          }
+        },
+        {
+          "headline": "neutral_2",
+          "content": "{\"label\": \"neutral\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "neutral",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "neutral",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "neutral",
+                0.9816,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "ne",
+                0.0086,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "bear",
+                0.0049,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "bull",
+                0.0026,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "mixed",
+                0.0003,
+                []
+              ],
+              [
+                "un",
+                0.0002,
+                []
+              ],
+              [
+                "none",
+                0.0002,
+                []
+              ],
+              [
+                "null",
+                0.0001,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "neutral": 0.9816,
+              "ne": 0.0086,
+              "bear": 0.0049,
+              "bull": 0.0026,
+              "b": 0.0,
+              "bul": 0.0,
+              "neu": 0.0
+            },
+            "grammar_invalid_mass": 0.0011,
+            "ambiguous_mass": 0.0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.9925,
+            "bullish": 0.0026,
+            "bearish": 0.0049
+          }
+        },
+        {
+          "headline": "bearish_3",
+          "content": "{\"label\": \"bearish\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "bear",
+            "ish",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "bear",
+            "chosen_classes": [
+              "bearish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "bear",
+                0.6705,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "neutral",
+                0.2837,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "bull",
+                0.0354,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "ne",
+                0.0046,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "negative",
+                0.0014,
+                []
+              ],
+              [
+                "b",
+                0.0006,
+                [
+                  "bearish",
+                  "bullish"
+                ]
+              ],
+              [
+                "neg",
+                0.0005,
+                []
+              ],
+              [
+                "sell",
+                0.0001,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "bear": 0.6705,
+              "neutral": 0.2837,
+              "bull": 0.0354,
+              "ne": 0.0046,
+              "b": 0.0006,
+              "be": 0.0001
+            },
+            "grammar_invalid_mass": 0.0028,
+            "ambiguous_mass": 0.0006,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.29,
+            "bullish": 0.0356,
+            "bearish": 0.6744
+          }
+        }
+      ],
+      "ordinal": [
+        {
+          "headline": "bullish",
+          "content": "{\"score\": 1}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " ",
+            "1",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "1",
+            "chosen_classes": [
+              "bullish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "1",
+                0.5144,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "2",
+                0.3992,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "0",
+                0.0854,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "3",
+                0.0008,
+                []
+              ],
+              [
+                "5",
+                0.0001,
+                []
+              ],
+              [
+                "4",
+                0.0001,
+                []
+              ],
+              [
+                "6",
+                0.0,
+                []
+              ],
+              [
+                "7",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "1": 0.5144,
+              "2": 0.3992,
+              "0": 0.0854,
+              "": 0.0
+            },
+            "grammar_invalid_mass": 0.001,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.0854,
+            "bullish": 0.9146,
+            "bearish": 0.0
+          }
+        },
+        {
+          "headline": "bearish",
+          "content": "{\"score\": -2}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " -",
+            "2",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "-",
+            "chosen_classes": [
+              "bearish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "-",
+                0.7161,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "",
+                0.2671,
+                [
+                  "bearish",
+                  "bullish",
+                  "neutral"
+                ]
+              ],
+              [
+                "\"-",
+                0.0097,
+                []
+              ],
+              [
+                "\"",
+                0.0064,
+                []
+              ],
+              [
+                "n",
+                0.0,
+                []
+              ],
+              [
+                "\"-\"",
+                0.0,
+                []
+              ],
+              [
+                "\"+",
+                0.0,
+                []
+              ],
+              [
+                "+",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "-": 0.7161,
+              "": 0.2671
+            },
+            "grammar_invalid_mass": 0.0163,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.0,
+            "bullish": 0.0,
+            "bearish": 1.0
+          }
+        },
+        {
+          "headline": "neutral",
+          "content": "{\"score\": 0}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " ",
+            "0",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "0",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "0",
+                0.5331,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "1",
+                0.3724,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "2",
+                0.0936,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "3",
+                0.0007,
+                []
+              ],
+              [
+                "4",
+                0.0001,
+                []
+              ],
+              [
+                "5",
+                0.0001,
+                []
+              ],
+              [
+                "6",
+                0.0,
+                []
+              ],
+              [
+                "7",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "0": 0.5331,
+              "1": 0.3724,
+              "2": 0.0936,
+              "": 0.0
+            },
+            "grammar_invalid_mass": 0.0009,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.5336,
+            "bullish": 0.4664,
+            "bearish": 0.0
+          }
+        },
+        {
+          "headline": "mixed",
+          "content": "{\"score\": 0}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " ",
+            "0",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "0",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": false,
+            "top": [
+              [
+                "1",
+                0.5206,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "0",
+                0.4271,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "2",
+                0.052,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "3",
+                0.0002,
+                []
+              ],
+              [
+                "4",
+                0.0,
+                []
+              ],
+              [
+                "5",
+                0.0,
+                []
+              ],
+              [
+                "½",
+                0.0,
+                []
+              ],
+              [
+                " ",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "0": 0.4271,
+              "1": 0.5206,
+              "2": 0.052,
+              "": 0.0
+            },
+            "grammar_invalid_mass": 0.0003,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.4273,
+            "bullish": 0.5727,
+            "bearish": 0.0
+          }
+        },
+        {
+          "headline": "bearish_2",
+          "content": "{\"score\": 0}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " ",
+            "0",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "0",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "0",
+                0.4462,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "1",
+                0.4366,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "2",
+                0.1165,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "3",
+                0.0005,
+                []
+              ],
+              [
+                "4",
+                0.0001,
+                []
+              ],
+              [
+                "5",
+                0.0,
+                []
+              ],
+              [
+                "6",
+                0.0,
+                []
+              ],
+              [
+                " -",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "0": 0.4462,
+              "1": 0.4366,
+              "2": 0.1165,
+              "": 0.0
+            },
+            "grammar_invalid_mass": 0.0007,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.4465,
+            "bullish": 0.5535,
+            "bearish": 0.0
+          }
+        },
+        {
+          "headline": "bullish_2",
+          "content": "{\"score\": 1}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " ",
+            "1",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "1",
+            "chosen_classes": [
+              "bullish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "1",
+                0.4541,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "2",
+                0.4489,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "0",
+                0.0924,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "3",
+                0.0029,
+                []
+              ],
+              [
+                "5",
+                0.0012,
+                []
+              ],
+              [
+                "4",
+                0.0005,
+                []
+              ],
+              [
+                "6",
+                0.0,
+                []
+              ],
+              [
+                "7",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "1": 0.4541,
+              "2": 0.4489,
+              "0": 0.0924,
+              "": 0.0
+            },
+            "grammar_invalid_mass": 0.0046,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.0928,
+            "bullish": 0.9072,
+            "bearish": 0.0
+          }
+        },
+        {
+          "headline": "neutral_2",
+          "content": "{\"score\": 0}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " ",
+            "0",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "0",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "0",
+                0.6898,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "1",
+                0.2684,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "2",
+                0.0413,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "3",
+                0.0004,
+                []
+              ],
+              [
+                "5",
+                0.0,
+                []
+              ],
+              [
+                "4",
+                0.0,
+                []
+              ],
+              [
+                "6",
+                0.0,
+                []
+              ],
+              [
+                "7",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "0": 0.6898,
+              "1": 0.2684,
+              "2": 0.0413,
+              "": 0.0
+            },
+            "grammar_invalid_mass": 0.0005,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.6901,
+            "bullish": 0.3099,
+            "bearish": 0.0
+          }
+        },
+        {
+          "headline": "bearish_3",
+          "content": "{\"score\": -2}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " -",
+            "2",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "-",
+            "chosen_classes": [
+              "bearish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "-",
+                0.6937,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "",
+                0.2849,
+                [
+                  "bearish",
+                  "bullish",
+                  "neutral"
+                ]
+              ],
+              [
+                "\"-",
+                0.0114,
+                []
+              ],
+              [
+                "\"",
+                0.0092,
+                []
+              ],
+              [
+                "n",
+                0.0002,
+                []
+              ],
+              [
+                "\"-\"",
+                0.0,
+                []
+              ],
+              [
+                "\"+",
+                0.0,
+                []
+              ],
+              [
+                "+",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "-": 0.6937,
+              "": 0.2849
+            },
+            "grammar_invalid_mass": 0.021,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.0,
+            "bullish": 0.0,
+            "bearish": 1.0
+          }
+        }
+      ]
+    },
+    "qwen3.5:4b-q4_K_M": {
+      "label": [
+        {
+          "headline": "bullish",
+          "content": "{\"label\": \"bullish\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "bull",
+            "ish",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "bull",
+            "chosen_classes": [
+              "bullish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "bull",
+                0.9981,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "bear",
+                0.0015,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "neutral",
+                0.0003,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "bul",
+                0.0,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                " bullish",
+                0.0,
+                []
+              ],
+              [
+                "positive",
+                0.0,
+                []
+              ],
+              [
+                " Bull",
+                0.0,
+                []
+              ],
+              [
+                "bullet",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "bull": 0.9981,
+              "bear": 0.0015,
+              "neutral": 0.0003,
+              "bul": 0.0
+            },
+            "grammar_invalid_mass": 0.0,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.0003,
+            "bullish": 0.9982,
+            "bearish": 0.0015
+          }
+        },
+        {
+          "headline": "bearish",
+          "content": "{\"label\": \"bearish\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "bear",
+            "ish",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "bear",
+            "chosen_classes": [
+              "bearish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "bear",
+                0.9999,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "bull",
+                0.0001,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                " bear",
+                0.0,
+                []
+              ],
+              [
+                "neutral",
+                0.0,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "negative",
+                0.0,
+                []
+              ],
+              [
+                "bearing",
+                0.0,
+                []
+              ],
+              [
+                "Bear",
+                0.0,
+                []
+              ],
+              [
+                "bearer",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "bear": 0.9999,
+              "bull": 0.0001,
+              "neutral": 0.0,
+              "be": 0.0
+            },
+            "grammar_invalid_mass": 0.0,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.0,
+            "bullish": 0.0001,
+            "bearish": 0.9999
+          }
+        },
+        {
+          "headline": "neutral",
+          "content": "{\"label\": \"neutral\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "neutral",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "neutral",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "neutral",
+                0.9999,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "bull",
+                0.0,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "bear",
+                0.0,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "negative",
+                0.0,
+                []
+              ],
+              [
+                "mixed",
+                0.0,
+                []
+              ],
+              [
+                "中性",
+                0.0,
+                []
+              ],
+              [
+                "null",
+                0.0,
+                []
+              ],
+              [
+                "Neutral",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "neutral": 0.9999,
+              "bull": 0.0,
+              "bear": 0.0,
+              "ne": 0.0,
+              "b": 0.0,
+              "bul": 0.0
+            },
+            "grammar_invalid_mass": 0.0,
+            "ambiguous_mass": 0.0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.9999,
+            "bullish": 0.0,
+            "bearish": 0.0
+          }
+        },
+        {
+          "headline": "mixed",
+          "content": "{\"label\": \"neutral\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "neutral",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "neutral",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "neutral",
+                0.7497,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "bull",
+                0.1164,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "bear",
+                0.1083,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "mixed",
+                0.0231,
+                []
+              ],
+              [
+                "positive",
+                0.0005,
+                []
+              ],
+              [
+                "negative",
+                0.0005,
+                []
+              ],
+              [
+                "bul",
+                0.0004,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "balanced",
+                0.0002,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "neutral": 0.7497,
+              "bull": 0.1164,
+              "bear": 0.1083,
+              "bul": 0.0004,
+              "ne": 0.0,
+              "b": 0.0
+            },
+            "grammar_invalid_mass": 0.0245,
+            "ambiguous_mass": 0.0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.7691,
+            "bullish": 0.1198,
+            "bearish": 0.1111
+          }
+        },
+        {
+          "headline": "bearish_2",
+          "content": "{\"label\": \"bearish\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "bear",
+            "ish",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "bear",
+            "chosen_classes": [
+              "bearish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "bear",
+                0.9996,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "bull",
+                0.0003,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "neutral",
+                0.0001,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "negative",
+                0.0,
+                []
+              ],
+              [
+                " bear",
+                0.0,
+                []
+              ],
+              [
+                "bearing",
+                0.0,
+                []
+              ],
+              [
+                "Bear",
+                0.0,
+                []
+              ],
+              [
+                "bearer",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "bear": 0.9996,
+              "bull": 0.0003,
+              "neutral": 0.0001,
+              "be": 0.0
+            },
+            "grammar_invalid_mass": 0.0,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.0001,
+            "bullish": 0.0003,
+            "bearish": 0.9996
+          }
+        },
+        {
+          "headline": "bullish_2",
+          "content": "{\"label\": \"bullish\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "bull",
+            "ish",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "bull",
+            "chosen_classes": [
+              "bullish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "bull",
+                0.9995,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "bear",
+                0.0004,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "neutral",
+                0.0,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "bul",
+                0.0,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                " bullish",
+                0.0,
+                []
+              ],
+              [
+                "positive",
+                0.0,
+                []
+              ],
+              [
+                "bullet",
+                0.0,
+                []
+              ],
+              [
+                " Bull",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "bull": 0.9995,
+              "bear": 0.0004,
+              "neutral": 0.0,
+              "bul": 0.0
+            },
+            "grammar_invalid_mass": 0.0,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.0,
+            "bullish": 0.9996,
+            "bearish": 0.0004
+          }
+        },
+        {
+          "headline": "neutral_2",
+          "content": "{\"label\": \"neutral\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "neutral",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "neutral",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "neutral",
+                1.0,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "bull",
+                0.0,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "bear",
+                0.0,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "null",
+                0.0,
+                []
+              ],
+              [
+                "中性",
+                0.0,
+                []
+              ],
+              [
+                "negative",
+                0.0,
+                []
+              ],
+              [
+                "Neutral",
+                0.0,
+                []
+              ],
+              [
+                "mixed",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "neutral": 1.0,
+              "bull": 0.0,
+              "bear": 0.0,
+              "ne": 0.0,
+              "bul": 0.0
+            },
+            "grammar_invalid_mass": 0.0,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 1.0,
+            "bullish": 0.0,
+            "bearish": 0.0
+          }
+        },
+        {
+          "headline": "bearish_3",
+          "content": "{\"label\": \"bearish\"}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "label",
+            "\":",
+            " \"",
+            "bear",
+            "ish",
+            "\"}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "bear",
+            "chosen_classes": [
+              "bearish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "bear",
+                0.9999,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "bull",
+                0.0001,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                " bear",
+                0.0,
+                []
+              ],
+              [
+                "bearer",
+                0.0,
+                []
+              ],
+              [
+                "bearing",
+                0.0,
+                []
+              ],
+              [
+                "Bear",
+                0.0,
+                []
+              ],
+              [
+                "negative",
+                0.0,
+                []
+              ],
+              [
+                "neutral",
+                0.0,
+                [
+                  "neutral"
+                ]
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "bear": 0.9999,
+              "bull": 0.0001,
+              "neutral": 0.0,
+              "be": 0.0
+            },
+            "grammar_invalid_mass": 0.0,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.0,
+            "bullish": 0.0001,
+            "bearish": 0.9999
+          }
+        }
+      ],
+      "ordinal": [
+        {
+          "headline": "bullish",
+          "content": "{\"score\": 1}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " ",
+            "1",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "1",
+            "chosen_classes": [
+              "bullish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "1",
+                0.7018,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "2",
+                0.2981,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "0",
+                0.0001,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "3",
+                0.0,
+                []
+              ],
+              [
+                "5",
+                0.0,
+                []
+              ],
+              [
+                "4",
+                0.0,
+                []
+              ],
+              [
+                "9",
+                0.0,
+                []
+              ],
+              [
+                "6",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "1": 0.7018,
+              "2": 0.2981,
+              "0": 0.0001,
+              "": 0.0
+            },
+            "grammar_invalid_mass": 0.0,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.0001,
+            "bullish": 0.9999,
+            "bearish": 0.0
+          }
+        },
+        {
+          "headline": "bearish",
+          "content": "{\"score\": -2}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " -",
+            "2",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "-",
+            "chosen_classes": [
+              "bearish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "-",
+                0.9983,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "\"-",
+                0.0016,
+                []
+              ],
+              [
+                "",
+                0.0001,
+                [
+                  "bearish",
+                  "bullish",
+                  "neutral"
+                ]
+              ],
+              [
+                "{\"",
+                0.0,
+                []
+              ],
+              [
+                "{-",
+                0.0,
+                []
+              ],
+              [
+                "\"",
+                0.0,
+                []
+              ],
+              [
+                "[-",
+                0.0,
+                []
+              ],
+              [
+                "(-",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "-": 0.9983,
+              "": 0.0001
+            },
+            "grammar_invalid_mass": 0.0016,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.0,
+            "bullish": 0.0,
+            "bearish": 1.0
+          }
+        },
+        {
+          "headline": "neutral",
+          "content": "{\"score\": 0}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " ",
+            "0",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "0",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "0",
+                0.9986,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "1",
+                0.0012,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "2",
+                0.0001,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "3",
+                0.0,
+                []
+              ],
+              [
+                "5",
+                0.0,
+                []
+              ],
+              [
+                "4",
+                0.0,
+                []
+              ],
+              [
+                "9",
+                0.0,
+                []
+              ],
+              [
+                "6",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "0": 0.9986,
+              "1": 0.0012,
+              "2": 0.0001,
+              "": 0.0
+            },
+            "grammar_invalid_mass": 0.0,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.9986,
+            "bullish": 0.0014,
+            "bearish": 0.0
+          }
+        },
+        {
+          "headline": "mixed",
+          "content": "{\"score\": 0}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " ",
+            "0",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "0",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "0",
+                0.6514,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "1",
+                0.3485,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "2",
+                0.0001,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "3",
+                0.0,
+                []
+              ],
+              [
+                "5",
+                0.0,
+                []
+              ],
+              [
+                "4",
+                0.0,
+                []
+              ],
+              [
+                "6",
+                0.0,
+                []
+              ],
+              [
+                "9",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "0": 0.6514,
+              "1": 0.3485,
+              "2": 0.0001,
+              "": 0.0
+            },
+            "grammar_invalid_mass": 0.0,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.6514,
+            "bullish": 0.3486,
+            "bearish": 0.0
+          }
+        },
+        {
+          "headline": "bearish_2",
+          "content": "{\"score\": -2}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " -",
+            "2",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "-",
+            "chosen_classes": [
+              "bearish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "-",
+                0.9972,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "\"-",
+                0.0024,
+                []
+              ],
+              [
+                "",
+                0.0004,
+                [
+                  "bearish",
+                  "bullish",
+                  "neutral"
+                ]
+              ],
+              [
+                "\"",
+                0.0,
+                []
+              ],
+              [
+                "{\"",
+                0.0,
+                []
+              ],
+              [
+                "{-",
+                0.0,
+                []
+              ],
+              [
+                "[-",
+                0.0,
+                []
+              ],
+              [
+                "negative",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "-": 0.9972,
+              "": 0.0004
+            },
+            "grammar_invalid_mass": 0.0024,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.0,
+            "bullish": 0.0,
+            "bearish": 1.0
+          }
+        },
+        {
+          "headline": "bullish_2",
+          "content": "{\"score\": 2}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " ",
+            "2",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "2",
+            "chosen_classes": [
+              "bullish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "2",
+                0.9759,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "1",
+                0.024,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "0",
+                0.0,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "3",
+                0.0,
+                []
+              ],
+              [
+                "5",
+                0.0,
+                []
+              ],
+              [
+                "4",
+                0.0,
+                []
+              ],
+              [
+                "9",
+                0.0,
+                []
+              ],
+              [
+                "6",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "2": 0.9759,
+              "1": 0.024,
+              "0": 0.0,
+              "": 0.0
+            },
+            "grammar_invalid_mass": 0.0,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.0,
+            "bullish": 1.0,
+            "bearish": 0.0
+          }
+        },
+        {
+          "headline": "neutral_2",
+          "content": "{\"score\": 0}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " ",
+            "0",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "0",
+            "chosen_classes": [
+              "neutral"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "0",
+                0.9998,
+                [
+                  "neutral"
+                ]
+              ],
+              [
+                "1",
+                0.0002,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "2",
+                0.0001,
+                [
+                  "bullish"
+                ]
+              ],
+              [
+                "3",
+                0.0,
+                []
+              ],
+              [
+                "5",
+                0.0,
+                []
+              ],
+              [
+                "4",
+                0.0,
+                []
+              ],
+              [
+                "9",
+                0.0,
+                []
+              ],
+              [
+                "6",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "0": 0.9998,
+              "1": 0.0002,
+              "2": 0.0001,
+              "": 0.0
+            },
+            "grammar_invalid_mass": 0.0,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.9998,
+            "bullish": 0.0002,
+            "bearish": 0.0
+          }
+        },
+        {
+          "headline": "bearish_3",
+          "content": "{\"score\": -2}",
+          "logprobs_present": true,
+          "tokens": [
+            "{\"",
+            "score",
+            "\":",
+            " -",
+            "2",
+            "}"
+          ],
+          "first_value_token": {
+            "found": true,
+            "chosen": "-",
+            "chosen_classes": [
+              "bearish"
+            ],
+            "chosen_is_argmax": true,
+            "top": [
+              [
+                "-",
+                0.997,
+                [
+                  "bearish"
+                ]
+              ],
+              [
+                "\"-",
+                0.0019,
+                []
+              ],
+              [
+                "",
+                0.001,
+                [
+                  "bearish",
+                  "bullish",
+                  "neutral"
+                ]
+              ],
+              [
+                "\"",
+                0.0,
+                []
+              ],
+              [
+                "{\"",
+                0.0,
+                []
+              ],
+              [
+                "{-",
+                0.0,
+                []
+              ],
+              [
+                "[-",
+                0.0,
+                []
+              ],
+              [
+                "(-",
+                0.0,
+                []
+              ]
+            ],
+            "grammar_valid_candidates": {
+              "-": 0.997,
+              "": 0.001
+            },
+            "grammar_invalid_mass": 0.002,
+            "ambiguous_mass": 0,
+            "collision": false
+          },
+          "class_probabilities": {
+            "neutral": 0.0,
+            "bullish": 0.0,
+            "bearish": 1.0
+          }
+        }
+      ]
+    }
+  },
+  "b_stream_logprobs": {
+    "qwen3.5:0.8b-q8_0": {
+      "content_chunks": 7,
+      "stream_logprobs_present": true,
+      "n_logprob_tokens": 7
+    },
+    "qwen3.5:4b-q4_K_M": {
+      "content_chunks": 7,
+      "stream_logprobs_present": true,
+      "n_logprob_tokens": 7
+    }
+  },
+  "c_field_order": {
+    "qwen3.5:4b-q4_K_M": {
+      "sentiment-first": {
+        "expected": [
+          "score",
+          "entity",
+          "summary"
+        ],
+        "runs": [
+          {
+            "headline": "bullish",
+            "keys": [
+              "score",
+              "entity",
+              "summary"
+            ],
+            "honoured": true
+          },
+          {
+            "headline": "bearish",
+            "keys": [
+              "score",
+              "entity",
+              "summary"
+            ],
+            "honoured": true
+          },
+          {
+            "headline": "mixed",
+            "keys": [
+              "score",
+              "entity",
+              "summary"
+            ],
+            "honoured": true
+          }
+        ],
+        "honoured": true
+      },
+      "summary-first": {
+        "expected": [
+          "summary",
+          "entity",
+          "score"
+        ],
+        "runs": [
+          {
+            "headline": "bullish",
+            "keys": [
+              "summary",
+              "entity",
+              "score"
+            ],
+            "honoured": true
+          },
+          {
+            "headline": "bearish",
+            "keys": [
+              "summary",
+              "entity",
+              "score"
+            ],
+            "honoured": true
+          },
+          {
+            "headline": "mixed",
+            "keys": [
+              "summary",
+              "entity",
+              "score"
+            ],
+            "honoured": true
+          }
+        ],
+        "honoured": true
+      },
+      "schema_vs_prompt": [
+        {
+          "prompt_order": "summary-first",
+          "schema_order": "sentiment-first",
+          "keys": [
+            "score",
+            "entity",
+            "summary"
+          ],
+          "follows": "schema"
+        },
+        {
+          "prompt_order": "sentiment-first",
+          "schema_order": "summary-first",
+          "keys": [
+            "summary",
+            "entity",
+            "score"
+          ],
+          "follows": "schema"
+        }
+      ]
+    },
+    "qwen3:4b-instruct-2507-q4_K_M": {
+      "sentiment-first": {
+        "expected": [
+          "score",
+          "entity",
+          "summary"
+        ],
+        "runs": [
+          {
+            "headline": "bullish",
+            "keys": [
+              "entity",
+              "score",
+              "summary"
+            ],
+            "honoured": false
+          },
+          {
+            "headline": "bearish",
+            "keys": [
+              "entity",
+              "score",
+              "summary"
+            ],
+            "honoured": false
+          },
+          {
+            "headline": "mixed",
+            "keys": [
+              "entity",
+              "score",
+              "summary"
+            ],
+            "honoured": false
+          }
+        ],
+        "honoured": false
+      },
+      "summary-first": {
+        "expected": [
+          "summary",
+          "entity",
+          "score"
+        ],
+        "runs": [
+          {
+            "headline": "bullish",
+            "keys": [
+              "entity",
+              "score",
+              "summary"
+            ],
+            "honoured": false
+          },
+          {
+            "headline": "bearish",
+            "keys": [
+              "entity",
+              "score",
+              "summary"
+            ],
+            "honoured": false
+          },
+          {
+            "headline": "mixed",
+            "keys": [
+              "entity",
+              "score",
+              "summary"
+            ],
+            "honoured": false
+          }
+        ],
+        "honoured": false
+      },
+      "schema_vs_prompt": [
+        {
+          "prompt_order": "summary-first",
+          "schema_order": "sentiment-first",
+          "keys": [
+            "entity",
+            "score",
+            "summary"
+          ],
+          "follows": "neither"
+        },
+        {
+          "prompt_order": "sentiment-first",
+          "schema_order": "summary-first",
+          "keys": [
+            "entity",
+            "score",
+            "summary"
+          ],
+          "follows": "neither"
+        }
+      ]
+    },
+    "ministral-3:3b": {
+      "sentiment-first": {
+        "expected": [
+          "score",
+          "entity",
+          "summary"
+        ],
+        "runs": [
+          {
+            "headline": "bullish",
+            "keys": [
+              "score",
+              "entity",
+              "summary"
+            ],
+            "honoured": true
+          },
+          {
+            "headline": "bearish",
+            "keys": [
+              "score",
+              "entity",
+              "summary"
+            ],
+            "honoured": true
+          },
+          {
+            "headline": "mixed",
+            "keys": [
+              "score",
+              "entity",
+              "summary"
+            ],
+            "honoured": true
+          }
+        ],
+        "honoured": true
+      },
+      "summary-first": {
+        "expected": [
+          "summary",
+          "entity",
+          "score"
+        ],
+        "runs": [
+          {
+            "headline": "bullish",
+            "keys": [
+              "summary",
+              "entity",
+              "score"
+            ],
+            "honoured": true
+          },
+          {
+            "headline": "bearish",
+            "keys": [
+              "summary",
+              "entity",
+              "score"
+            ],
+            "honoured": true
+          },
+          {
+            "headline": "mixed",
+            "keys": [
+              "summary",
+              "entity",
+              "score"
+            ],
+            "honoured": true
+          }
+        ],
+        "honoured": true
+      },
+      "schema_vs_prompt": [
+        {
+          "prompt_order": "summary-first",
+          "schema_order": "sentiment-first",
+          "keys": [
+            "score",
+            "entity",
+            "summary"
+          ],
+          "follows": "schema"
+        },
+        {
+          "prompt_order": "sentiment-first",
+          "schema_order": "summary-first",
+          "keys": [
+            "summary",
+            "entity",
+            "score"
+          ],
+          "follows": "schema"
+        }
+      ]
+    }
+  },
+  "d_systemone": {
+    "tev1:0.8b-q8_0": {
+      "response_keys": [
+        "answers",
+        "model",
+        "usage"
+      ],
+      "answer_keys": [
+        "choice",
+        "confidence",
+        "probabilities",
+        "type"
+      ],
+      "usage": {
+        "input_tokens": 264,
+        "output_tokens": 0
+      },
+      "raw_example": {
+        "model": "tev1:0.8b-q8_0",
+        "answers": {
+          "sentiment": {
+            "type": "choice",
+            "choice": "bullish",
+            "probabilities": {
+              "neutral": 0.027623985952425125,
+              "bullish": 0.9692466078759214,
+              "bearish": 0.003129406171653543
+            },
+            "confidence": 0.9538699118138821
+          }
+        },
+        "usage": {
+          "input_tokens": 264,
+          "output_tokens": 0
+        }
+      },
+      "cold_wall_ms": 1394.0,
+      "warm_wall_ms_p50": 70.7,
+      "warm_wall_ms_min": 65.1,
+      "warm_wall_ms_max": 74.7,
+      "per_headline": {
+        "bullish": {
+          "choice": "bullish",
+          "probabilities": {
+            "neutral": 0.0276,
+            "bullish": 0.9692,
+            "bearish": 0.0031
+          },
+          "confidence": 0.9539,
+          "input_tokens": 264
+        },
+        "bearish": {
+          "choice": "bearish",
+          "probabilities": {
+            "neutral": 0.0575,
+            "bullish": 0.0111,
+            "bearish": 0.9313
+          },
+          "confidence": 0.897,
+          "input_tokens": 268
+        },
+        "neutral": {
+          "choice": "neutral",
+          "probabilities": {
+            "neutral": 0.8628,
+            "bullish": 0.0943,
+            "bearish": 0.0429
+          },
+          "confidence": 0.7942,
+          "input_tokens": 257
+        },
+        "mixed": {
+          "choice": "neutral",
+          "probabilities": {
+            "neutral": 0.475,
+            "bullish": 0.457,
+            "bearish": 0.068
+          },
+          "confidence": 0.2125,
+          "input_tokens": 258
+        },
+        "bearish_2": {
+          "choice": "bearish",
+          "probabilities": {
+            "neutral": 0.0729,
+            "bullish": 0.019,
+            "bearish": 0.9081
+          },
+          "confidence": 0.8622,
+          "input_tokens": 263
+        },
+        "bullish_2": {
+          "choice": "bullish",
+          "probabilities": {
+            "neutral": 0.07,
+            "bullish": 0.9227,
+            "bearish": 0.0072
+          },
+          "confidence": 0.8841,
+          "input_tokens": 259
+        },
+        "neutral_2": {
+          "choice": "neutral",
+          "probabilities": {
+            "neutral": 0.9008,
+            "bullish": 0.0646,
+            "bearish": 0.0346
+          },
+          "confidence": 0.8512,
+          "input_tokens": 254
+        },
+        "bearish_3": {
+          "choice": "bearish",
+          "probabilities": {
+            "neutral": 0.1052,
+            "bullish": 0.0206,
+            "bearish": 0.8741
+          },
+          "confidence": 0.8112,
+          "input_tokens": 260
+        }
+      },
+      "loaded_context_length": 8192
+    },
+    "nimble:9b-q4_K_M": {
+      "response_keys": [
+        "answers",
+        "model",
+        "usage"
+      ],
+      "answer_keys": [
+        "choice",
+        "confidence",
+        "probabilities",
+        "type"
+      ],
+      "usage": {
+        "input_tokens": 341,
+        "output_tokens": 0
+      },
+      "raw_example": {
+        "model": "nimble:9b-q4_K_M",
+        "answers": {
+          "sentiment": {
+            "type": "choice",
+            "choice": "bullish",
+            "probabilities": {
+              "neutral": 0.0006262197604001452,
+              "bullish": 0.9980997035700886,
+              "bearish": 0.0012740766695112185
+            },
+            "confidence": 0.9971495553551327
+          }
+        },
+        "usage": {
+          "input_tokens": 341,
+          "output_tokens": 0
+        }
+      },
+      "cold_wall_ms": 6171.7,
+      "warm_wall_ms_p50": 814.8,
+      "warm_wall_ms_min": 808.9,
+      "warm_wall_ms_max": 838.7,
+      "per_headline": {
+        "bullish": {
+          "choice": "bullish",
+          "probabilities": {
+            "neutral": 0.0006,
+            "bullish": 0.9981,
+            "bearish": 0.0013
+          },
+          "confidence": 0.9971,
+          "input_tokens": 341
+        },
+        "bearish": {
+          "choice": "bearish",
+          "probabilities": {
+            "neutral": 0.0003,
+            "bullish": 0.0002,
+            "bearish": 0.9995
+          },
+          "confidence": 0.9993,
+          "input_tokens": 345
+        },
+        "neutral": {
+          "choice": "neutral",
+          "probabilities": {
+            "neutral": 0.968,
+            "bullish": 0.0268,
+            "bearish": 0.0052
+          },
+          "confidence": 0.952,
+          "input_tokens": 334
+        },
+        "mixed": {
+          "choice": "bullish",
+          "probabilities": {
+            "neutral": 0.08,
+            "bullish": 0.8217,
+            "bearish": 0.0983
+          },
+          "confidence": 0.7326,
+          "input_tokens": 335
+        },
+        "bearish_2": {
+          "choice": "bearish",
+          "probabilities": {
+            "neutral": 0.0026,
+            "bullish": 0.0004,
+            "bearish": 0.997
+          },
+          "confidence": 0.9955,
+          "input_tokens": 341
+        },
+        "bullish_2": {
+          "choice": "bullish",
+          "probabilities": {
+            "neutral": 0.0004,
+            "bullish": 0.9989,
+            "bearish": 0.0007
+          },
+          "confidence": 0.9984,
+          "input_tokens": 336
+        },
+        "neutral_2": {
+          "choice": "neutral",
+          "probabilities": {
+            "neutral": 0.9954,
+            "bullish": 0.0015,
+            "bearish": 0.0031
+          },
+          "confidence": 0.993,
+          "input_tokens": 331
+        },
+        "bearish_3": {
+          "choice": "bearish",
+          "probabilities": {
+            "neutral": 0.0001,
+            "bullish": 0.0001,
+            "bearish": 0.9998
+          },
+          "confidence": 0.9998,
+          "input_tokens": 337
+        }
+      },
+      "loaded_context_length": 8194
+    },
+    "clef-flash:9b-q8_0": {
+      "response_keys": [
+        "answers",
+        "model",
+        "usage"
+      ],
+      "answer_keys": [
+        "choice",
+        "confidence",
+        "probabilities",
+        "type"
+      ],
+      "usage": {
+        "input_tokens": 281,
+        "output_tokens": 0
+      },
+      "raw_example": {
+        "model": "clef-flash:9b-q8_0",
+        "answers": {
+          "sentiment": {
+            "type": "choice",
+            "choice": "bullish",
+            "probabilities": {
+              "bearish": 0.02144582996753218,
+              "bullish": 0.9557870694018952,
+              "neutral": 0.02276710063057272
+            },
+            "confidence": 0.9336806041028426
+          }
+        },
+        "usage": {
+          "input_tokens": 281,
+          "output_tokens": 0
+        }
+      },
+      "cold_wall_ms": 9202.1,
+      "warm_wall_ms_p50": 656.1,
+      "warm_wall_ms_min": 651.4,
+      "warm_wall_ms_max": 692.5,
+      "per_headline": {
+        "bullish": {
+          "choice": "bullish",
+          "probabilities": {
+            "neutral": 0.0228,
+            "bullish": 0.9558,
+            "bearish": 0.0214
+          },
+          "confidence": 0.9337,
+          "input_tokens": 281
+        },
+        "bearish": {
+          "choice": "bearish",
+          "probabilities": {
+            "neutral": 0.0277,
+            "bullish": 0.0319,
+            "bearish": 0.9404
+          },
+          "confidence": 0.9105,
+          "input_tokens": 285
+        },
+        "neutral": {
+          "choice": "neutral",
+          "probabilities": {
+            "neutral": 0.9239,
+            "bullish": 0.0517,
+            "bearish": 0.0244
+          },
+          "confidence": 0.8858,
+          "input_tokens": 274
+        },
+        "mixed": {
+          "choice": "bullish",
+          "probabilities": {
+            "neutral": 0.2986,
+            "bullish": 0.5855,
+            "bearish": 0.1159
+          },
+          "confidence": 0.3782,
+          "input_tokens": 275
+        },
+        "bearish_2": {
+          "choice": "bearish",
+          "probabilities": {
+            "neutral": 0.0455,
+            "bullish": 0.0431,
+            "bearish": 0.9114
+          },
+          "confidence": 0.8671,
+          "input_tokens": 281
+        },
+        "bullish_2": {
+          "choice": "bullish",
+          "probabilities": {
+            "neutral": 0.0463,
+            "bullish": 0.9222,
+            "bearish": 0.0315
+          },
+          "confidence": 0.8833,
+          "input_tokens": 276
+        },
+        "neutral_2": {
+          "choice": "neutral",
+          "probabilities": {
+            "neutral": 0.9685,
+            "bullish": 0.0159,
+            "bearish": 0.0156
+          },
+          "confidence": 0.9527,
+          "input_tokens": 271
+        },
+        "bearish_3": {
+          "choice": "bearish",
+          "probabilities": {
+            "neutral": 0.0197,
+            "bullish": 0.0231,
+            "bearish": 0.9572
+          },
+          "confidence": 0.9358,
+          "input_tokens": 277
+        }
+      },
+      "loaded_context_length": 16384
+    }
+  },
+  "e_think_false": {
+    "qwen3.5:0.8b-q8_0": {
+      "plain": {
+        "thinking_chars": 0,
+        "think_tag_in_content": false,
+        "eval_tokens": 24,
+        "content_head": "Tamsin Retail reported higher-than-expected quarterly sales despite facing increased freight costs that could compress its profit margins."
+      },
+      "json_schema": {
+        "thinking_chars": 0,
+        "think_tag_in_content": false,
+        "eval_tokens": 33,
+        "content_head": "{\n  \"summary\": \"Tamsin Retail reports higher-than-expected quarterly sales despite facing increased freight costs that may compress its profit margins.\"\n}"
+      },
+      "honoured": true
+    },
+    "qwen3.5:2b-q4_K_M": {
+      "plain": {
+        "thinking_chars": 0,
+        "think_tag_in_content": false,
+        "eval_tokens": 23,
+        "content_head": "Tamsin Retail beat its quarterly sales estimates while simultaneously warning that rising freight costs will erode profit margins."
+      },
+      "json_schema": {
+        "thinking_chars": 0,
+        "think_tag_in_content": false,
+        "eval_tokens": 25,
+        "content_head": "{\"summary\":\"Tamsin Retail beat quarterly sales estimates while warning that rising freight costs will compress its profit margins.\"}"
+      },
+      "honoured": true
+    },
+    "qwen3.5:4b-q4_K_M": {
+      "plain": {
+        "thinking_chars": 0,
+        "think_tag_in_content": false,
+        "eval_tokens": 28,
+        "content_head": "Tamsin Retail reported quarterly sales that exceeded analyst expectations, though it cautioned that rising freight costs are likely to compress its profit margi"
+      },
+      "json_schema": {
+        "thinking_chars": 0,
+        "think_tag_in_content": false,
+        "eval_tokens": 30,
+        "content_head": "{\n  \"summary\": \"Tamsin Retail exceeded quarterly sales expectations but cautioned that rising freight costs could compress its profit margins.\"\n}"
+      },
+      "honoured": true
+    },
+    "qwen3:4b-instruct-2507-q4_K_M": {
+      "plain": {
+        "thinking_chars": 0,
+        "think_tag_in_content": false,
+        "eval_tokens": 21,
+        "content_head": "Tamsin Retail exceeds quarterly sales estimates but cautions that rising freight costs will pressure its margins."
+      },
+      "json_schema": {
+        "thinking_chars": 196,
+        "think_tag_in_content": false,
+        "eval_tokens": 72,
+        "content_head": "{ \"summary\": \"Tamsin Retail exceeds quarterly sales estimates but cautions that rising freight costs will narrow margins.\" }"
+      },
+      "honoured": false
+    },
+    "ministral-3:3b": {
+      "plain": {
+        "thinking_chars": 0,
+        "think_tag_in_content": false,
+        "eval_tokens": 23,
+        "content_head": "Tamsin Retail exceeded its quarterly sales forecasts while acknowledging that rising freight expenses could negatively impact profit margins."
+      },
+      "json_schema": {
+        "thinking_chars": 0,
+        "think_tag_in_content": false,
+        "eval_tokens": 29,
+        "content_head": "{\"summary\": \"Tamsin Retail exceeded its quarterly sales forecasts while acknowledging that rising freight costs will likely compress its profit margins.\"}"
+      },
+      "honoured": true
+    },
+    "qwen3.5:9b-q4_K_M": {
+      "plain": {
+        "thinking_chars": 0,
+        "think_tag_in_content": false,
+        "eval_tokens": 25,
+        "content_head": "Tamsin Retail exceeded its quarterly sales expectations, though it cautioned that rising freight costs are expected to compress profit margins."
+      },
+      "json_schema": {
+        "thinking_chars": 0,
+        "think_tag_in_content": false,
+        "eval_tokens": 34,
+        "content_head": "{\n  \"summary\": \"Tamsin Retail exceeded quarterly sales expectations, though it cautioned that rising freight costs are expected to compress its profit margins.\""
+      },
+      "honoured": true
+    }
+  },
+  "f_latency": {
+    "qwen3.5:0.8b-q8_0": {
+      "signal": {
+        "~300": {
+          "n": 5,
+          "eval_tokens_p50": 8.0,
+          "prompt_tokens_p50": 510.0,
+          "wall_ms_p50": 190.1
+        },
+        "~1500": {
+          "n": 5,
+          "eval_tokens_p50": 7.0,
+          "prompt_tokens_p50": 1670.0,
+          "wall_ms_p50": 454.0
+        }
+      },
+      "summary": {
+        "~300": {
+          "n": 5,
+          "eval_ms_p50": 588.1,
+          "eval_tokens_p50": 78.0,
+          "prompt_eval_ms_p50": 110.1,
+          "prompt_tokens_p50": 437.0,
+          "summary_words_p50": 43.0,
+          "time_to_summary_text_ms_p50": 169.8,
+          "ttft_ms_p50": 121.5,
+          "wall_ms_p50": 709.2
+        },
+        "~1500": {
+          "n": 5,
+          "eval_ms_p50": 709.0,
+          "eval_tokens_p50": 94.0,
+          "prompt_eval_ms_p50": 375.9,
+          "prompt_tokens_p50": 1597.0,
+          "summary_words_p50": 51.0,
+          "time_to_summary_text_ms_p50": 449.8,
+          "ttft_ms_p50": 389.7,
+          "wall_ms_p50": 1098.1
+        }
+      },
+      "analyze": {
+        "~300": {
+          "n": 5,
+          "eval_ms_p50": 822.4,
+          "eval_tokens_p50": 100.0,
+          "prompt_eval_ms_p50": 144.3,
+          "prompt_tokens_p50": 585.0,
+          "summary_words_p50": 45.0,
+          "time_to_score_ms_p50": 220.0,
+          "time_to_summary_text_ms_p50": 365.9,
+          "ttft_ms_p50": 155.3,
+          "wall_ms_p50": 977.7
+        },
+        "~1500": {
+          "n": 5,
+          "eval_ms_p50": 1088.3,
+          "eval_tokens_p50": 104.0,
+          "prompt_eval_ms_p50": 411.4,
+          "prompt_tokens_p50": 1745.0,
+          "summary_words_p50": 45.0,
+          "time_to_score_ms_p50": 489.3,
+          "time_to_summary_text_ms_p50": 635.4,
+          "ttft_ms_p50": 427.3,
+          "wall_ms_p50": 1545.7
+        }
+      }
+    },
+    "qwen3.5:2b-q4_K_M": {
+      "summary": {
+        "~300": {
+          "n": 5,
+          "eval_ms_p50": 1183.1,
+          "eval_tokens_p50": 73.0,
+          "prompt_eval_ms_p50": 251.4,
+          "prompt_tokens_p50": 437.0,
+          "summary_words_p50": 46.0,
+          "time_to_summary_text_ms_p50": 318.8,
+          "ttft_ms_p50": 263.0,
+          "wall_ms_p50": 1458.4
+        },
+        "~1500": {
+          "n": 5,
+          "eval_ms_p50": 1308.4,
+          "eval_tokens_p50": 93.0,
+          "prompt_eval_ms_p50": 863.8,
+          "prompt_tokens_p50": 1597.0,
+          "summary_words_p50": 54.0,
+          "time_to_summary_text_ms_p50": 926.6,
+          "ttft_ms_p50": 877.8,
+          "wall_ms_p50": 2166.7
+        }
+      }
+    },
+    "qwen3.5:4b-q4_K_M": {
+      "summary": {
+        "~300": {
+          "n": 5,
+          "eval_ms_p50": 3113.2,
+          "eval_tokens_p50": 98.0,
+          "prompt_eval_ms_p50": 614.5,
+          "prompt_tokens_p50": 437.0,
+          "summary_words_p50": 58.0,
+          "time_to_summary_text_ms_p50": 790.4,
+          "ttft_ms_p50": 658.4,
+          "wall_ms_p50": 3767.7
+        },
+        "~1500": {
+          "n": 5,
+          "eval_ms_p50": 2005.3,
+          "eval_tokens_p50": 90.0,
+          "prompt_eval_ms_p50": 2242.0,
+          "prompt_tokens_p50": 1597.0,
+          "summary_words_p50": 49.0,
+          "time_to_summary_text_ms_p50": 2403.0,
+          "ttft_ms_p50": 2290.9,
+          "wall_ms_p50": 4281.9
+        }
+      },
+      "analyze": {
+        "~300": {
+          "n": 5,
+          "eval_ms_p50": 2676.9,
+          "eval_tokens_p50": 126.0,
+          "prompt_eval_ms_p50": 803.7,
+          "prompt_tokens_p50": 585.0,
+          "summary_words_p50": 58.0,
+          "time_to_score_ms_p50": 920.3,
+          "time_to_summary_text_ms_p50": 1296.1,
+          "ttft_ms_p50": 830.8,
+          "wall_ms_p50": 3524.7
+        },
+        "~1500": {
+          "n": 5,
+          "eval_ms_p50": 2148.2,
+          "eval_tokens_p50": 126.0,
+          "prompt_eval_ms_p50": 2265.2,
+          "prompt_tokens_p50": 1745.0,
+          "summary_words_p50": 58.0,
+          "time_to_score_ms_p50": 2384.1,
+          "time_to_summary_text_ms_p50": 2740.7,
+          "ttft_ms_p50": 2294.9,
+          "wall_ms_p50": 4442.7
+        }
+      }
+    },
+    "qwen3:4b-instruct-2507-q4_K_M": {
+      "analyze": {
+        "~300": {
+          "n": 5,
+          "eval_ms_p50": 2471.8,
+          "eval_tokens_p50": 133.0,
+          "prompt_eval_ms_p50": 406.2,
+          "prompt_tokens_p50": 575.0,
+          "summary_words_p50": 53.0,
+          "time_to_score_ms_p50": 716.4,
+          "time_to_summary_text_ms_p50": 808.3,
+          "ttft_ms_p50": 433.5,
+          "wall_ms_p50": 2921.4
+        },
+        "~1500": {
+          "n": 5,
+          "eval_ms_p50": 2692.1,
+          "eval_tokens_p50": 171.0,
+          "prompt_eval_ms_p50": 1562.7,
+          "prompt_tokens_p50": 1735.0,
+          "summary_words_p50": 89.0,
+          "time_to_score_ms_p50": 1917.9,
+          "time_to_summary_text_ms_p50": 1988.9,
+          "ttft_ms_p50": 1619.3,
+          "wall_ms_p50": 4311.4
+        }
+      }
+    },
+    "ministral-3:3b": {
+      "analyze": {
+        "~300": {
+          "n": 5,
+          "eval_ms_p50": 2329.5,
+          "eval_tokens_p50": 131.0,
+          "prompt_eval_ms_p50": 345.5,
+          "prompt_tokens_p50": 577.0,
+          "summary_words_p50": 37.0,
+          "time_to_score_ms_p50": 433.1,
+          "time_to_summary_text_ms_p50": 708.9,
+          "ttft_ms_p50": 361.1,
+          "wall_ms_p50": 2691.8
+        },
+        "~1500": {
+          "n": 5,
+          "eval_ms_p50": 2132.7,
+          "eval_tokens_p50": 135.0,
+          "prompt_eval_ms_p50": 1366.1,
+          "prompt_tokens_p50": 1752.0,
+          "summary_words_p50": 51.0,
+          "time_to_score_ms_p50": 1472.9,
+          "time_to_summary_text_ms_p50": 1804.8,
+          "ttft_ms_p50": 1397.2,
+          "wall_ms_p50": 3529.7
+        }
+      }
+    },
+    "qwen3.5:9b-q4_K_M": {
+      "analyze": {
+        "~300": {
+          "n": 5,
+          "eval_ms_p50": 2794.3,
+          "eval_tokens_p50": 103.0,
+          "prompt_eval_ms_p50": 1441.7,
+          "prompt_tokens_p50": 585.0,
+          "summary_words_p50": 46.0,
+          "time_to_score_ms_p50": 1611.6,
+          "time_to_summary_text_ms_p50": 2115.0,
+          "ttft_ms_p50": 1460.2,
+          "wall_ms_p50": 4254.1
+        },
+        "~1500": {
+          "n": 5,
+          "eval_ms_p50": 2692.8,
+          "eval_tokens_p50": 96.0,
+          "prompt_eval_ms_p50": 4056.2,
+          "prompt_tokens_p50": 1745.0,
+          "summary_words_p50": 44.0,
+          "time_to_score_ms_p50": 4219.4,
+          "time_to_summary_text_ms_p50": 4723.2,
+          "ttft_ms_p50": 4088.6,
+          "wall_ms_p50": 6777.9
+        }
+      }
+    },
+    "tev1:0.8b-q8_0": {
+      "signal": {
+        "~300": {
+          "n": 5,
+          "prompt_tokens_p50": 535.0,
+          "wall_ms_p50": 132.0
+        },
+        "~1500": {
+          "n": 5,
+          "prompt_tokens_p50": 1676.0,
+          "wall_ms_p50": 391.0
+        }
+      }
+    },
+    "nimble:9b-q4_K_M": {
+      "signal": {
+        "~300": {
+          "n": 5,
+          "prompt_tokens_p50": 612.0,
+          "wall_ms_p50": 1470.1
+        },
+        "~1500": {
+          "n": 5,
+          "prompt_tokens_p50": 1772.0,
+          "wall_ms_p50": 4133.1
+        }
+      }
+    },
+    "clef-flash:9b-q8_0": {
+      "signal": {
+        "~300": {
+          "n": 5,
+          "prompt_tokens_p50": 552.0,
+          "wall_ms_p50": 1294.1
+        },
+        "~1500": {
+          "n": 5,
+          "prompt_tokens_p50": 1712.0,
+          "wall_ms_p50": 3931.8
+        }
+      }
+    }
+  },
+  "findings": [
+    "(a) qwen3.5:0.8b-q8_0 label: logprobs present=True; first value tokens ['bear', 'bull', 'neutral']; collisions 0/8; generated token is the reported argmax 7/8; max grammar-invalid first-token mass 0.0052",
+    "(a) qwen3.5:0.8b-q8_0 ordinal: logprobs present=True; first value tokens ['-', '0', '1']; collisions 0/8; generated token is the reported argmax 7/8; max grammar-invalid first-token mass 0.021",
+    "(a) qwen3.5:4b-q4_K_M label: logprobs present=True; first value tokens ['bear', 'bull', 'neutral']; collisions 0/8; generated token is the reported argmax 8/8; max grammar-invalid first-token mass 0.0245",
+    "(a) qwen3.5:4b-q4_K_M ordinal: logprobs present=True; first value tokens ['-', '0', '1', '2']; collisions 0/8; generated token is the reported argmax 8/8; max grammar-invalid first-token mass 0.0024",
+    "(b) qwen3.5:0.8b-q8_0: streamed chunks carry logprobs=True",
+    "(b) qwen3.5:4b-q4_K_M: streamed chunks carry logprobs=True",
+    "(c) qwen3.5:4b-q4_K_M: schema property order honoured: sentiment-first=True, summary-first=True; when prompt and schema disagree the output follows: schema, schema",
+    "(c) qwen3:4b-instruct-2507-q4_K_M: schema property order honoured: sentiment-first=False, summary-first=False; when prompt and schema disagree the output follows: neither, neither",
+    "(c) ministral-3:3b: schema property order honoured: sentiment-first=True, summary-first=True; when prompt and schema disagree the output follows: schema, schema",
+    "(d) tev1:0.8b-q8_0: keys ['answers', 'model', 'usage'], answer ['choice', 'confidence', 'probabilities', 'type']; cold 1394.0 ms, warm p50 70.7 ms",
+    "(d) nimble:9b-q4_K_M: keys ['answers', 'model', 'usage'], answer ['choice', 'confidence', 'probabilities', 'type']; cold 6171.7 ms, warm p50 814.8 ms",
+    "(d) clef-flash:9b-q8_0: keys ['answers', 'model', 'usage'], answer ['choice', 'confidence', 'probabilities', 'type']; cold 9202.1 ms, warm p50 656.1 ms",
+    "(e) qwen3.5:0.8b-q8_0: think=false honoured=True",
+    "(e) qwen3.5:2b-q4_K_M: think=false honoured=True",
+    "(e) qwen3.5:4b-q4_K_M: think=false honoured=True",
+    "(e) qwen3:4b-instruct-2507-q4_K_M: think=false honoured=False",
+    "(e) ministral-3:3b: think=false honoured=True",
+    "(e) qwen3.5:9b-q4_K_M: think=false honoured=True",
+    "(f) qwen3.5:0.8b-q8_0 /signal: ~300: wall 190.1 ms; ~1500: wall 454.0 ms",
+    "(f) qwen3.5:0.8b-q8_0 /summary: ~300: wall 709.2, ttft 121.5, summary text 169.8 ms; ~1500: wall 1098.1, ttft 389.7, summary text 449.8 ms",
+    "(f) qwen3.5:0.8b-q8_0 /analyze: ~300: wall 977.7, ttft 155.3, score 220.0, summary text 365.9 ms; ~1500: wall 1545.7, ttft 427.3, score 489.3, summary text 635.4 ms",
+    "(f) qwen3.5:2b-q4_K_M /summary: ~300: wall 1458.4, ttft 263.0, summary text 318.8 ms; ~1500: wall 2166.7, ttft 877.8, summary text 926.6 ms",
+    "(f) qwen3.5:4b-q4_K_M /summary: ~300: wall 3767.7, ttft 658.4, summary text 790.4 ms; ~1500: wall 4281.9, ttft 2290.9, summary text 2403.0 ms",
+    "(f) qwen3.5:4b-q4_K_M /analyze: ~300: wall 3524.7, ttft 830.8, score 920.3, summary text 1296.1 ms; ~1500: wall 4442.7, ttft 2294.9, score 2384.1, summary text 2740.7 ms",
+    "(f) qwen3:4b-instruct-2507-q4_K_M /analyze: ~300: wall 2921.4, ttft 433.5, score 716.4, summary text 808.3 ms; ~1500: wall 4311.4, ttft 1619.3, score 1917.9, summary text 1988.9 ms",
+    "(f) ministral-3:3b /analyze: ~300: wall 2691.8, ttft 361.1, score 433.1, summary text 708.9 ms; ~1500: wall 3529.7, ttft 1397.2, score 1472.9, summary text 1804.8 ms",
+    "(f) qwen3.5:9b-q4_K_M /analyze: ~300: wall 4254.1, ttft 1460.2, score 1611.6, summary text 2115.0 ms; ~1500: wall 6777.9, ttft 4088.6, score 4219.4, summary text 4723.2 ms",
+    "(f) tev1:0.8b-q8_0 /signal: ~300: wall 132.0 ms; ~1500: wall 391.0 ms",
+    "(f) nimble:9b-q4_K_M /signal: ~300: wall 1470.1 ms; ~1500: wall 4133.1 ms",
+    "(f) clef-flash:9b-q8_0 /signal: ~300: wall 1294.1 ms; ~1500: wall 3931.8 ms"
+  ],
+  "errors": []
+}

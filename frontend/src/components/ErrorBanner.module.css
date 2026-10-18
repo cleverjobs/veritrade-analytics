@@ -1,0 +1,50 @@
+.banner {
+  border: 1px solid var(--danger);
+  border-left-width: 4px;
+  background: var(--danger-bg);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+}
+
+.title {
+  font-weight: 600;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.context {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.code {
+  color: var(--danger);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 0.3rem;
+}
+
+.status {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 0.9em;
+}
+
+.message {
+  margin: 0.25rem 0;
+}
+
+.hint {
+  color: var(--muted);
+  margin: 0;
+}
+
+.extra {
+  color: var(--muted);
+  font-size: 0.875rem;
+  margin: 0.25rem 0 0;
+}

@@ -54,3 +54,26 @@ Guiding principle (Kris, R2): **this is a PoC - balance the level of rigor per a
 - Lean prompt grid: 2 rubric styles x few-shot {0, 4} x field order where relevant (<= 8 configs per model).
 - Stopped Docker containers stay stopped; the restart command is handed back at the end.
 - `tev1:0.8b-q8_0` is used only in CI to exercise the real decision-model path in containers; it is not evaluated.
+
+## Build-time findings that adjusted the plan
+
+Measured during P1/P2, recorded here so the deviations are traceable. Inputs for the Ollama probe were synthetic
+(`evals/results/ollama_probe.json`, native Metal, warm, n=5).
+
+- **Sources** (`02-source-probe.md`): AP News, Investing.com, Benzinga and Business Wire refuse a plain client at
+  their CDN (Cloudflare / Akamai), so all four backups were promoted. Final 10: Yahoo Finance, CNBC, Motley Fool,
+  PR Newswire, GlobeNewswire, SEC EDGAR EX-99.1, CNN Business, Fortune, Guardian Business, BBC Business.
+- **R7 sanity gate passed**: each endpoint has at least one candidate inside its budget, so no budget moved.
+  - `/signal`: `qwen3.5:0.8b` answers in 190 ms at ~510 prompt tokens. The 9B decision models take 1.3-1.5 s
+    at the same size, so they are reported against the budget rather than the budget relaxed for them.
+  - `/summary`: `qwen3.5:2b` shows first text at 0.93 s and finishes at 2.2 s on ~1.6k-token articles;
+    `qwen3.5:4b` misses the 1.5 s TTFT budget at that size (2.4 s).
+  - `/analyze`: `ministral-3:3b` reaches the score at 1.47 s and finishes at 3.5 s on ~1.75k tokens; the 4B
+    qwen models miss TTFT at full-article size.
+- **Logprobs**: Ollama 0.40.6 also returns logprobs on streamed chunks (undocumented). The knob comparison stays
+  on non-streaming `/signal`; `/analyze` keeps the ordinal knob. Logprob-weighted streaming confidence goes to
+  the backlog.
+- **Field order**: `qwen3:4b-instruct-2507` ignores schema property order (always entity, score, summary) and
+  ignores `think:false` when a schema is set, so the field-order dimension runs on `qwen3.5:4b` and
+  `ministral-3:3b` only.
+- **Fetch cap** raised from 5 MB to 10 MB: CNN article pages are 5.7-6.6 MB decompressed.

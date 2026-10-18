@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     )
     fetch_connect_timeout_s: float = 3.0
     fetch_deadline_s: float = 8.0
-    fetch_max_bytes: int = 5_000_000
+    fetch_max_bytes: int = 10_000_000
     fetch_max_redirects: int = 5
     fetch_cache_ttl_s: float = 600.0
     fetch_error_ttl_s: float = 60.0

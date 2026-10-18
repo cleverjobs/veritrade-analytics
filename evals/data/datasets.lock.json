@@ -1,0 +1,44 @@
+{
+  "datasets": {
+    "tfns": {
+      "repo_id": "zeroshot/twitter-financial-news-sentiment",
+      "ref": "refs/convert/parquet",
+      "revision": "3e6bbcfb0c378a3017cea4ba198a4ce2594cd4c1",
+      "license": "MIT",
+      "files": {
+        "default/train/0000.parquet": {
+          "sha256": "dd40451982f52ac954e5f60423aeb2fd18c4675d08c2a9efe563883c2131b5cd",
+          "bytes": 564814
+        },
+        "default/validation/0000.parquet": {
+          "sha256": "d6d2daad8d581ce83b3e663b999645dc82d99ca832a49909b771022b9d287519",
+          "bytes": 152765
+        }
+      }
+    },
+    "fpb": {
+      "repo_id": "takala/financial_phrasebank",
+      "ref": "main",
+      "revision": "8d3fe0c36d5feec6b3cc5e455b0fcb4820fb9964",
+      "license": "CC BY-NC-SA 3.0",
+      "files": {
+        "data/FinancialPhraseBank-v1.0.zip": {
+          "sha256": "0e1a06c4900fdae46091d031068601e3773ba067c7cecb5b0da1dcba5ce989a6",
+          "bytes": 681890
+        }
+      }
+    },
+    "finentity": {
+      "repo_id": "yixuantt/FinEntity",
+      "ref": "main",
+      "revision": "e86e5451a1fce4731fe07c710649a229d92e5cab",
+      "license": "ODC-BY",
+      "files": {
+        "FinEntity.json": {
+          "sha256": "3208667de69383120b0380aebeaabe360669eda72269c33e1c8b09d63df55463",
+          "bytes": 710430
+        }
+      }
+    }
+  }
+}

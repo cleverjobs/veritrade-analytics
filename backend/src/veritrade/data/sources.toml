@@ -1,87 +1,279 @@
 # Source registry shared by the fetcher, extractors, probe, Opus discovery and live smoke.
-# `status` is set by scripts/probe_sources.py: candidate | primary | backup | rejected.
-# [sources.<key>.profile] holds per-domain extraction selectors (filled from probe output).
+# Decided by scripts/probe_sources.py (evidence: evals/data/source_probe.json, .context/docs/design/02-source-probe.md).
+#
+# status            primary (served + evaluated, `rank` = preference order) | backup | rejected (`reason`)
+# feeds             RSS/Atom URLs, tried in order; items with a non-English <dc:language> are skipped
+# sections          HTML pages or sitemaps scanned for links when there is no usable feed
+# article_pattern   regex on the normalized URL (https, no query or fragment) that marks an article
+# exclude_pattern   regex that drops live blogs, video and galleries
+# discovery         "edgar-8k-ex99": feed entries are filing indexes resolved to their EX-99.1 exhibit
+#
+# [sources.<key>.profile] (selectors are tag/class/id/attribute + descendant only, so selectolax and lxml
+# cssselect agree; the probe checks both on every captured page)
+# body              selector of the body paragraphs, in document order
+# drop              selectors removed before `body` is applied (captions, widgets, promos, tables)
+# title             selector of the headline element
+# lede_paragraphs   paragraphs that form the lede (default 2); stop markers never cut inside the lede
+# min_words         paragraphs shorter than this are ignored (default 1)
+# stop_markers      case-insensitive paragraph prefixes; the body ends at the first match after the lede
+#                   (press-release About / forward-looking / contacts, partner promo pitches)
+# paywall           selector of the region the publisher marks as gated (JSON-LD hasPart); missing or
+#                   empty means the server sent a teaser
+# notes             what the probe saw that a selector cannot express
+
+# --- primary: the final 10, in plan order with backups swapped in for rejected sources ---------------
 
 [sources.yahoo]
 name = "Yahoo Finance"
 domains = ["finance.yahoo.com"]
 kind = "news"
-status = "candidate"
+status = "primary"
+rank = 1
+sections = ["https://finance.yahoo.com/topic/stock-market-news/", "https://finance.yahoo.com/news/"]
+article_pattern = '^https://finance\.yahoo\.com/(?:[a-z-]+/)*(?:news|articles)/[a-z0-9-]+\.html$'
+
+[sources.yahoo.profile]
+body = 'div[data-testid="article-body"] p'
+drop = ['div[data-testid="inarticle-ad"]', 'div[data-testid="ad-container"]', "figure", "div.readmore"]
+title = "h1.cover-title"
+lede_paragraphs = 2
+stop_markers = ["Before you buy stock in", "Should you invest $1,000 in", "Should you buy stock in"]
+notes = """Most stock-market stories are partner copy (Motley Fool, Insider Monkey, 24/7 Wall St); the page \
+JSON names the partner in providerId and partner promos survive inside the body. The second half of the \
+text sits in div[data-testid=read-more] behind a 'Story continues' button and must be kept. No RSS any \
+more (/news/rssindex is 404) and no JSON-LD articleBody. No consent redirect from the BG test IP in \
+Oct 2026; the reject-all flow still works when Yahoo does redirect."""
 
 [sources.cnbc]
 name = "CNBC"
 domains = ["www.cnbc.com", "cnbc.com"]
 kind = "news"
-status = "candidate"
+status = "primary"
+rank = 2
+feeds = ["https://www.cnbc.com/id/100003114/device/rss/rss.html"]
+article_pattern = '^https://www\.cnbc\.com/20\d\d/\d\d/\d\d/[a-z0-9-]+\.html$'
 
-[sources.apnews]
-name = "AP News"
-domains = ["apnews.com"]
-kind = "news"
-status = "candidate"
-
-[sources.investing]
-name = "Investing.com"
-domains = ["www.investing.com", "investing.com"]
-kind = "news"
-status = "candidate"
+[sources.cnbc.profile]
+body = "div.ArticleBody-articleBody div.group p"
+drop = ["div.InlineImage-imageEmbed", "div.InlineVideo-wrapper", "div.RelatedContent-relatedContent"]
+title = "h1.ArticleHeader-headline"
+lede_paragraphs = 2
+notes = """Key Points bullets (div.RenderKeyPoints-list li) are an editor-written summary outside the body. \
+CNBC PRO stories share the URL shape but are truncated and flagged isAccessibleForFree=false. No JSON-LD \
+articleBody; the speakable cssSelector is '.group p'."""
 
 [sources.fool]
 name = "The Motley Fool"
 domains = ["www.fool.com", "fool.com"]
 kind = "news"
-status = "candidate"
+status = "primary"
+rank = 3
+feeds = ["https://www.fool.com/a/feeds/foolwatch?apikey=foolwatch-feed"]
+article_pattern = '^https://www\.fool\.com/investing/20\d\d/\d\d/\d\d/[a-z0-9-]+/$'
 
-[sources.benzinga]
-name = "Benzinga"
-domains = ["www.benzinga.com", "benzinga.com"]
-kind = "news"
-status = "candidate"
+[sources.fool.profile]
+body = "div#article-body p"
+drop = ["div.image", "p.caption", "section.foolcom-satoshi-scope", "span.ticker-mention", "table"]
+title = "h1"
+lede_paragraphs = 2
+stop_markers = ["Before you buy stock in", "Should you invest $1,000 in", "Should you buy stock in"]
+notes = """Inline ticker chips such as '( IONQ -8.94% )' are live quotes, not article text, hence the \
+span.ticker-mention drop; section.foolcom-satoshi-scope is the stock data widget and data tables put a \
+paragraph in every cell. Tailwind classes \
+everywhere, but the page has a single h1 and a stable #article-body."""
 
 [sources.prnewswire]
 name = "PR Newswire"
 domains = ["www.prnewswire.com", "prnewswire.com"]
 kind = "press-release"
-status = "candidate"
+status = "primary"
+rank = 4
+feeds = [
+    "https://www.prnewswire.com/rss/financial-services-latest-news/financial-services-latest-news-list.rss",
+    "https://www.prnewswire.com/rss/news-releases-list.rss",
+]
+article_pattern = '^https://www\.prnewswire\.com/news-releases/[a-z0-9-]+-\d+\.html$'
+
+[sources.prnewswire.profile]
+body = "section.release-body p"
+drop = ["div.continue-reading", "div.inline-gallery-container", "table"]
+title = "h1"
+lede_paragraphs = 2
+stop_markers = [
+    "About ", "Forward-Looking Statement", "Forward Looking Statement", "Cautionary Statement", "Safe Harbor",
+    "Media Contact", "Investor Contact", "Investors Contact", "Contact:", "Contacts", "For investor",
+    "For media", "SOURCE ", "View original content", "Photos accompanying", "A photo accompanying",
+    "Attachment", "Website",
+]
+notes = """The first paragraph opens with the dateline 'CITY, Mon. DD, YYYY /PRNewswire/ --'. Feeds mix \
+translated copies of the same release (dc:language), which discovery filters out. One cache-miss \
+fetch took 6.8 s, so the 8 s fetch deadline is tight here."""
 
 [sources.globenewswire]
 name = "GlobeNewswire"
 domains = ["www.globenewswire.com", "globenewswire.com"]
 kind = "press-release"
-status = "candidate"
+status = "primary"
+rank = 5
+feeds = ["https://www.globenewswire.com/RssFeed/orgclass/1/feedTitle/GlobeNewswire%20-%20News%20about%20Public%20Companies"]
+article_pattern = '^https://www\.globenewswire\.com/news-release/20\d\d/\d\d/\d\d/\d+/0/en/[^/]+\.html$'
+
+[sources.globenewswire.profile]
+body = "div#main-body-container p, div#main-body-container li"
+drop = ["table"]
+title = 'h1[itemprop="headline"]'
+lede_paragraphs = 2
+stop_markers = [
+    "About ", "Forward-Looking Statement", "Forward Looking Statement", "Cautionary Statement", "Safe Harbor",
+    "Media Contact", "Investor Contact", "Investors Contact", "Contact:", "Contacts", "For investor",
+    "For media", "SOURCE ", "View original content", "Photos accompanying", "A photo accompanying",
+    "Attachment", "Website",
+]
+notes = """Resolutions and highlights are often <ol>/<ul> items rather than paragraphs, hence the li in \
+body (a selector list; both parsers keep document order). JSON-LD marks releases free; slowest of the \
+primaries at 0.6 to 1.0 s per page."""
 
 [sources.sec]
 name = "SEC EDGAR 8-K EX-99.1"
 domains = ["www.sec.gov", "sec.gov"]
 kind = "filing"
-status = "candidate"
+status = "primary"
+rank = 6
+feeds = ["https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&company=&dateb=&owner=include&start=0&count=40&output=atom"]
+discovery = "edgar-8k-ex99"
+article_pattern = '^https://www\.sec\.gov/Archives/edgar/data/\d+/\d+/[^/]+\.html?$'
+
+[sources.sec.profile]
+body = "p"
+drop = ["table"]
+lede_paragraphs = 3
+min_words = 4
+stop_markers = [
+    "About ", "Forward-Looking Statement", "Forward Looking Statement", "Cautionary Statement", "Safe Harbor",
+    "Media Contact", "Investor Contact", "Investors Contact", "Contact:", "Contacts", "For investor",
+    "For media",
+]
+notes = """Exhibits arrive as text/html wrapped in the EDGAR SGML envelope (<DOCUMENT><TYPE>EX-99.1 ...), \
+with no h1, JSON-LD or semantic containers; the headline is usually the first bold paragraph after \
+'Exhibit 99.1' and the issuer name, which min_words skips. Some filer agents emit div/span text with \
+no <p>, where this profile finds nothing and the cascade must fall back to density. EX-99.1 is also \
+used for financial statements and decks; discovery prefers index descriptions that say press release, \
+earnings or results. Requests carry the declared SEC_USER_AGENT and stay under 10 req/s."""
 
 [sources.cnn]
 name = "CNN Business"
 domains = ["www.cnn.com", "edition.cnn.com", "cnn.com"]
 kind = "news"
-status = "candidate"
+status = "primary"
+rank = 7
+sections = ["https://edition.cnn.com/business"]
+article_pattern = '^https://(?:www|edition)\.cnn\.com/20\d\d/\d\d/\d\d/(?:business|economy|investing|markets|tech|media)/[a-z0-9-]+$'
+
+[sources.cnn.profile]
+body = "div.article__content p"
+drop = [
+    "div.related-content-elevate", "div.related-content", "div.image__related-content",
+    "div.video-resource-elevate", 'div[itemprop="caption"]', "figcaption",
+]
+title = "h1#maincontent"
+lede_paragraphs = 2
+paywall = "div.article__content"
+notes = """JSON-LD carries the full articleBody, so the jsonld strategy works. Pages are 5 to 6 MB of \
+inline JSON, which makes DOM parsing the slow step for CNN. JSON-LD says isAccessibleForFree=false \
+(hasPart .article__content) yet the server sends the whole text; the registration wall is client-side. \
+EU visitors are redirected from www to edition.cnn.com; the business section has no RSS."""
 
 [sources.fortune]
 name = "Fortune"
 domains = ["fortune.com"]
 kind = "news"
-status = "candidate"
+status = "primary"
+rank = 8
+feeds = ["https://fortune.com/feed/fortune-feeds/?id=3230629"]
+article_pattern = '^https://fortune\.com/(?:[a-z-]+/)?20\d\d/\d\d/\d\d/[a-z0-9-]+/$'
 
-[sources.businesswire]
-name = "Business Wire"
-domains = ["www.businesswire.com", "businesswire.com"]
-kind = "press-release"
-status = "candidate"
+[sources.fortune.profile]
+body = "article.article-content p"
+drop = ["p.fortune-commentary-disclaimer", "div#related-video"]
+title = 'h1[data-cy="article-title"]'
+lede_paragraphs = 2
+paywall = "div.paywall"
+notes = """JSON-LD says isAccessibleForFree=false with hasPart .paywall, but the full text is in the server \
+HTML (metering happens client-side); the first paragraph sits outside div.paywall. Navigation promos \
+add up to seven more h1 elements, so the title needs the data-cy hook. Replaces AP News."""
 
 [sources.guardian]
 name = "The Guardian Business"
 domains = ["www.theguardian.com", "theguardian.com"]
 kind = "news"
-status = "candidate"
+status = "primary"
+rank = 9
+feeds = ["https://www.theguardian.com/uk/business/rss"]
+article_pattern = '^https://www\.theguardian\.com/[a-z-]+(?:/[a-z-]+)?/20\d\d/[a-z]{3}/\d\d/[a-z0-9-]+$'
+exclude_pattern = '/(?:live|video|gallery|audio|picture)/'
+
+[sources.guardian.profile]
+body = "div.article-body-commercial-selector p"
+drop = ["figure", "aside"]
+title = "h1"
+lede_paragraphs = 2
+notes = """Class names are hashed (dcr-*) except the commercial/viewer selector classes. Newsletter promos \
+are <figure> blocks with paragraphs inside, hence the figure drop. JSON-LD marks articles free. \
+Replaces Investing.com."""
 
 [sources.bbc]
 name = "BBC Business"
 domains = ["www.bbc.com", "www.bbc.co.uk", "bbc.com"]
 kind = "news"
-status = "candidate"
+status = "primary"
+rank = 10
+feeds = ["https://feeds.bbci.co.uk/news/business/rss.xml"]
+article_pattern = '^https://www\.bbc\.(?:com|co\.uk)/news/articles/[a-z0-9]+$'
+
+[sources.bbc.profile]
+body = 'div[data-testid="rich-text"] p'
+drop = ["figure"]
+title = "h1#main-heading"
+lede_paragraphs = 2
+stop_markers = ["BBC InDepth is the home", "Get in touch", "Top image credit"]
+notes = """Class names are hashed (ssrcss-*); data-testid attributes are the stable hooks. The standfirst \
+in the header is outside the body. Feed links resolve to bbc.co.uk for UK/EU visitors and bbc.com \
+elsewhere. JSON-LD type is ReportageNewsArticle without articleBody. Replaces Benzinga."""
+
+# --- rejected: a plain client is refused from the probe IP ---------------------------------------------
+
+[sources.apnews]
+name = "AP News"
+domains = ["apnews.com"]
+kind = "news"
+status = "rejected"
+reason = "Cloudflare managed challenge (403, cf-mitigated: challenge) on every path: hubs, sitemaps and articles."
+sections = ["https://apnews.com/hub/business", "https://apnews.com/news-sitemap-content.xml"]
+article_pattern = '^https://apnews\.com/article/[a-z0-9-]+$'
+
+[sources.investing]
+name = "Investing.com"
+domains = ["www.investing.com", "investing.com"]
+kind = "news"
+status = "rejected"
+reason = "RSS answers, but every HTML page is a Cloudflare 403 with a 3-byte body (WAF rule, no challenge)."
+feeds = ["https://www.investing.com/rss/news_25.rss", "https://www.investing.com/rss/news.rss"]
+article_pattern = '^https://www\.investing\.com/news/[a-z0-9-]+/[a-z0-9-]+$'
+
+[sources.benzinga]
+name = "Benzinga"
+domains = ["www.benzinga.com", "benzinga.com"]
+kind = "news"
+status = "rejected"
+reason = "Cloudflare 'Attention Required!' 403 on every HTML page; only /feed (evergreen pages) and sitemaps answer."
+sections = ["https://www.benzinga.com/sitemap-benzinga.com/www/googlenews.xml"]
+article_pattern = '^https://www\.benzinga\.com/(?:[a-z0-9-]+/)*\d{2}/\d{2}/\d+/[a-z0-9-]+$'
+
+[sources.businesswire]
+name = "Business Wire"
+domains = ["www.businesswire.com", "businesswire.com"]
+kind = "press-release"
+status = "rejected"
+reason = "Akamai Bot Manager: /newsroom serves an interactive challenge (HTTP 200), release pages a 403 'Page Unavailable'."
+feeds = ["https://feed.businesswire.com/mrss/home/?rss=G1QFDERJXkJcFVJYWQ=="]
+article_pattern = '^https://www\.businesswire\.com/news/home/\d+/en/[^/]+/$'

@@ -1,0 +1,62 @@
+# Default: the app talks to native Ollama on the host (Metal on macOS).
+# Bundled CPU Ollama (Linux / CI / no native install):
+#   docker compose --env-file deploy/bundled.env up -d
+name: veritrade
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app.Dockerfile
+    image: veritrade-app:local
+    ports:
+      - "8000:8000"
+    environment:
+      OLLAMA_BASE_URL: ${VT_OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      VT_OLLAMA_BACKEND_LABEL: ${VT_OLLAMA_BACKEND_LABEL:-native-metal}
+      # Host-side OLLAMA_MODELS restricts the allowlist; never passed raw into the ollama container,
+      # where the same name means "model storage dir".
+      VT_MODELS: ${OLLAMA_MODELS:-}
+      VT_DEFAULT_MODEL_SIGNAL: ${VT_DEFAULT_MODEL_SIGNAL:-}
+      VT_DEFAULT_MODEL_SUMMARY: ${VT_DEFAULT_MODEL_SUMMARY:-}
+      VT_DEFAULT_MODEL_ANALYZE: ${VT_DEFAULT_MODEL_ANALYZE:-}
+      SEC_USER_AGENT: ${SEC_USER_AGENT:-VeriTrade Analytics PoC kris.dimitrov92@gmail.com}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      ollama-pull:
+        condition: service_completed_successfully
+        required: false
+
+  ollama:
+    profiles: [bundled]
+    image: ollama/ollama:${OLLAMA_IMAGE_TAG:-0.40.6}
+    volumes:
+      - ${OLLAMA_MODEL_DIR:-ollama-models}:/root/.ollama
+    environment:
+      OLLAMA_KEEP_ALIVE: 30m
+      OLLAMA_MAX_LOADED_MODELS: "2"
+      OLLAMA_FLASH_ATTENTION: "1"
+      OLLAMA_KV_CACHE_TYPE: q8_0
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  ollama-pull:
+    profiles: [bundled]
+    image: ollama/ollama:${OLLAMA_IMAGE_TAG:-0.40.6}
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      VT_PULL_MODELS: ${VT_PULL_MODELS:-qwen3.5:0.8b-q8_0,tev1:0.8b-q8_0}
+    volumes:
+      - ./docker/ollama-pull.sh:/scripts/ollama-pull.sh:ro
+    entrypoint: ["/bin/sh", "/scripts/ollama-pull.sh"]
+    restart: "no"
+
+volumes:
+  ollama-models:

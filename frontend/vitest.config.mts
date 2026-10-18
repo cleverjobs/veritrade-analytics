@@ -1,13 +1,14 @@
 import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
-  plugins: [tsconfigPaths(), react()],
+  plugins: [react()],
+  resolve: { tsconfigPaths: true },
   test: {
     environment: "jsdom",
     include: ["tests/**/*.test.{ts,tsx}"],
+    // Playwright specs run against the compose stack, never under Vitest.
+    exclude: [...configDefaults.exclude, "e2e/**"],
     setupFiles: ["tests/setup.ts"],
-    passWithNoTests: true,
   },
 });
