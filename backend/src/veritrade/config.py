@@ -40,8 +40,13 @@ class Settings(BaseSettings):
     fetch_max_redirects: int = 5
     fetch_cache_ttl_s: float = 600.0
     fetch_error_ttl_s: float = 60.0
+    # Pages are up to fetch_max_bytes each, so the fetch cache is bounded by size as well as count.
+    fetch_cache_max_bytes: int = 200_000_000
     result_cache_ttl_s: float = 3600.0
     cache_max_entries: int = 512
+    models_cache_ttl_s: float = 10.0
+    # /health and /models answer even when Ollama hangs, so the container healthcheck stays meaningful.
+    ollama_probe_timeout_s: float = 2.0
 
     cors_origins: str = ""
     static_dir: Path | None = None

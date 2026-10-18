@@ -1071,53 +1071,53 @@
           },
           "400": {
             "content": {
-              "text/event-stream": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Error raised before the stream opens"
           },
           "422": {
             "content": {
-              "text/event-stream": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Error raised before the stream opens"
           },
           "502": {
             "content": {
-              "text/event-stream": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             },
-            "description": "Bad Gateway"
+            "description": "Error raised before the stream opens"
           },
           "503": {
             "content": {
-              "text/event-stream": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             },
-            "description": "Service Unavailable"
+            "description": "Error raised before the stream opens"
           },
           "504": {
             "content": {
-              "text/event-stream": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             },
-            "description": "Gateway Timeout"
+            "description": "Error raised before the stream opens"
           }
         },
         "summary": "Analyze Stream"
@@ -1356,53 +1356,53 @@
           },
           "400": {
             "content": {
-              "text/event-stream": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Error raised before the stream opens"
           },
           "422": {
             "content": {
-              "text/event-stream": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Error raised before the stream opens"
           },
           "502": {
             "content": {
-              "text/event-stream": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             },
-            "description": "Bad Gateway"
+            "description": "Error raised before the stream opens"
           },
           "503": {
             "content": {
-              "text/event-stream": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             },
-            "description": "Service Unavailable"
+            "description": "Error raised before the stream opens"
           },
           "504": {
             "content": {
-              "text/event-stream": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             },
-            "description": "Gateway Timeout"
+            "description": "Error raised before the stream opens"
           }
         },
         "summary": "Summary Stream"
