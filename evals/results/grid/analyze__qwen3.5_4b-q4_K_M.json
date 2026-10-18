@@ -1,0 +1,847 @@
+{
+ "endpoint": "analyze",
+ "model": "qwen3.5:4b-q4_K_M",
+ "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+ "split": "dev300",
+ "n": 300,
+ "class_weights": {
+  "bullish": 0.6045,
+  "bearish": 0.4533,
+  "neutral": 1.9422
+ },
+ "inversion_cap": 0.02,
+ "generated_by": "uv run python -m veritrade_evals.grid analyze",
+ "configs": [
+  {
+   "name": "v1",
+   "variant": "sentiment-first",
+   "prompt_version": "analyze/qwen3.5:4b-q4_K_M/v1@7daf4f28",
+   "dims": {
+    "rubric": "A",
+    "shots": "0"
+   },
+   "cache_key": "48e2d7b2dbdb1098",
+   "counts": {
+    "n": 300,
+    "done": 300,
+    "missing": 0,
+    "errors": 0
+   },
+   "diagnostics": {
+    "score_histogram": {
+     "-2": 31,
+     "-1": 31,
+     "0": 190,
+     "1": 38,
+     "2": 10
+    }
+   },
+   "latency": {
+    "n": 300,
+    "wall_ms_p50": 542.8534,
+    "wall_ms_p95": 591.8257,
+    "server_ms_p50": null
+   },
+   "policies": {
+    "ordinal": {
+     "default": {
+      "threshold": 1.0,
+      "metrics": {
+       "n": 300,
+       "per_class": {
+        "bullish": {
+         "precision": 0.8774,
+         "recall": 0.46,
+         "f05": 0.7427,
+         "calls": 31.6925,
+         "support": 60.4527
+        },
+        "bearish": {
+         "precision": 0.8211,
+         "recall": 0.59,
+         "f05": 0.7615,
+         "calls": 32.5721,
+         "support": 45.3317
+        }
+       },
+       "f05_macro": 0.7521,
+       "inversion_rate": 0.0,
+       "coverage": 1.0,
+       "signal_rate": 0.2142,
+       "accuracy": 0.7969,
+       "selective_accuracy": 0.7969,
+       "confusion": {
+        "rows_gold": [
+         "bullish",
+         "bearish",
+         "neutral"
+        ],
+        "columns_pred": [
+         "bullish",
+         "bearish",
+         "neutral",
+         "abstain"
+        ],
+        "counts": [
+         [
+          46,
+          0,
+          54,
+          0
+         ],
+         [
+          0,
+          59,
+          41,
+          0
+         ],
+         [
+          2,
+          3,
+          95,
+          0
+         ]
+        ]
+       }
+      }
+     },
+     "operating_point": {
+      "threshold": 1.0,
+      "metrics": {
+       "n": 300,
+       "per_class": {
+        "bullish": {
+         "precision": 0.8774,
+         "recall": 0.46,
+         "f05": 0.7427,
+         "calls": 31.6925,
+         "support": 60.4527
+        },
+        "bearish": {
+         "precision": 0.8211,
+         "recall": 0.59,
+         "f05": 0.7615,
+         "calls": 32.5721,
+         "support": 45.3317
+        }
+       },
+       "f05_macro": 0.7521,
+       "inversion_rate": 0.0,
+       "coverage": 1.0,
+       "signal_rate": 0.2142,
+       "accuracy": 0.7969,
+       "selective_accuracy": 0.7969,
+       "confusion": {
+        "rows_gold": [
+         "bullish",
+         "bearish",
+         "neutral"
+        ],
+        "columns_pred": [
+         "bullish",
+         "bearish",
+         "neutral",
+         "abstain"
+        ],
+        "counts": [
+         [
+          46,
+          0,
+          54,
+          0
+         ],
+         [
+          0,
+          59,
+          41,
+          0
+         ],
+         [
+          2,
+          3,
+          95,
+          0
+         ]
+        ]
+       }
+      }
+     },
+     "sweep": [
+      {
+       "threshold": 1.0,
+       "f05_macro": 0.7521,
+       "precision_bullish": 0.8774,
+       "precision_bearish": 0.8211,
+       "recall_bullish": 0.46,
+       "recall_bearish": 0.59,
+       "inversion_rate": 0.0,
+       "coverage": 1.0,
+       "signal_rate": 0.2142,
+       "risk": 0.2031
+      },
+      {
+       "threshold": 2.0,
+       "f05_macro": 0.3926,
+       "precision_bullish": 0.5546,
+       "precision_bearish": 0.6854,
+       "recall_bullish": 0.08,
+       "recall_bearish": 0.28,
+       "inversion_rate": 0.0,
+       "coverage": 0.8766,
+       "signal_rate": 0.0908,
+       "risk": 0.2317
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "v2",
+   "variant": "sentiment-first",
+   "prompt_version": "analyze/qwen3.5:4b-q4_K_M/v2@b5068e95",
+   "dims": {
+    "rubric": "A",
+    "shots": "4"
+   },
+   "cache_key": "5cd0d7927c530c44",
+   "counts": {
+    "n": 300,
+    "done": 300,
+    "missing": 0,
+    "errors": 0
+   },
+   "diagnostics": {
+    "score_histogram": {
+     "-2": 18,
+     "-1": 26,
+     "0": 219,
+     "1": 31,
+     "2": 6
+    }
+   },
+   "latency": {
+    "n": 300,
+    "wall_ms_p50": 1061.5846,
+    "wall_ms_p95": 1319.1941,
+    "server_ms_p50": null
+   },
+   "policies": {
+    "ordinal": {
+     "default": {
+      "threshold": 1.0,
+      "metrics": {
+       "n": 300,
+       "per_class": {
+        "bullish": {
+         "precision": 0.9181,
+         "recall": 0.36,
+         "f05": 0.7008,
+         "calls": 23.7051,
+         "support": 60.4527
+        },
+        "bearish": {
+         "precision": 0.7001,
+         "recall": 0.4,
+         "f05": 0.6087,
+         "calls": 25.9013,
+         "support": 45.3317
+        }
+       },
+       "f05_macro": 0.6548,
+       "inversion_rate": 0.0,
+       "coverage": 1.0,
+       "signal_rate": 0.1654,
+       "accuracy": 0.748,
+       "selective_accuracy": 0.748,
+       "confusion": {
+        "rows_gold": [
+         "bullish",
+         "bearish",
+         "neutral"
+        ],
+        "columns_pred": [
+         "bullish",
+         "bearish",
+         "neutral",
+         "abstain"
+        ],
+        "counts": [
+         [
+          36,
+          0,
+          64,
+          0
+         ],
+         [
+          0,
+          40,
+          60,
+          0
+         ],
+         [
+          1,
+          4,
+          95,
+          0
+         ]
+        ]
+       }
+      }
+     },
+     "operating_point": {
+      "threshold": 1.0,
+      "metrics": {
+       "n": 300,
+       "per_class": {
+        "bullish": {
+         "precision": 0.9181,
+         "recall": 0.36,
+         "f05": 0.7008,
+         "calls": 23.7051,
+         "support": 60.4527
+        },
+        "bearish": {
+         "precision": 0.7001,
+         "recall": 0.4,
+         "f05": 0.6087,
+         "calls": 25.9013,
+         "support": 45.3317
+        }
+       },
+       "f05_macro": 0.6548,
+       "inversion_rate": 0.0,
+       "coverage": 1.0,
+       "signal_rate": 0.1654,
+       "accuracy": 0.748,
+       "selective_accuracy": 0.748,
+       "confusion": {
+        "rows_gold": [
+         "bullish",
+         "bearish",
+         "neutral"
+        ],
+        "columns_pred": [
+         "bullish",
+         "bearish",
+         "neutral",
+         "abstain"
+        ],
+        "counts": [
+         [
+          36,
+          0,
+          64,
+          0
+         ],
+         [
+          0,
+          40,
+          60,
+          0
+         ],
+         [
+          1,
+          4,
+          95,
+          0
+         ]
+        ]
+       }
+      }
+     },
+     "sweep": [
+      {
+       "threshold": 1.0,
+       "f05_macro": 0.6548,
+       "precision_bullish": 0.9181,
+       "precision_bearish": 0.7001,
+       "recall_bullish": 0.36,
+       "recall_bearish": 0.4,
+       "inversion_rate": 0.0,
+       "coverage": 1.0,
+       "signal_rate": 0.1654,
+       "risk": 0.252
+      },
+      {
+       "threshold": 2.0,
+       "f05_macro": 0.2715,
+       "precision_bullish": 0.6088,
+       "precision_bearish": 0.5385,
+       "recall_bullish": 0.05,
+       "recall_bearish": 0.15,
+       "inversion_rate": 0.0,
+       "coverage": 0.8933,
+       "signal_rate": 0.0586,
+       "risk": 0.2749
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "v3",
+   "variant": "sentiment-first",
+   "prompt_version": "analyze/qwen3.5:4b-q4_K_M/v3@6a6f6cdb",
+   "dims": {
+    "rubric": "B",
+    "shots": "0"
+   },
+   "cache_key": "3ca3c9377b8ea66e",
+   "counts": {
+    "n": 300,
+    "done": 300,
+    "missing": 0,
+    "errors": 0
+   },
+   "diagnostics": {
+    "score_histogram": {
+     "-2": 18,
+     "-1": 16,
+     "0": 239,
+     "1": 26,
+     "2": 1
+    }
+   },
+   "latency": {
+    "n": 300,
+    "wall_ms_p50": 637.8282,
+    "wall_ms_p95": 739.7943,
+    "server_ms_p50": null
+   },
+   "policies": {
+    "ordinal": {
+     "default": {
+      "threshold": 1.0,
+      "metrics": {
+       "n": 300,
+       "per_class": {
+        "bullish": {
+         "precision": 0.89,
+         "recall": 0.26,
+         "f05": 0.5995,
+         "calls": 17.6599,
+         "support": 60.4527
+        },
+        "bearish": {
+         "precision": 0.7888,
+         "recall": 0.32,
+         "f05": 0.61,
+         "calls": 18.3904,
+         "support": 45.3317
+        }
+       },
+       "f05_macro": 0.6048,
+       "inversion_rate": 0.0,
+       "coverage": 1.0,
+       "signal_rate": 0.1202,
+       "accuracy": 0.7287,
+       "selective_accuracy": 0.7287,
+       "confusion": {
+        "rows_gold": [
+         "bullish",
+         "bearish",
+         "neutral"
+        ],
+        "columns_pred": [
+         "bullish",
+         "bearish",
+         "neutral",
+         "abstain"
+        ],
+        "counts": [
+         [
+          26,
+          0,
+          74,
+          0
+         ],
+         [
+          0,
+          32,
+          68,
+          0
+         ],
+         [
+          1,
+          2,
+          97,
+          0
+         ]
+        ]
+       }
+      }
+     },
+     "operating_point": {
+      "threshold": 1.0,
+      "metrics": {
+       "n": 300,
+       "per_class": {
+        "bullish": {
+         "precision": 0.89,
+         "recall": 0.26,
+         "f05": 0.5995,
+         "calls": 17.6599,
+         "support": 60.4527
+        },
+        "bearish": {
+         "precision": 0.7888,
+         "recall": 0.32,
+         "f05": 0.61,
+         "calls": 18.3904,
+         "support": 45.3317
+        }
+       },
+       "f05_macro": 0.6048,
+       "inversion_rate": 0.0,
+       "coverage": 1.0,
+       "signal_rate": 0.1202,
+       "accuracy": 0.7287,
+       "selective_accuracy": 0.7287,
+       "confusion": {
+        "rows_gold": [
+         "bullish",
+         "bearish",
+         "neutral"
+        ],
+        "columns_pred": [
+         "bullish",
+         "bearish",
+         "neutral",
+         "abstain"
+        ],
+        "counts": [
+         [
+          26,
+          0,
+          74,
+          0
+         ],
+         [
+          0,
+          32,
+          68,
+          0
+         ],
+         [
+          1,
+          2,
+          97,
+          0
+         ]
+        ]
+       }
+      }
+     },
+     "sweep": [
+      {
+       "threshold": 1.0,
+       "f05_macro": 0.6048,
+       "precision_bullish": 0.89,
+       "precision_bearish": 0.7888,
+       "recall_bullish": 0.26,
+       "recall_bearish": 0.32,
+       "inversion_rate": 0.0,
+       "coverage": 1.0,
+       "signal_rate": 0.1202,
+       "risk": 0.2713
+      },
+      {
+       "threshold": 2.0,
+       "f05_macro": 0.2258,
+       "precision_bullish": 1.0,
+       "precision_bearish": 0.6512,
+       "recall_bullish": 0.01,
+       "recall_bearish": 0.16,
+       "inversion_rate": 0.0,
+       "coverage": 0.919,
+       "signal_rate": 0.0391,
+       "risk": 0.2882
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "v4",
+   "variant": "sentiment-first",
+   "prompt_version": "analyze/qwen3.5:4b-q4_K_M/v4@45bd12a9",
+   "dims": {
+    "rubric": "B",
+    "shots": "4"
+   },
+   "cache_key": "bd4da74f91cb4355",
+   "counts": {
+    "n": 300,
+    "done": 300,
+    "missing": 0,
+    "errors": 0
+   },
+   "diagnostics": {
+    "score_histogram": {
+     "-2": 14,
+     "-1": 12,
+     "0": 266,
+     "1": 5,
+     "2": 3
+    }
+   },
+   "latency": {
+    "n": 300,
+    "wall_ms_p50": 1031.3866,
+    "wall_ms_p95": 1202.0515,
+    "server_ms_p50": null
+   },
+   "policies": {
+    "ordinal": {
+     "default": {
+      "threshold": 1.0,
+      "metrics": {
+       "n": 300,
+       "per_class": {
+        "bullish": {
+         "precision": 1.0,
+         "recall": 0.08,
+         "f05": 0.303,
+         "calls": 4.8362,
+         "support": 60.4527
+        },
+        "bearish": {
+         "precision": 0.7369,
+         "recall": 0.24,
+         "f05": 0.5211,
+         "calls": 14.7639,
+         "support": 45.3317
+        }
+       },
+       "f05_macro": 0.4121,
+       "inversion_rate": 0.0,
+       "coverage": 1.0,
+       "signal_rate": 0.0653,
+       "accuracy": 0.6868,
+       "selective_accuracy": 0.6868,
+       "confusion": {
+        "rows_gold": [
+         "bullish",
+         "bearish",
+         "neutral"
+        ],
+        "columns_pred": [
+         "bullish",
+         "bearish",
+         "neutral",
+         "abstain"
+        ],
+        "counts": [
+         [
+          8,
+          0,
+          92,
+          0
+         ],
+         [
+          0,
+          24,
+          76,
+          0
+         ],
+         [
+          0,
+          2,
+          98,
+          0
+         ]
+        ]
+       }
+      }
+     },
+     "operating_point": {
+      "threshold": 1.0,
+      "metrics": {
+       "n": 300,
+       "per_class": {
+        "bullish": {
+         "precision": 1.0,
+         "recall": 0.08,
+         "f05": 0.303,
+         "calls": 4.8362,
+         "support": 60.4527
+        },
+        "bearish": {
+         "precision": 0.7369,
+         "recall": 0.24,
+         "f05": 0.5211,
+         "calls": 14.7639,
+         "support": 45.3317
+        }
+       },
+       "f05_macro": 0.4121,
+       "inversion_rate": 0.0,
+       "coverage": 1.0,
+       "signal_rate": 0.0653,
+       "accuracy": 0.6868,
+       "selective_accuracy": 0.6868,
+       "confusion": {
+        "rows_gold": [
+         "bullish",
+         "bearish",
+         "neutral"
+        ],
+        "columns_pred": [
+         "bullish",
+         "bearish",
+         "neutral",
+         "abstain"
+        ],
+        "counts": [
+         [
+          8,
+          0,
+          92,
+          0
+         ],
+         [
+          0,
+          24,
+          76,
+          0
+         ],
+         [
+          0,
+          2,
+          98,
+          0
+         ]
+        ]
+       }
+      }
+     },
+     "sweep": [
+      {
+       "threshold": 1.0,
+       "f05_macro": 0.4121,
+       "precision_bullish": 1.0,
+       "precision_bearish": 0.7369,
+       "recall_bullish": 0.08,
+       "recall_bearish": 0.24,
+       "inversion_rate": 0.0,
+       "coverage": 1.0,
+       "signal_rate": 0.0653,
+       "risk": 0.3132
+      },
+      {
+       "threshold": 2.0,
+       "f05_macro": 0.2316,
+       "precision_bullish": 1.0,
+       "precision_bearish": 0.5834,
+       "recall_bullish": 0.03,
+       "recall_bearish": 0.12,
+       "inversion_rate": 0.0,
+       "coverage": 0.9718,
+       "signal_rate": 0.0371,
+       "risk": 0.3223
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "best": {
+  "config": "v1",
+  "variant": "sentiment-first",
+  "policy": "ordinal",
+  "prompt_version": "analyze/qwen3.5:4b-q4_K_M/v1@7daf4f28",
+  "threshold": 1.0,
+  "inversion_cap_met": true,
+  "metrics": {
+   "n": 300,
+   "per_class": {
+    "bullish": {
+     "precision": 0.8774,
+     "recall": 0.46,
+     "f05": 0.7427,
+     "calls": 31.6925,
+     "support": 60.4527
+    },
+    "bearish": {
+     "precision": 0.8211,
+     "recall": 0.59,
+     "f05": 0.7615,
+     "calls": 32.5721,
+     "support": 45.3317
+    }
+   },
+   "f05_macro": 0.7521,
+   "inversion_rate": 0.0,
+   "coverage": 1.0,
+   "signal_rate": 0.2142,
+   "accuracy": 0.7969,
+   "selective_accuracy": 0.7969,
+   "confusion": {
+    "rows_gold": [
+     "bullish",
+     "bearish",
+     "neutral"
+    ],
+    "columns_pred": [
+     "bullish",
+     "bearish",
+     "neutral",
+     "abstain"
+    ],
+    "counts": [
+     [
+      46,
+      0,
+      54,
+      0
+     ],
+     [
+      0,
+      59,
+      41,
+      0
+     ],
+     [
+      2,
+      3,
+      95,
+      0
+     ]
+    ]
+   }
+  },
+  "cis": {
+   "f05_macro": {
+    "point": 0.7521,
+    "low": 0.6638,
+    "high": 0.8339
+   },
+   "inversion_rate": {
+    "point": 0.0,
+    "low": 0.0,
+    "high": 0.0
+   },
+   "coverage": {
+    "point": 1.0,
+    "low": 1.0,
+    "high": 1.0
+   },
+   "signal_rate": {
+    "point": 0.2142,
+    "low": 0.1803,
+    "high": 0.2517
+   },
+   "accuracy": {
+    "point": 0.7969,
+    "low": 0.7561,
+    "high": 0.8339
+   }
+  },
+  "latency": {
+   "n": 300,
+   "wall_ms_p50": 542.8534,
+   "wall_ms_p95": 591.8257,
+   "server_ms_p50": null
+  }
+ }
+}

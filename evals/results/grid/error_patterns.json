@@ -1,0 +1,278 @@
+{
+ "per_model": {
+  "qwen3.5:0.8b-q8_0": {
+   "directional_calls": 39,
+   "wrong_calls": 1,
+   "neutral_called_bullish": 0,
+   "neutral_called_bearish": 1,
+   "bullish_called_bearish": 0,
+   "bearish_called_bullish": 0,
+   "bullish_missed": 84,
+   "bearish_missed": 78,
+   "failed": 0
+  },
+  "clef-flash:9b-q8_0": {
+   "directional_calls": 172,
+   "wrong_calls": 6,
+   "neutral_called_bullish": 4,
+   "neutral_called_bearish": 2,
+   "bullish_called_bearish": 0,
+   "bearish_called_bullish": 0,
+   "bullish_missed": 16,
+   "bearish_missed": 18,
+   "failed": 0
+  },
+  "nimble:9b-q4_K_M": {
+   "directional_calls": 131,
+   "wrong_calls": 3,
+   "neutral_called_bullish": 1,
+   "neutral_called_bearish": 2,
+   "bullish_called_bearish": 0,
+   "bearish_called_bullish": 0,
+   "bullish_missed": 42,
+   "bearish_missed": 30,
+   "failed": 0
+  },
+  "ministral-3:3b": {
+   "directional_calls": 95,
+   "wrong_calls": 7,
+   "neutral_called_bullish": 2,
+   "neutral_called_bearish": 4,
+   "bullish_called_bearish": 1,
+   "bearish_called_bullish": 0,
+   "bullish_missed": 70,
+   "bearish_missed": 41,
+   "failed": 0
+  },
+  "qwen3:4b-instruct-2507-q4_K_M": {
+   "directional_calls": 97,
+   "wrong_calls": 8,
+   "neutral_called_bullish": 5,
+   "neutral_called_bearish": 3,
+   "bullish_called_bearish": 0,
+   "bearish_called_bullish": 0,
+   "bullish_missed": 48,
+   "bearish_missed": 63,
+   "failed": 0
+  },
+  "qwen3.5:4b-q4_K_M": {
+   "directional_calls": 110,
+   "wrong_calls": 5,
+   "neutral_called_bullish": 2,
+   "neutral_called_bearish": 3,
+   "bullish_called_bearish": 0,
+   "bearish_called_bullish": 0,
+   "bullish_missed": 54,
+   "bearish_missed": 41,
+   "failed": 0
+  }
+ },
+ "buckets": {
+  "analyst action": {
+   "n": 22,
+   "gold": {
+    "bullish": 15,
+    "bearish": 7,
+    "neutral": 0
+   },
+   "models": {
+    "qwen3.5:0.8b-q8_0": {
+     "directional_calls": 7,
+     "wrong_calls": 0,
+     "missed_directional": 15
+    },
+    "clef-flash:9b-q8_0": {
+     "directional_calls": 19,
+     "wrong_calls": 0,
+     "missed_directional": 3
+    },
+    "nimble:9b-q4_K_M": {
+     "directional_calls": 15,
+     "wrong_calls": 0,
+     "missed_directional": 7
+    },
+    "ministral-3:3b": {
+     "directional_calls": 10,
+     "wrong_calls": 0,
+     "missed_directional": 12
+    },
+    "qwen3:4b-instruct-2507-q4_K_M": {
+     "directional_calls": 20,
+     "wrong_calls": 0,
+     "missed_directional": 2
+    },
+    "qwen3.5:4b-q4_K_M": {
+     "directional_calls": 21,
+     "wrong_calls": 0,
+     "missed_directional": 1
+    }
+   }
+  },
+  "earnings / guidance": {
+   "n": 46,
+   "gold": {
+    "bullish": 12,
+    "bearish": 22,
+    "neutral": 12
+   },
+   "models": {
+    "qwen3.5:0.8b-q8_0": {
+     "directional_calls": 10,
+     "wrong_calls": 1,
+     "missed_directional": 25
+    },
+    "clef-flash:9b-q8_0": {
+     "directional_calls": 31,
+     "wrong_calls": 2,
+     "missed_directional": 5
+    },
+    "nimble:9b-q4_K_M": {
+     "directional_calls": 27,
+     "wrong_calls": 2,
+     "missed_directional": 9
+    },
+    "ministral-3:3b": {
+     "directional_calls": 24,
+     "wrong_calls": 2,
+     "missed_directional": 12
+    },
+    "qwen3:4b-instruct-2507-q4_K_M": {
+     "directional_calls": 25,
+     "wrong_calls": 4,
+     "missed_directional": 13
+    },
+    "qwen3.5:4b-q4_K_M": {
+     "directional_calls": 28,
+     "wrong_calls": 2,
+     "missed_directional": 8
+    }
+   }
+  },
+  "price move": {
+   "n": 64,
+   "gold": {
+    "bullish": 32,
+    "bearish": 25,
+    "neutral": 7
+   },
+   "models": {
+    "qwen3.5:0.8b-q8_0": {
+     "directional_calls": 13,
+     "wrong_calls": 0,
+     "missed_directional": 44
+    },
+    "clef-flash:9b-q8_0": {
+     "directional_calls": 47,
+     "wrong_calls": 0,
+     "missed_directional": 10
+    },
+    "nimble:9b-q4_K_M": {
+     "directional_calls": 32,
+     "wrong_calls": 0,
+     "missed_directional": 25
+    },
+    "ministral-3:3b": {
+     "directional_calls": 24,
+     "wrong_calls": 1,
+     "missed_directional": 33
+    },
+    "qwen3:4b-instruct-2507-q4_K_M": {
+     "directional_calls": 19,
+     "wrong_calls": 0,
+     "missed_directional": 38
+    },
+    "qwen3.5:4b-q4_K_M": {
+     "directional_calls": 24,
+     "wrong_calls": 0,
+     "missed_directional": 33
+    }
+   }
+  },
+  "macro / markets": {
+   "n": 40,
+   "gold": {
+    "bullish": 12,
+    "bearish": 12,
+    "neutral": 16
+   },
+   "models": {
+    "qwen3.5:0.8b-q8_0": {
+     "directional_calls": 1,
+     "wrong_calls": 0,
+     "missed_directional": 23
+    },
+    "clef-flash:9b-q8_0": {
+     "directional_calls": 23,
+     "wrong_calls": 1,
+     "missed_directional": 2
+    },
+    "nimble:9b-q4_K_M": {
+     "directional_calls": 14,
+     "wrong_calls": 0,
+     "missed_directional": 10
+    },
+    "ministral-3:3b": {
+     "directional_calls": 6,
+     "wrong_calls": 0,
+     "missed_directional": 18
+    },
+    "qwen3:4b-instruct-2507-q4_K_M": {
+     "directional_calls": 5,
+     "wrong_calls": 1,
+     "missed_directional": 20
+    },
+    "qwen3.5:4b-q4_K_M": {
+     "directional_calls": 6,
+     "wrong_calls": 0,
+     "missed_directional": 18
+    }
+   }
+  },
+  "other": {
+   "n": 128,
+   "gold": {
+    "bullish": 29,
+    "bearish": 34,
+    "neutral": 65
+   },
+   "models": {
+    "qwen3.5:0.8b-q8_0": {
+     "directional_calls": 8,
+     "wrong_calls": 0,
+     "missed_directional": 55
+    },
+    "clef-flash:9b-q8_0": {
+     "directional_calls": 52,
+     "wrong_calls": 3,
+     "missed_directional": 14
+    },
+    "nimble:9b-q4_K_M": {
+     "directional_calls": 43,
+     "wrong_calls": 1,
+     "missed_directional": 21
+    },
+    "ministral-3:3b": {
+     "directional_calls": 31,
+     "wrong_calls": 4,
+     "missed_directional": 36
+    },
+    "qwen3:4b-instruct-2507-q4_K_M": {
+     "directional_calls": 28,
+     "wrong_calls": 3,
+     "missed_directional": 38
+    },
+    "qwen3.5:4b-q4_K_M": {
+     "directional_calls": 31,
+     "wrong_calls": 3,
+     "missed_directional": 35
+    }
+   }
+  }
+ },
+ "cross_model": {
+  "models": 6,
+  "directional_gold_no_model_calls_correctly": 20,
+  "neutral_gold_every_model_calls_directional": 1,
+  "any_model_inverts": 1
+ }
+}
