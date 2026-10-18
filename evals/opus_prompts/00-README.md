@@ -19,8 +19,14 @@ The agents never fetch anything themselves. They drive the deterministic CLI
 | 4 adjudicate | one agent | `40-adjudicate.md` | `prepare --stage adjudicate`, `ingest --stage adjudicate` | keep or replace |
 | 5 refill | main loop | - | `status`, then steps 1-4 for the cells that are short | every cell has enough eligible articles |
 | 6 finalize | main loop | - | `finalize`, `verify` | committed `evals/data/articles/{articles.jsonl,stats.json}` |
+| 7 judge summaries | judge agents over batches of judge packets | `50-judge.md` | `summary_eval judge-prepare`, `judge-check`, `judge-ingest` | blind 1-5 faithfulness and coverage per candidate summary |
 
-Only the main loop runs `prepare`, `finalize`, `verify` and `ingest --agreement`. Discovery and gold agents may
+Step 7 uses `uv run python -m veritrade_evals.summary_eval <command>` and runs after `generate` and `score`
+have produced the candidate summaries (decision R6). Judges see each article with its candidate summaries
+under shuffled labels `S1..Sn`; the label-to-model map stays in a private file only `judge-ingest` reads.
+
+Only the main loop runs `prepare`, `finalize`, `verify`, `ingest --agreement`, `judge-prepare` and
+`judge-ingest`. Discovery and gold agents may
 run `status`; labellers and the adjudicator do not, so their judgements stay independent.
 
 An article is **eligible** when its gold output is usable, it was published within 60 days before 2026-10-18
@@ -59,6 +65,18 @@ This build session's transcript is published, and the repository is public.
 | `adjudicate_ids.txt` | `ingest --stage label_*` | ids where the labellers disagree or one is unsure |
 | `cache/`, `discovery_log.jsonl` | `discover` | archive responses (6 h), per-run archive counts |
 
+## Private layout (`evals/data/private/summary/`)
+
+| Path | Written by | Contents |
+|---|---|---|
+| `preds/<endpoint>/<model>/`, `manifest.json` | `generate` | generated summaries per candidate, keyed by run config |
+| `scores/<split>.jsonl` | `score` | per-summary check results and key-fact cosines |
+| `spotcheck/<split>.md`, `review/` | `spot-check`, ad-hoc reviews | facts next to summary sentences for hand labelling |
+| `judge/packets/<id>.md`, `judge/packets_<split>.txt` | `judge-prepare` | article plus anonymised candidate summaries |
+| `judge/blinding/<id>.json` | `judge-prepare` | label-to-candidate map; judges never open it |
+| `judge/out/<id>.json` | judge agents | outputs, schema in `50-judge.md` |
+| `judge/ingested/<split>.jsonl` | `judge-ingest` | de-blinded scores that `report` aggregates |
+
 ## Main-loop runbook
 
 ```bash
@@ -81,4 +99,10 @@ uv run python -m veritrade_evals articles prepare --stage adjudicate
 # 5. refill short cells, then
 uv run python -m veritrade_evals articles finalize
 uv run python -m veritrade_evals articles verify
+
+# 7. summary judge (after summary_eval generate + score on the split)
+uv run python -m veritrade_evals.summary_eval judge-prepare --split dev
+#    spawn judge agents over batches of the paths in judge/packets_dev.txt (50-judge.md)
+uv run python -m veritrade_evals.summary_eval judge-ingest --split dev
+uv run python -m veritrade_evals.summary_eval report --split dev
 ```

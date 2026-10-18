@@ -6,7 +6,13 @@ import logging
 import httpx
 import pytest
 
-from veritrade.api.contracts import MetaEvent, SummaryDeltaEvent, SummaryDoneEvent, SummaryResponse
+from veritrade.api.contracts import (
+    AnalyzeResponse,
+    MetaEvent,
+    SummaryDeltaEvent,
+    SummaryDoneEvent,
+    SummaryResponse,
+)
 
 from .fakes import SUMMARY, FakeOllama, Page, sse_events
 
@@ -91,3 +97,21 @@ async def test_summary_stream_cut_at_the_output_limit_flags_the_done_event(
     # The salvaged result is cached with its flag.
     replay = SummaryResponse.model_validate((await api.post("/api/summary", json={"url": page.url})).json())
     assert (replay.meta.cached, replay.summary, replay.truncated) == (True, SUMMARY, True)
+
+
+async def test_overlong_summaries_are_served_capped_without_the_truncated_flag(
+    api: httpx.AsyncClient, ollama: FakeOllama, page: Page
+) -> None:
+    sentences = [f"Acme detail number {i} matters." for i in range(5)]
+    ollama.summary = " ".join(sentences)
+    capped = " ".join(sentences[:3])
+    response = await api.post("/api/summary/stream", json={"url": page.url})
+    assert response.status_code == 200, response.text
+    events = sse_events(response.text)
+    text = "".join(SummaryDeltaEvent.model_validate(d).text for n, d in events if n == "summary_delta")
+    done = SummaryDoneEvent.model_validate(events[-1][1]).result
+    assert text == ollama.summary, "deltas stream what the model wrote; the done event carries the cap"
+    assert (done.summary, done.truncated) == (capped, False)
+
+    analyzed = AnalyzeResponse.model_validate((await api.post("/api/analyze", json={"url": page.url})).json())
+    assert (analyzed.summary, analyzed.truncated) == (capped, False)

@@ -7,11 +7,12 @@ import re
 from collections.abc import AsyncGenerator
 from contextlib import aclosing
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, overload
 
 from pydantic import BaseModel, ValidationError
 
 from veritrade.errors import SchemaViolation
+from veritrade.extract.dom import split_sentences
 from veritrade.inference.confidence import (
     LabelLogprobPolicy,
     OrdinalPolicy,
@@ -42,6 +43,10 @@ from veritrade.prompts.registry import PromptSpec
 
 CHARS_PER_TOKEN = 4
 TOP_LOGPROBS = 20
+# Product spec for every served summary; models overshoot it, so serving enforces it.
+SUMMARY_MAX_SENTENCES = 3
+SUMMARY_MAX_WORDS = 60
+ELLIPSIS = "…"
 # Terminal punctuation, closing quotes or brackets, then whitespace. The text end is no boundary:
 # a cut right after "3." may sit inside "3.5".
 _COMPLETE_SENTENCES = re.compile(r"(.*[.!?][\"'”’)\]]*)\s", re.DOTALL)
@@ -172,6 +177,37 @@ def cut_to_sentence(text: str) -> str:
     return (match.group(1) if match else text).strip()
 
 
+def cap_summary(
+    text: str, max_sentences: int = SUMMARY_MAX_SENTENCES, max_words: int = SUMMARY_MAX_WORDS
+) -> str:
+    """Whole leading sentences within both caps; a first sentence over the word cap is cut at a word
+    and ends with an ellipsis. Text already within the caps is returned unchanged."""
+    sentences = split_sentences(text)
+    kept: list[str] = []
+    words = 0
+    for sentence in sentences[:max_sentences]:
+        count = len(sentence.split())
+        if words + count > max_words:
+            break
+        kept.append(sentence)
+        words += count
+    if len(kept) == len(sentences):
+        return text.strip()
+    if kept:
+        return " ".join(kept)
+    head = " ".join(sentences[0].split()[:max_words]).rstrip(",;:")
+    return head + ELLIPSIS
+
+
+@overload
+def _capped(out: SummaryOut) -> SummaryOut: ...
+@overload
+def _capped(out: AnalyzeOut) -> AnalyzeOut: ...
+def _capped(out: SummaryOut | AnalyzeOut) -> SummaryOut | AnalyzeOut:
+    summary = cap_summary(out.summary)
+    return out if summary == out.summary else out.model_copy(update={"summary": summary})
+
+
 def _salvage(spec: ModelSpec, endpoint: Endpoint, chat: ChatResult) -> tuple[int | None, str, str]:
     """Score, entity and sentence-cut summary decoded from JSON that num_predict cut off."""
     log.warning(
@@ -199,7 +235,7 @@ def _salvage(spec: ModelSpec, endpoint: Endpoint, chat: ChatResult) -> tuple[int
 
 def _salvage_summary(spec: ModelSpec, chat: ChatResult) -> SummaryResult:
     _, _, summary = _salvage(spec, "summary", chat)
-    return SummaryResult(SummaryOut(summary=summary), chat, truncated=True)
+    return SummaryResult(_capped(SummaryOut(summary=summary)), chat, truncated=True)
 
 
 def _salvage_analyze(
@@ -209,7 +245,7 @@ def _salvage_analyze(
     score, entity, summary = _salvage(spec, "analyze", chat)
     if score is None:
         raise SchemaViolation(f"{spec.name} reached its output token limit before writing the score")
-    out = out_type.model_validate({"score": score, "entity": entity, "summary": summary})
+    out = _capped(out_type.model_validate({"score": score, "entity": entity, "summary": summary}))
     return AnalyzeResult(out, score_verdict(spec, out.score), chat, truncated=True)
 
 
@@ -225,7 +261,7 @@ async def summarize(client: OllamaClient, spec: ModelSpec, prompt: PromptSpec, t
         )
     except OutputTruncated as cut:
         return _salvage_summary(spec, cut.chat)
-    return SummaryResult(out, chat)
+    return SummaryResult(_capped(out), chat)
 
 
 async def summarize_stream(
@@ -244,7 +280,7 @@ async def summarize_stream(
                     yield _salvage_summary(spec, item)
                     return
                 scanner.close()
-                yield SummaryResult(_validate(SummaryOut, item.content, spec.name), item)
+                yield SummaryResult(_capped(_validate(SummaryOut, item.content, spec.name)), item)
                 return
             for event in scanner.feed(item):
                 yield event
@@ -260,6 +296,7 @@ async def analyze(client: OllamaClient, spec: ModelSpec, prompt: PromptSpec, tex
         )
     except OutputTruncated as cut:
         return _salvage_analyze(spec, out_type, cut.chat)
+    out = _capped(out)
     return AnalyzeResult(out, score_verdict(spec, out.score), chat)
 
 
@@ -281,7 +318,7 @@ async def analyze_stream(
                     yield _salvage_analyze(spec, out_type, item)
                     return
                 scanner.close()
-                out = _validate(out_type, item.content, spec.name)
+                out = _capped(_validate(out_type, item.content, spec.name))
                 yield AnalyzeResult(out, score_verdict(spec, out.score), item)
                 return
             for event in scanner.feed(item):

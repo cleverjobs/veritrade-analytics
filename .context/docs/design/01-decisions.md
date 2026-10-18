@@ -82,3 +82,13 @@ Measured during P1/P2, recorded here so the deviations are traceable. Inputs for
   neutral (26 of 60 dev tweets disagreed with the logprob argmax; 0 of 60 with the penalty off). Every chat call
   now pins `presence_penalty 0`, `frequency_penalty 0`, `repeat_penalty 1`; `num_predict` still bounds runaway
   output.
+- **Length-cut generations are salvaged**: a summary or analyze output that hits `num_predict` returns its fields
+  with the summary cut to the last full sentence and `truncated: true`, instead of a 502 after a doubled-budget
+  retry.
+- **Summary length is enforced in serving** (R6 follow-up): no candidate reached the 0.8 deterministic pass rate
+  on the dev articles, mostly on the 60-word cap. Rather than relax the gate, the service caps every summary at
+  3 sentences / 60 words at a sentence boundary, and the frozen prompts ask for 2-3 sentences of at most 50 words
+  that name the primary entity first.
+- **Key-fact coverage threshold 0.60** (R6): a hand spot-check of 45 key facts on 10 dev articles agreed best
+  at a cosine of 0.60 (33/45); 0.75 marked no false "covered" but missed 20 stated facts. 0.60 is primary and
+  0.75 is reported as a conservative bound; the Opus judge remains the selection signal.
