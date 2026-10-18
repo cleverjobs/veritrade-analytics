@@ -37,8 +37,29 @@ describe("runReducer", () => {
     const lane = state.lanes.find((l) => l.id === "summary");
     expect(lane).toMatchObject({ status: "done", firstTokenAtMs: 300, endAtMs: 900 });
     expect(state.summary).toBe("Final.");
+    expect(state.summaryTruncated).toBe(false);
     expect(state.running).toBe(true);
     expect(articleMeta(state)?.title).toBe(done.meta.title);
+  });
+
+  it("keeps the truncation flag from the final summary until the next run", () => {
+    const done = summaryResponse();
+    const truncated = play([
+      start,
+      {
+        type: "done",
+        runId: 1,
+        lane: "summary",
+        atMs: 900,
+        meta: done.meta,
+        timings: done.timings,
+        summary: "Cut.",
+        truncated: true,
+      },
+      { type: "done", runId: 1, lane: "signal", atMs: 950, meta: done.meta, timings: done.timings },
+    ]);
+    expect(truncated.summaryTruncated).toBe(true);
+    expect(runReducer(truncated, { ...start, runId: 2 }).summaryTruncated).toBe(false);
   });
 
   it("records time to signal from a JSON signal response and finishes the run", () => {

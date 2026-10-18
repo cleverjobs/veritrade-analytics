@@ -35,6 +35,8 @@ class ChatResult:
     timings: OllamaTimings = field(default_factory=OllamaTimings)
     logprobs: tuple[TokenLogprob, ...] | None = None
     ttft_ms: float | None = None
+    # Ollama's reason for stopping; "length" means num_predict cut the output.
+    done_reason: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

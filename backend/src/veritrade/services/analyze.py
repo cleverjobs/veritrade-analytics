@@ -92,5 +92,6 @@ def _response(prepared: Prepared, result: AnalyzeResult, *, ttft_ms: float | Non
         signal=signal_result(result.verdict),
         entity=result.entity,
         summary=result.output.summary,
+        truncated=result.truncated,
         timings=prepared.timings(inference_timings(result.chat, ttft_ms=ttft_ms)),
     )

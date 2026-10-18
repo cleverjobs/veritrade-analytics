@@ -163,6 +163,7 @@ export function summaryResponse(options: Omit<MetaOptions, "endpoint"> = {}): Su
   return {
     meta: articleMeta({ endpoint: "summary", ...options }),
     summary: SUMMARY_TEXT,
+    truncated: false,
     timings: timings(
       { wall_ms: 2410, ttft_ms: 512, load_ms: 12, prompt_eval_ms: 420, eval_ms: 1930, eval_tokens: 46 },
       2610,
@@ -176,6 +177,7 @@ export function analyzeResponse(options: Omit<MetaOptions, "endpoint"> = {}): An
     signal: bullishOrdinal,
     entity: ENTITY,
     summary: SUMMARY_TEXT,
+    truncated: false,
     timings: timings(
       { wall_ms: 2980, ttft_ms: 560, load_ms: 15, prompt_eval_ms: 470, eval_ms: 2410, eval_tokens: 61 },
       3190,

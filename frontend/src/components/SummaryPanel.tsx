@@ -6,6 +6,8 @@ import styles from "./SummaryPanel.module.css";
 interface SummaryPanelProps {
   status: LaneStatus;
   text: string;
+  /** The server cut the summary at the model's output limit. */
+  truncated?: boolean;
   model?: string | null;
   streaming: boolean;
   /** Client-measured time from submit to the first summary token. */
@@ -27,7 +29,7 @@ function statusLabel(status: LaneStatus, text: string, streaming: boolean): stri
   }
 }
 
-export function SummaryPanel({ status, text, model, streaming, firstTokenMs }: SummaryPanelProps) {
+export function SummaryPanel({ status, text, truncated, model, streaming, firstTokenMs }: SummaryPanelProps) {
   const active = status === "pending" || status === "streaming";
   return (
     <section className={styles.panel} aria-labelledby="summary-heading" aria-busy={active}>
@@ -46,6 +48,11 @@ export function SummaryPanel({ status, text, model, streaming, firstTokenMs }: S
         </p>
       ) : status === "done" ? (
         <p className={styles.empty}>The model returned an empty summary.</p>
+      ) : null}
+      {truncated && text ? (
+        <p className={styles.note} data-testid="summary-truncated">
+          The model hit its output limit, so this summary was cut short.
+        </p>
       ) : null}
       {model || typeof firstTokenMs === "number" ? (
         <p className={styles.footer}>

@@ -98,6 +98,7 @@ export function AnalyzeApp() {
               <SummaryPanel
                 status={summaryLane.status}
                 text={state.summary}
+                truncated={state.summaryTruncated}
                 model={summaryLane.meta?.model}
                 streaming={state.streaming}
                 firstTokenMs={summaryLane.firstTokenAtMs}

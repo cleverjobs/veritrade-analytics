@@ -119,6 +119,8 @@ class FakeOllama:
     chat_failure: Exception | httpx.Response | None = None
     # Emit an Ollama error line after this many content chunks.
     stream_error_after: int | None = None
+    # End any output that contains this text right after it with done_reason "length", as num_predict does.
+    cut_after: str | None = None
     down: bool = False
     streams: list[NdjsonStream] = field(default_factory=list)
 
@@ -150,9 +152,13 @@ class FakeOllama:
         body = json.loads(request.content)
         fields = list(body["format"]["properties"])
         content = json.dumps({name: self._value(name) for name in fields}, ensure_ascii=False)
+        done_reason = "stop"
+        if self.cut_after and self.cut_after in content:
+            content = content[: content.index(self.cut_after) + len(self.cut_after)]
+            done_reason = "length"
         if body["stream"]:
-            return self._stream(content)
-        reply = _done(message={"role": "assistant", "content": content})
+            return self._stream(content, done_reason)
+        reply = _done(message={"role": "assistant", "content": content}, done_reason=done_reason)
         if body.get("logprobs") and fields in (["label"], ["score"]):
             reply["logprobs"] = self._logprobs(content, fields[0])
         return httpx.Response(200, json=reply)
@@ -169,7 +175,7 @@ class FakeOllama:
             _logprob(content[start + len(first) :], 0.99),
         ]
 
-    def _stream(self, content: str) -> httpx.Response:
+    def _stream(self, content: str, done_reason: str) -> httpx.Response:
         pieces = [content[i : i + self.chunk_chars] for i in range(0, len(content), self.chunk_chars)]
         chunks: list[dict[str, Any]] = [
             {"model": "m", "message": {"role": "assistant", "content": piece}, "done": False}
@@ -178,7 +184,7 @@ class FakeOllama:
         if self.stream_error_after is not None:
             chunks = [*chunks[: self.stream_error_after], {"error": "llama runner process has terminated"}]
         else:
-            chunks.append(_done(eval_count=len(pieces)))
+            chunks.append(_done(eval_count=len(pieces), done_reason=done_reason))
         stream = NdjsonStream([(json.dumps(chunk) + "\n").encode() for chunk in chunks], self.delay)
         self.streams.append(stream)
         return httpx.Response(200, stream=stream, headers={"content-type": "application/x-ndjson"})

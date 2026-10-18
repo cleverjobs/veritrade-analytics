@@ -82,6 +82,7 @@ function handleEvent(
         meta: result.meta,
         timings: result.timings,
         summary: result.summary,
+        truncated: result.truncated,
         signal: combined?.signal,
         entity: combined ? (combined.entity ?? null) : undefined,
       });

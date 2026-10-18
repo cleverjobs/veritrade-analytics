@@ -98,6 +98,12 @@
           },
           "timings": {
             "$ref": "#/components/schemas/Timings"
+          },
+          "truncated": {
+            "default": false,
+            "description": "True when the summary was cut at the model's output limit.",
+            "title": "Truncated",
+            "type": "boolean"
           }
         },
         "required": [
@@ -880,6 +886,12 @@
           },
           "timings": {
             "$ref": "#/components/schemas/Timings"
+          },
+          "truncated": {
+            "default": false,
+            "description": "True when the summary was cut at the model's output limit.",
+            "title": "Truncated",
+            "type": "boolean"
           }
         },
         "required": [

@@ -173,6 +173,12 @@ export interface components {
             /** Summary */
             summary: string;
             timings: components["schemas"]["Timings"];
+            /**
+             * Truncated
+             * @description True when the summary was cut at the model's output limit.
+             * @default false
+             */
+            truncated: boolean;
         };
         /** ArticleMeta */
         ArticleMeta: {
@@ -451,6 +457,12 @@ export interface components {
             /** Summary */
             summary: string;
             timings: components["schemas"]["Timings"];
+            /**
+             * Truncated
+             * @description True when the summary was cut at the model's output limit.
+             * @default false
+             */
+            truncated: boolean;
         };
         /** Timings */
         Timings: {

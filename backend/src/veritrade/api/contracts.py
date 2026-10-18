@@ -108,6 +108,7 @@ class SignalResponse(_Strict):
 class SummaryResponse(_Strict):
     meta: ArticleMeta
     summary: str
+    truncated: bool = Field(False, description="True when the summary was cut at the model's output limit.")
     timings: Timings
 
 
@@ -116,6 +117,7 @@ class AnalyzeResponse(_Strict):
     signal: SignalResult
     entity: str | None = None
     summary: str
+    truncated: bool = Field(False, description="True when the summary was cut at the model's output limit.")
     timings: Timings
 
 

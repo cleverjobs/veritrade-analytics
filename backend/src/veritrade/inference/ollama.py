@@ -31,9 +31,24 @@ from veritrade.inference.types import (
 )
 
 Message = Mapping[str, str]
-# Greedy and seeded so evals and serving see the same output for the same prompt.
-FIXED_OPTIONS: dict[str, Any] = {"temperature": 0, "seed": 0}
+# Greedy and seeded so evals and serving see the same output for the same prompt. Penalties are neutralised
+# because Modelfiles set them (qwen3.5: presence_penalty 1.5), which skews outputs away from recent tokens.
+FIXED_OPTIONS: dict[str, Any] = {
+    "temperature": 0,
+    "seed": 0,
+    "presence_penalty": 0,
+    "frequency_penalty": 0,
+    "repeat_penalty": 1,
+}
 SENTIMENT_QUESTION = "sentiment"
+
+
+class OutputTruncated(SchemaViolation):
+    """Generation hit num_predict before the JSON closed; `chat` keeps the partial output."""
+
+    def __init__(self, model: str, chat: ChatResult) -> None:
+        super().__init__(f"{model} reached its output token limit before the JSON closed")
+        self.chat = chat
 
 
 class _ChoiceAnswer(BaseModel):
@@ -50,6 +65,10 @@ def _ms(value: Any) -> float | None:
 
 def _int(value: Any) -> int | None:
     return value if isinstance(value, int) else None
+
+
+def _str(value: Any) -> str | None:
+    return value if isinstance(value, str) else None
 
 
 def parse_timings(body: Mapping[str, Any]) -> OllamaTimings:
@@ -220,6 +239,7 @@ class OllamaClient:
             wall_ms=wall_ms,
             timings=parse_timings(raw),
             logprobs=parse_logprobs(raw.get("logprobs")),
+            done_reason=_str(raw.get("done_reason")),
         )
         return result, raw
 
@@ -247,13 +267,15 @@ class OllamaClient:
         options: Mapping[str, Any] | None = None,
         logprobs: bool = False,
         top_logprobs: int | None = None,
+        retry_cut: bool = True,
     ) -> tuple[T, ChatResult]:
-        """Schema-constrained chat, validated; one retry, with a doubled budget if output was cut."""
+        """Schema-constrained chat, validated, with one retry. Output cut at num_predict is retried with
+        a doubled budget, or raised as OutputTruncated when `retry_cut` is off so the caller can salvage."""
         opts = dict(options or {})
         spent_ms = 0.0
         last_error: ValidationError | None = None
         for _attempt in range(2):
-            result, raw = await self.chat_raw(
+            result, _ = await self.chat_raw(
                 model,
                 messages,
                 format=ollama_format(out_type),
@@ -266,8 +288,11 @@ class OllamaClient:
                 parsed = out_type.model_validate_json(result.content)
             except ValidationError as exc:
                 last_error = exc
-                if raw.get("done_reason") == "length" and isinstance(opts.get("num_predict"), int):
-                    opts["num_predict"] = opts["num_predict"] * 2
+                if result.done_reason == "length":
+                    if not retry_cut:
+                        raise OutputTruncated(model, dataclasses.replace(result, wall_ms=spent_ms)) from exc
+                    if isinstance(opts.get("num_predict"), int):
+                        opts["num_predict"] = opts["num_predict"] * 2
                 continue
             return parsed, dataclasses.replace(result, wall_ms=spent_ms)
         raise SchemaViolation(
@@ -328,6 +353,7 @@ class OllamaClient:
                             timings=parse_timings(chunk),
                             logprobs=tuple(token_logprobs) or None,
                             ttft_ms=ttft_ms,
+                            done_reason=_str(chunk.get("done_reason")),
                         )
                         return
         except httpx.HTTPError as exc:

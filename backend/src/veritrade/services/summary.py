@@ -66,5 +66,6 @@ def _response(prepared: Prepared, result: SummaryResult, *, ttft_ms: float | Non
     return SummaryResponse(
         meta=prepared.meta,
         summary=result.output.summary,
+        truncated=result.truncated,
         timings=prepared.timings(inference_timings(result.chat, ttft_ms=ttft_ms)),
     )

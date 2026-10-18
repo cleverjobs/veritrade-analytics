@@ -40,7 +40,15 @@ async def test_chat_sends_fixed_decoding_and_parses_the_response(
     assert sent["think"] is False
     assert sent["stream"] is False
     assert sent["keep_alive"] == "5m"
-    assert sent["options"] == {"num_ctx": 8192, "num_predict": 16, "temperature": 0, "seed": 0}
+    assert sent["options"] == {
+        "num_ctx": 8192,
+        "num_predict": 16,
+        "temperature": 0,
+        "seed": 0,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "repeat_penalty": 1,
+    }
     assert sent["format"] == ollama_format(LabelOut)
     assert (sent["logprobs"], sent["top_logprobs"]) == (True, 20)
     assert result.content == '{"label": "neutral"}'

@@ -27,6 +27,8 @@ export interface RunState {
   /** Server-reported time to sentiment on the combined stream. */
   serverSignalMs: number | null;
   summary: string;
+  /** The server cut the summary at the model's output limit. */
+  summaryTruncated: boolean;
 }
 
 interface Tagged {
@@ -45,6 +47,7 @@ export type RunAction =
       meta: ArticleMeta;
       timings: Timings;
       summary?: string;
+      truncated?: boolean;
       signal?: SignalResult;
       entity?: string | null;
     } & Tagged)
@@ -61,6 +64,7 @@ export const initialRunState: RunState = {
   entity: null,
   serverSignalMs: null,
   summary: "",
+  summaryTruncated: false,
 };
 
 function newLane(id: LaneId): Lane {
@@ -130,6 +134,7 @@ export function runReducer(state: RunState, action: RunAction): RunState {
         ...next,
         // The final payload is authoritative over the concatenated deltas.
         summary: action.summary ?? next.summary,
+        summaryTruncated: action.truncated ?? next.summaryTruncated,
         signal: action.signal ?? next.signal,
         entity: action.entity !== undefined ? action.entity : next.entity,
       };

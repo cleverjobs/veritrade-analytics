@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+import re
 from collections.abc import AsyncGenerator
 from contextlib import aclosing
 from dataclasses import dataclass
@@ -16,11 +18,19 @@ from veritrade.inference.confidence import (
     ProbabilityPolicy,
     policy_for,
 )
-from veritrade.inference.incremental import JsonFieldScanner, ScanEvent
-from veritrade.inference.ollama import OllamaClient
+from veritrade.inference.incremental import (
+    EntityClosed,
+    JsonFieldScanner,
+    ScanEvent,
+    ScoreClosed,
+    SummaryText,
+)
+from veritrade.inference.ollama import OllamaClient, OutputTruncated
 from veritrade.inference.schemas import (
     ANALYZE_MODELS,
     AnalyzeOut,
+    AnalyzeSentimentFirst,
+    AnalyzeSummaryFirst,
     LabelOut,
     OrdinalOut,
     SummaryOut,
@@ -32,12 +42,18 @@ from veritrade.prompts.registry import PromptSpec
 
 CHARS_PER_TOKEN = 4
 TOP_LOGPROBS = 20
+# Terminal punctuation, closing quotes or brackets, then whitespace. The text end is no boundary:
+# a cut right after "3." may sit inside "3.5".
+_COMPLETE_SENTENCES = re.compile(r"(.*[.!?][\"'”’)\]]*)\s", re.DOTALL)
+
+log = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, slots=True)
 class SummaryResult:
     output: SummaryOut
     chat: ChatResult
+    truncated: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,6 +61,7 @@ class AnalyzeResult:
     output: AnalyzeOut
     verdict: Verdict
     chat: ChatResult
+    truncated: bool = False
 
     @property
     def entity(self) -> str | None:
@@ -97,6 +114,7 @@ def _combine(first: ChatResult, second: ChatResult) -> ChatResult:
             total_ms=_sum(t1.total_ms, t2.total_ms),
         ),
         logprobs=second.logprobs,
+        done_reason=second.done_reason,
     )
 
 
@@ -148,9 +166,65 @@ def _validate[T: BaseModel](out_type: type[T], content: str, model: str) -> T:
         ) from exc
 
 
+def cut_to_sentence(text: str) -> str:
+    """The text up to its last complete sentence, or all of it when no sentence has ended."""
+    match = _COMPLETE_SENTENCES.match(text)
+    return (match.group(1) if match else text).strip()
+
+
+def _salvage(spec: ModelSpec, endpoint: Endpoint, chat: ChatResult) -> tuple[int | None, str, str]:
+    """Score, entity and sentence-cut summary decoded from JSON that num_predict cut off."""
+    log.warning(
+        "%s output from %s hit num_predict after %s eval tokens; salvaging the partial JSON",
+        endpoint,
+        spec.name,
+        chat.timings.eval_tokens,
+    )
+    score: int | None = None
+    entity = ""
+    parts: list[str] = []
+    for event in JsonFieldScanner().feed(chat.content):
+        match event:
+            case ScoreClosed(score=value):
+                score = value
+            case EntityClosed(entity=value):
+                entity = value
+            case SummaryText(delta=delta):
+                parts.append(delta)
+    summary = cut_to_sentence("".join(parts))
+    if not summary:
+        raise SchemaViolation(f"{spec.name} reached its output token limit before writing a summary")
+    return score, entity, summary
+
+
+def _salvage_summary(spec: ModelSpec, chat: ChatResult) -> SummaryResult:
+    _, _, summary = _salvage(spec, "summary", chat)
+    return SummaryResult(SummaryOut(summary=summary), chat, truncated=True)
+
+
+def _salvage_analyze(
+    spec: ModelSpec, out_type: type[AnalyzeSentimentFirst] | type[AnalyzeSummaryFirst], chat: ChatResult
+) -> AnalyzeResult:
+    """A cut generation still needs its score; summary-first output cut before it stays a violation."""
+    score, entity, summary = _salvage(spec, "analyze", chat)
+    if score is None:
+        raise SchemaViolation(f"{spec.name} reached its output token limit before writing the score")
+    out = out_type.model_validate({"score": score, "entity": entity, "summary": summary})
+    return AnalyzeResult(out, score_verdict(spec, out.score), chat, truncated=True)
+
+
+def _was_cut(chat: ChatResult, scanner: JsonFieldScanner) -> bool:
+    return chat.done_reason == "length" and not scanner.done
+
+
 async def summarize(client: OllamaClient, spec: ModelSpec, prompt: PromptSpec, text: str) -> SummaryResult:
     messages = prompt.messages(fit_input(text, spec.max_input_tokens), "default")
-    out, chat = await client.chat_json(spec.name, messages, SummaryOut, options=chat_options(spec, "summary"))
+    try:
+        out, chat = await client.chat_json(
+            spec.name, messages, SummaryOut, options=chat_options(spec, "summary"), retry_cut=False
+        )
+    except OutputTruncated as cut:
+        return _salvage_summary(spec, cut.chat)
     return SummaryResult(out, chat)
 
 
@@ -166,6 +240,9 @@ async def summarize_stream(
     async with aclosing(stream):
         async for item in stream:
             if isinstance(item, ChatResult):
+                if _was_cut(item, scanner):
+                    yield _salvage_summary(spec, item)
+                    return
                 scanner.close()
                 yield SummaryResult(_validate(SummaryOut, item.content, spec.name), item)
                 return
@@ -175,10 +252,14 @@ async def summarize_stream(
 
 async def analyze(client: OllamaClient, spec: ModelSpec, prompt: PromptSpec, text: str) -> AnalyzeResult:
     order = spec.field_order or "sentiment-first"
+    out_type = ANALYZE_MODELS[order]
     messages = prompt.messages(fit_input(text, spec.max_input_tokens), order)
-    out, chat = await client.chat_json(
-        spec.name, messages, ANALYZE_MODELS[order], options=chat_options(spec, "analyze")
-    )
+    try:
+        out, chat = await client.chat_json(
+            spec.name, messages, out_type, options=chat_options(spec, "analyze"), retry_cut=False
+        )
+    except OutputTruncated as cut:
+        return _salvage_analyze(spec, out_type, cut.chat)
     return AnalyzeResult(out, score_verdict(spec, out.score), chat)
 
 
@@ -196,6 +277,9 @@ async def analyze_stream(
     async with aclosing(stream):
         async for item in stream:
             if isinstance(item, ChatResult):
+                if _was_cut(item, scanner):
+                    yield _salvage_analyze(spec, out_type, item)
+                    return
                 scanner.close()
                 out = _validate(out_type, item.content, spec.name)
                 yield AnalyzeResult(out, score_verdict(spec, out.score), item)
