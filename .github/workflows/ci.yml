@@ -103,12 +103,13 @@ jobs:
           path: ${{ runner.temp }}/ollama-models
           key: ${{ steps.models.outputs.cache-primary-key }}
 
+      # Loads both models; a different article than the tests use keeps their requests uncached.
       - name: Warm up both models
         run: |
           for model in qwen3.5:0.8b-q8_0 tev1:0.8b-q8_0; do
             curl -fsS --max-time 600 -o /dev/null -w "$model %{http_code} %{time_total}s\n" \
               -H 'content-type: application/json' \
-              -d "{\"url\": \"http://www.cnn.com/vt-skeleton/article-1\", \"model\": \"$model\"}" \
+              -d "{\"url\": \"http://www.bbc.com/vt-skeleton/article-1\", \"model\": \"$model\"}" \
               "$E2E_BASE_URL/api/signal"
           done
 

@@ -13,6 +13,9 @@ frontend/.next
 frontend/out
 frontend/e2e
 frontend/tests
+frontend/playwright.config.ts
+frontend/vitest.config.mts
+frontend/*.md
 frontend/test-results
 frontend/playwright-report
 frontend/blob-report

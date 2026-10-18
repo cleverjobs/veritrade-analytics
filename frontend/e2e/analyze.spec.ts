@@ -83,9 +83,13 @@ test.describe("analyze page", () => {
 test("signal-only API call with the decision model returns a label and stage timings", async ({
   request,
 }) => {
-  const resp = await request.post("/api/signal", { data: { url: ARTICLE_URL, model: DECISION_MODEL } });
+  // no_cache: earlier tests and the CI warm-up may have cached this exact request.
+  const resp = await request.post("/api/signal", {
+    data: { url: ARTICLE_URL, model: DECISION_MODEL, no_cache: true },
+  });
   expect(resp.status()).toBe(200);
   const body = await resp.json();
+  expect(body.meta.cached).toBe(false);
 
   expect(LABELS).toContain(body.signal.sentiment);
   expect(body.signal.policy).toBe("probability");
