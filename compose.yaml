@@ -33,6 +33,8 @@ services:
   ollama:
     profiles: [bundled]
     image: ollama/ollama:${OLLAMA_IMAGE_TAG:-0.40.6}
+    # Unlimited by default; OLLAMA_CPUS=4 mimics a GitHub runner and spares a busy host.
+    cpus: ${OLLAMA_CPUS:-0}
     volumes:
       # OLLAMA_MODEL_DIR swaps the named volume for a host directory (CI caches it between runs).
       - ${OLLAMA_MODEL_DIR:-ollama-models}:/root/.ollama/models

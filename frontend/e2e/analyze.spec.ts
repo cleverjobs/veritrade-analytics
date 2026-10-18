@@ -1,7 +1,21 @@
 import { expect, test, type Page } from "@playwright/test";
 
-// Defaults match compose.e2e.yaml: the fixture site answers for publisher hostnames inside the stack.
-const ARTICLE_URL = process.env.E2E_ARTICLE_URL ?? "http://www.cnn.com/vt-skeleton/article-1";
+// Source key -> hostname the fixture site answers for inside the stack (compose.e2e.yaml).
+const FIXTURE_HOSTS: Record<string, string> = {
+  yahoo: "finance.yahoo.com",
+  cnbc: "www.cnbc.com",
+  fool: "www.fool.com",
+  prnewswire: "www.prnewswire.com",
+  globenewswire: "www.globenewswire.com",
+  sec: "www.sec.gov",
+  cnn: "www.cnn.com",
+  fortune: "fortune.com",
+  guardian: "www.theguardian.com",
+  bbc: "www.bbc.com",
+};
+const fixtureUrl = (host: string) => `http://${host}/vt-skeleton/article-1`;
+
+const ARTICLE_URL = process.env.E2E_ARTICLE_URL ?? fixtureUrl(FIXTURE_HOSTS.cnbc);
 const DECISION_MODEL = process.env.E2E_DECISION_MODEL ?? "tev1:0.8b-q8_0";
 const EXTRACTOR = process.env.E2E_EXTRACTOR ?? "trafilatura";
 
@@ -80,23 +94,27 @@ test.describe("analyze page", () => {
   });
 });
 
-test("signal-only API call with the decision model returns a label and stage timings", async ({
-  request,
-}) => {
-  // no_cache: earlier tests and the CI warm-up may have cached this exact request.
-  const resp = await request.post("/api/signal", {
-    data: { url: ARTICLE_URL, model: DECISION_MODEL, no_cache: true },
-  });
-  expect(resp.status()).toBe(200);
-  const body = await resp.json();
-  expect(body.meta.cached).toBe(false);
+test.describe("signal-only API with the decision model", () => {
+  for (const [source, host] of Object.entries(FIXTURE_HOSTS)) {
+    test(`${source}: label, source profile and stage timings`, async ({ request }) => {
+      // no_cache: earlier tests and the CI warm-up may have cached this exact request.
+      const resp = await request.post("/api/signal", {
+        data: { url: fixtureUrl(host), model: DECISION_MODEL, no_cache: true },
+      });
+      expect(resp.status()).toBe(200);
+      const body = await resp.json();
 
-  expect(LABELS).toContain(body.signal.sentiment);
-  expect(body.signal.policy).toBe("probability");
-  expect(Object.keys(body.signal.probabilities).sort()).toEqual([...LABELS].sort());
-  expect(body.meta).toMatchObject({ model: DECISION_MODEL, model_kind: "decision", endpoint: "signal" });
-  // The fixture keeps the publisher hostname, so the source profile still resolves.
-  expect(body.meta.source).toBeTruthy();
-  expect(body.timings.inference.wall_ms).toBeGreaterThan(0);
-  expect(body.timings.extract_ms).toBeGreaterThanOrEqual(0);
+      expect(LABELS).toContain(body.signal.sentiment);
+      expect(body.signal.policy).toBe("probability");
+      expect(Object.keys(body.signal.probabilities).sort()).toEqual([...LABELS].sort());
+      expect(body.meta).toMatchObject({
+        source,
+        model: DECISION_MODEL,
+        model_kind: "decision",
+        endpoint: "signal",
+        cached: false,
+      });
+      expect(body.timings.inference.wall_ms).toBeGreaterThan(0);
+    });
+  }
 });
