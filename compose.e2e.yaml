@@ -1,0 +1,59 @@
+# e2e stack: bundled CPU Ollama with the CI models, a fixture site posing as the publishers, app in test mode.
+#   docker compose -f compose.yaml -f compose.e2e.yaml up -d --wait
+#   (cd frontend && pnpm exec playwright test)
+#   docker compose -f compose.yaml -f compose.e2e.yaml down
+# Article URLs look like http://www.cnbc.com/vt-skeleton/article-1 and never leave the compose network.
+services:
+  app:
+    environment:
+      VT_ENV: test
+      # Lifts the private-address block for exactly the fixture hostnames (refused outside VT_ENV=test).
+      VT_SSRF_TEST_ALLOW_HOSTS: >-
+        finance.yahoo.com,www.cnbc.com,www.fool.com,www.prnewswire.com,www.globenewswire.com,
+        www.sec.gov,www.cnn.com,fortune.com,www.theguardian.com,www.bbc.com
+      VT_OLLAMA_BASE_URL: http://ollama:11434
+      VT_OLLAMA_BACKEND_LABEL: docker-cpu
+      # The models listed in deploy/ci-models.txt.
+      VT_MODELS: qwen3.5:0.8b-q8_0,tev1:0.8b-q8_0
+      VT_DEFAULT_MODEL_SIGNAL: qwen3.5:0.8b-q8_0
+      VT_DEFAULT_MODEL_SUMMARY: qwen3.5:0.8b-q8_0
+      VT_DEFAULT_MODEL_ANALYZE: qwen3.5:0.8b-q8_0
+    depends_on:
+      fixture-site:
+        condition: service_healthy
+
+  ollama:
+    profiles: !reset []
+
+  ollama-pull:
+    profiles: !reset []
+    environment:
+      VT_PULL_MODELS: ""
+      VT_PULL_MODELS_FILE: /ci-models.txt
+    volumes:
+      - ./deploy/ci-models.txt:/ci-models.txt:ro
+
+  fixture-site:
+    image: nginx:1.29-alpine
+    volumes:
+      - ./backend/tests/fixtures/skeletons:/usr/share/nginx/html:ro
+      - ./docker/e2e/fixture-site.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      default:
+        # Docker's embedded DNS answers these names with this container, so no request reaches a publisher.
+        aliases:
+          - finance.yahoo.com
+          - www.cnbc.com
+          - www.fool.com
+          - www.prnewswire.com
+          - www.globenewswire.com
+          - www.sec.gov
+          - www.cnn.com
+          - fortune.com
+          - www.theguardian.com
+          - www.bbc.com
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/healthz"]
+      interval: 2s
+      timeout: 2s
+      retries: 15

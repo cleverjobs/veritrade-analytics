@@ -1,6 +1,8 @@
-# Default: the app talks to native Ollama on the host (Metal on macOS).
-# Bundled CPU Ollama (Linux / CI / no native install):
-#   docker compose --env-file deploy/bundled.env up -d
+# Default: the app uses native Ollama on the host (Metal on macOS; on Linux start it with OLLAMA_HOST=0.0.0.0).
+#   docker compose up -d
+# Bundled: CPU Ollama in a container, models pulled on first start (Linux, CI, no native install).
+#   docker compose --profile bundled --env-file deploy/bundled.env up -d
+# Either way the UI and API answer on http://localhost:8000 (VT_PORT changes the host port).
 name: veritrade
 
 services:
@@ -10,17 +12,17 @@ services:
       dockerfile: docker/app.Dockerfile
     image: veritrade-app:local
     ports:
-      - "8000:8000"
+      - "${VT_PORT:-8000}:8000"
     environment:
-      OLLAMA_BASE_URL: ${VT_OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      VT_OLLAMA_BASE_URL: ${VT_OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       VT_OLLAMA_BACKEND_LABEL: ${VT_OLLAMA_BACKEND_LABEL:-native-metal}
-      # Host-side OLLAMA_MODELS restricts the allowlist; never passed raw into the ollama container,
-      # where the same name means "model storage dir".
-      VT_MODELS: ${OLLAMA_MODELS:-}
+      # Empty values keep the models.toml allowlist and defaults.
+      VT_MODELS: ${VT_MODELS:-}
       VT_DEFAULT_MODEL_SIGNAL: ${VT_DEFAULT_MODEL_SIGNAL:-}
       VT_DEFAULT_MODEL_SUMMARY: ${VT_DEFAULT_MODEL_SUMMARY:-}
       VT_DEFAULT_MODEL_ANALYZE: ${VT_DEFAULT_MODEL_ANALYZE:-}
-      SEC_USER_AGENT: ${SEC_USER_AGENT:-VeriTrade Analytics PoC kris.dimitrov92@gmail.com}
+      # Passed through only when set on the host; otherwise the app's public contact default applies.
+      SEC_USER_AGENT:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -32,7 +34,8 @@ services:
     profiles: [bundled]
     image: ollama/ollama:${OLLAMA_IMAGE_TAG:-0.40.6}
     volumes:
-      - ${OLLAMA_MODEL_DIR:-ollama-models}:/root/.ollama
+      # OLLAMA_MODEL_DIR swaps the named volume for a host directory (CI caches it between runs).
+      - ${OLLAMA_MODEL_DIR:-ollama-models}:/root/.ollama/models
     environment:
       OLLAMA_KEEP_ALIVE: 30m
       OLLAMA_MAX_LOADED_MODELS: "2"
@@ -42,6 +45,7 @@ services:
       test: ["CMD", "ollama", "list"]
       interval: 5s
       timeout: 5s
+      start_period: 10s
       retries: 30
 
   ollama-pull:
@@ -52,10 +56,10 @@ services:
         condition: service_healthy
     environment:
       OLLAMA_HOST: http://ollama:11434
-      VT_PULL_MODELS: ${VT_PULL_MODELS:-qwen3.5:0.8b-q8_0,tev1:0.8b-q8_0}
+      VT_PULL_MODELS: ${VT_PULL_MODELS:-qwen3.5:0.8b-q8_0}
     volumes:
-      - ./docker/ollama-pull.sh:/scripts/ollama-pull.sh:ro
-    entrypoint: ["/bin/sh", "/scripts/ollama-pull.sh"]
+      - ./docker/ollama-pull.sh:/ollama-pull.sh:ro
+    entrypoint: ["/bin/sh", "/ollama-pull.sh"]
     restart: "no"
 
 volumes:
