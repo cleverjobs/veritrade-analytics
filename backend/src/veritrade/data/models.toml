@@ -9,9 +9,9 @@
 # ordinal_t   directional call only when |score| >= ordinal_t (always set: streaming fallback)
 
 [defaults]
-signal = "nimble:9b-q4_K_M"
-summary = "qwen3.5:4b-q4_K_M"
-analyze = "qwen3.5:4b-q4_K_M"
+signal = "qwen3.5:0.8b-q8_0"
+summary = "qwen3.5:2b-q4_K_M"
+analyze = "ministral-3:3b"
 
 [models."clef-flash:9b-q8_0"]
 kind = "decision"

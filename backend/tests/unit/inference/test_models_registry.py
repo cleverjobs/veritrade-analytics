@@ -66,8 +66,9 @@ def test_resolve_rejects(endpoint: str, model: str, message: str) -> None:
 def test_restriction_filters_allowlist_and_moves_defaults() -> None:
     registry = Registry.load(_settings(models="qwen3.5:0.8b-q8_0, tev1:0.8b-q8_0"))
     assert [s.name for s in registry.allowed("signal")] == ["tev1:0.8b-q8_0", "qwen3.5:0.8b-q8_0"]
-    assert registry.defaults["signal"] == "tev1:0.8b-q8_0"
+    assert registry.defaults["signal"] == "qwen3.5:0.8b-q8_0"
     assert registry.defaults["summary"] == "qwen3.5:0.8b-q8_0"
+    assert registry.defaults["analyze"] == "qwen3.5:0.8b-q8_0"
     with pytest.raises(ModelNotAllowed, match="disabled by VT_MODELS"):
         registry.resolve("signal", "nimble:9b-q4_K_M")
 
