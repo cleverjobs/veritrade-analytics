@@ -18,6 +18,8 @@ from veritrade.extract.dom import Dom, Node
 GENERIC_STOPS = (
     "Forward-Looking Statement",
     "Forward Looking Statement",
+    "Forward-Looking Information",
+    "Forward Looking Information",
     "Cautionary Statement",
     "Safe Harbor",
     "Media Contact",
@@ -73,6 +75,7 @@ class Profile:
     min_words: int = 1
     stop_markers: tuple[str, ...] = ()
     paywall: str | None = None
+    max_link_density: float | None = None
 
     @property
     def stops(self) -> tuple[str, ...]:
@@ -99,6 +102,7 @@ def _profile(key: str, raw: dict[str, Any]) -> Profile:
         min_words=int(raw.get("min_words", 1)),
         stop_markers=tuple(str(s) for s in raw.get("stop_markers", ())),
         paywall=raw.get("paywall"),
+        max_link_density=float(cap) if (cap := raw.get("max_link_density")) is not None else None,
     )
 
 
@@ -209,10 +213,13 @@ def refine(texts: Sequence[str], profile: Profile | None) -> list[str]:
 
 
 def select_body(dom: Dom, profile: Profile) -> list[Node]:
-    """Body candidates in document order after the profile's drop selectors ran."""
+    """Body candidates in document order after the profile's drop selectors and link-density cap ran."""
     for css in profile.drop:
         dom.remove(css)
-    return dom.select(profile.body)
+    nodes = dom.select(profile.body)
+    if (cap := profile.max_link_density) is None:
+        return nodes
+    return [node for node in nodes if node.link_density() <= cap]
 
 
 def extract(dom: Dom, url: str, source_key: str | None) -> list[str]:

@@ -2,11 +2,20 @@
 
 from __future__ import annotations
 
+import re
 import warnings
 from collections.abc import Callable
 
 from veritrade.extract.dom import normalize, parse, strip_xml_declaration
 from veritrade.extract.types import ExtractorName
+
+_EDGAR_TEXT = re.compile(r"\A\s*<DOCUMENT>.*?<TEXT>(.*?)(?:</TEXT>|\Z)", re.IGNORECASE | re.DOTALL)
+
+
+def unwrap_edgar(html: str) -> str:
+    """The <TEXT> body of an EDGAR SGML document (trafilatura rejects the envelope); other pages as given."""
+    match = _EDGAR_TEXT.match(html)
+    return match.group(1).strip() if match else html
 
 
 def _lines(text: str | None) -> list[str]:
@@ -74,4 +83,4 @@ ADAPTERS: dict[ExtractorName, Callable[[str, str], list[str]]] = {
 
 
 def extract(name: ExtractorName, html: str, url: str) -> list[str]:
-    return ADAPTERS[name](html, url)
+    return ADAPTERS[name](unwrap_edgar(html), url)

@@ -19,9 +19,11 @@
     "VTB-11",
     "VTB-12",
     "VTB-13",
-    "VTB-14"
+    "VTB-14",
+    "VTB-15",
+    "VTB-16"
   ],
   "jsonld_body": false,
   "stop_marker": "About ",
-  "bytes": 128963
+  "bytes": 129180
 }

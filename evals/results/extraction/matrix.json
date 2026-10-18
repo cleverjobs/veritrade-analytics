@@ -1,0 +1,3751 @@
+{
+ "version": 1,
+ "generatedBy": "uv run python -m veritrade_evals.extraction_bench report",
+ "generatedAt": "2026-10-18T19:35:30+00:00",
+ "articles": {
+  "n": 90,
+  "splits": {
+   "test": 60,
+   "dev": 30
+  },
+  "perSource": {
+   "bbc": 8,
+   "cnbc": 9,
+   "cnn": 9,
+   "fool": 9,
+   "fortune": 9,
+   "globenewswire": 9,
+   "guardian": 9,
+   "prnewswire": 9,
+   "sec": 9,
+   "yahoo": 10
+  }
+ },
+ "incomplete": [],
+ "environment": {
+  "chip": "Apple M4 Pro",
+  "cpus": 14,
+  "ramGb": 48,
+  "os": "macOS-26.6.2",
+  "python": "3.13.12",
+  "packages": {
+   "beautifulsoup4": "4.15.0",
+   "cssselect": "1.6.0",
+   "justext": "3.0.2",
+   "lxml": "6.1.3",
+   "lxml-html-clean": "0.4.5",
+   "newspaper4k": "0.9.6",
+   "readability-lxml": "0.8.4.1",
+   "selectolax": "1.0.1",
+   "trafilatura": "2.3.1"
+  },
+  "sessions": [
+   {
+    "started_at": "2026-10-18T17:29:52+00:00",
+    "finished_at": "2026-10-18T17:33:09+00:00",
+    "records": 2070,
+    "loadavg_1m_mean": 6.1,
+    "loadavg_1m_max": 7.34,
+    "ollama_samples": 90,
+    "ollama_model_resident": 90,
+    "ollama_models": [
+     "ministral-3:3b",
+     "qwen3-embedding:0.6b",
+     "qwen3.5:0.8b-q8_0"
+    ],
+    "runs": 5
+   }
+  ],
+  "sharedNote": "Ollama had a model resident in 90/90 per-article samples (another eval was running), mean 1-min load average 6.1"
+ },
+ "gold": {
+  "tokensP50": 437.5,
+  "fullTokensP50": 689.5,
+  "fullTokensP95": 1506.15,
+  "ledeTokensP50": 128.0
+ },
+ "signal": {
+  "model": "clef-flash:9b-q8_0",
+  "config": "v4",
+  "promptVersion": "signal/clef-flash:9b-q8_0/v4@fcc93f1b",
+  "threshold": 0.8,
+  "ollamaVersion": "0.40.6",
+  "inputs": 2070,
+  "distinctInputs": 375,
+  "modelCalls": 373,
+  "goldVerdicts": {
+   "bearish": 28,
+   "neutral": 27,
+   "bullish": 35
+  }
+ },
+ "servedGap": {
+  "best": "selectolax/density",
+  "served": "selectolax/cascade",
+  "f1": {
+   "point": -0.0062,
+   "ci": [
+    -0.013,
+    0.0009
+   ]
+  }
+ },
+ "rows": [
+  {
+   "parser": "selectolax",
+   "extractor": "cascade",
+   "n": 90,
+   "p50Ms": 1.151,
+   "p95Ms": 2.4152,
+   "precision": 0.9452,
+   "recall": 0.9812,
+   "f1": 0.9589,
+   "leakage": 0.0526,
+   "tokensToLlm": 718.0,
+   "failureRate": 0.0,
+   "installMb": 7.4833,
+   "name": "selectolax/cascade",
+   "f1Ci": [
+    0.9416,
+    0.9733
+   ],
+   "precisionOk": 0.9452,
+   "recallOk": 0.9812,
+   "f1Ok": 0.9589,
+   "tokenLeakage": 0.0548,
+   "failures": {},
+   "tokensToLlmP95": 1524.25,
+   "ledeTokens": 128.0,
+   "parseMsP50": 0.544,
+   "parserMb": 7.4833,
+   "extractorMb": 0.0,
+   "methods": {
+    "profile": 78,
+    "jsonld": 9,
+    "density": 3
+   },
+   "titleMatchesGold": 0.8667,
+   "unstable": 0,
+   "signalAgreement": 0.9778,
+   "signalAgreementOk": 0.9778,
+   "signalN": 90,
+   "signalMissing": 0,
+   "signalFlips": 0,
+   "signalLost": 1,
+   "signalNew": 1,
+   "signalAgreementCi": [
+    0.9444,
+    1.0
+   ],
+   "ledeIdentical": 0.5111,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.9887,
+     "recall": 0.9991,
+     "leakage": 0.0211,
+     "p50Ms": 0.992,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9985,
+     "recall": 0.997,
+     "leakage": 0.0,
+     "p50Ms": 1.221,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 2.284,
+     "signalAgreement": 1.0,
+     "methods": {
+      "jsonld": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9764,
+     "recall": 0.9554,
+     "leakage": 0.0092,
+     "p50Ms": 1.122,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9939,
+     "recall": 0.9918,
+     "leakage": 0.0038,
+     "p50Ms": 1.014,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9178,
+     "recall": 1.0,
+     "leakage": 0.1309,
+     "p50Ms": 0.619,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 1.196,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9102,
+     "recall": 0.9662,
+     "leakage": 0.1327,
+     "p50Ms": 1.023,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9084,
+     "recall": 0.9077,
+     "leakage": 0.0657,
+     "p50Ms": 0.529,
+     "signalAgreement": 0.7778,
+     "methods": {
+      "profile": 6,
+      "density": 3
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.9043,
+     "recall": 0.9952,
+     "leakage": 0.1488,
+     "p50Ms": 1.748,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": "lxml",
+   "extractor": "cascade",
+   "n": 90,
+   "p50Ms": 2.093,
+   "p95Ms": 3.9284,
+   "precision": 0.9452,
+   "recall": 0.9812,
+   "f1": 0.9589,
+   "leakage": 0.0526,
+   "tokensToLlm": 718.0,
+   "failureRate": 0.0,
+   "installMb": 19.9983,
+   "name": "lxml/cascade",
+   "f1Ci": [
+    0.9416,
+    0.9733
+   ],
+   "precisionOk": 0.9452,
+   "recallOk": 0.9812,
+   "f1Ok": 0.9589,
+   "tokenLeakage": 0.0548,
+   "failures": {},
+   "tokensToLlmP95": 1524.25,
+   "ledeTokens": 128.0,
+   "parseMsP50": 1.2415,
+   "parserMb": 19.9983,
+   "extractorMb": 0.0,
+   "methods": {
+    "profile": 78,
+    "jsonld": 9,
+    "density": 3
+   },
+   "titleMatchesGold": 0.8667,
+   "unstable": 0,
+   "signalAgreement": 0.9778,
+   "signalAgreementOk": 0.9778,
+   "signalN": 90,
+   "signalMissing": 0,
+   "signalFlips": 0,
+   "signalLost": 1,
+   "signalNew": 1,
+   "signalAgreementCi": [
+    0.9444,
+    1.0
+   ],
+   "ledeIdentical": 0.5111,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.9887,
+     "recall": 0.9991,
+     "leakage": 0.0211,
+     "p50Ms": 1.911,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9985,
+     "recall": 0.997,
+     "leakage": 0.0,
+     "p50Ms": 2.062,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 2.205,
+     "signalAgreement": 1.0,
+     "methods": {
+      "jsonld": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9764,
+     "recall": 0.9554,
+     "leakage": 0.0092,
+     "p50Ms": 2.815,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9939,
+     "recall": 0.9918,
+     "leakage": 0.0038,
+     "p50Ms": 1.872,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9178,
+     "recall": 1.0,
+     "leakage": 0.1309,
+     "p50Ms": 0.949,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 2.182,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9102,
+     "recall": 0.9662,
+     "leakage": 0.1327,
+     "p50Ms": 2.07,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9084,
+     "recall": 0.9077,
+     "leakage": 0.0657,
+     "p50Ms": 0.621,
+     "signalAgreement": 0.7778,
+     "methods": {
+      "profile": 6,
+      "density": 3
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.9043,
+     "recall": 0.9952,
+     "leakage": 0.1488,
+     "p50Ms": 3.792,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": "bs4-lxml",
+   "extractor": "cascade",
+   "n": 90,
+   "p50Ms": 10.4545,
+   "p95Ms": 27.4631,
+   "precision": 0.9452,
+   "recall": 0.9812,
+   "f1": 0.9589,
+   "leakage": 0.0526,
+   "tokensToLlm": 718.0,
+   "failureRate": 0.0,
+   "installMb": 20.4799,
+   "name": "bs4-lxml/cascade",
+   "f1Ci": [
+    0.9416,
+    0.9733
+   ],
+   "precisionOk": 0.9452,
+   "recallOk": 0.9812,
+   "f1Ok": 0.9589,
+   "tokenLeakage": 0.0548,
+   "failures": {},
+   "tokensToLlmP95": 1524.25,
+   "ledeTokens": 128.0,
+   "parseMsP50": 7.554,
+   "parserMb": 20.4799,
+   "extractorMb": 0.0,
+   "methods": {
+    "profile": 78,
+    "jsonld": 9,
+    "density": 3
+   },
+   "titleMatchesGold": 0.8667,
+   "unstable": 0,
+   "signalAgreement": 0.9778,
+   "signalAgreementOk": 0.9778,
+   "signalN": 90,
+   "signalMissing": 0,
+   "signalFlips": 0,
+   "signalLost": 1,
+   "signalNew": 1,
+   "signalAgreementCi": [
+    0.9444,
+    1.0
+   ],
+   "ledeIdentical": 0.5111,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.9887,
+     "recall": 0.9991,
+     "leakage": 0.0211,
+     "p50Ms": 10.5515,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9985,
+     "recall": 0.997,
+     "leakage": 0.0,
+     "p50Ms": 7.832,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 2.229,
+     "signalAgreement": 1.0,
+     "methods": {
+      "jsonld": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9764,
+     "recall": 0.9554,
+     "leakage": 0.0092,
+     "p50Ms": 14.521,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9939,
+     "recall": 0.9918,
+     "leakage": 0.0038,
+     "p50Ms": 9.935,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9178,
+     "recall": 1.0,
+     "leakage": 0.1309,
+     "p50Ms": 6.301,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 10.697,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9102,
+     "recall": 0.9662,
+     "leakage": 0.1327,
+     "p50Ms": 26.337,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9084,
+     "recall": 0.9077,
+     "leakage": 0.0657,
+     "p50Ms": 2.266,
+     "signalAgreement": 0.7778,
+     "methods": {
+      "profile": 6,
+      "density": 3
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.9043,
+     "recall": 0.9952,
+     "leakage": 0.1488,
+     "p50Ms": 25.7675,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": "bs4",
+   "extractor": "cascade",
+   "n": 90,
+   "p50Ms": 13.347,
+   "p95Ms": 37.5302,
+   "precision": 0.9452,
+   "recall": 0.9812,
+   "f1": 0.9589,
+   "leakage": 0.0526,
+   "tokensToLlm": 718.0,
+   "failureRate": 0.0,
+   "installMb": 0.5666,
+   "name": "bs4/cascade",
+   "f1Ci": [
+    0.9416,
+    0.9733
+   ],
+   "precisionOk": 0.9452,
+   "recallOk": 0.9812,
+   "f1Ok": 0.9589,
+   "tokenLeakage": 0.0548,
+   "failures": {},
+   "tokensToLlmP95": 1524.25,
+   "ledeTokens": 128.0,
+   "parseMsP50": 10.5875,
+   "parserMb": 0.5666,
+   "extractorMb": 0.0,
+   "methods": {
+    "profile": 78,
+    "jsonld": 9,
+    "density": 3
+   },
+   "titleMatchesGold": 0.8667,
+   "unstable": 0,
+   "signalAgreement": 0.9778,
+   "signalAgreementOk": 0.9778,
+   "signalN": 90,
+   "signalMissing": 0,
+   "signalFlips": 0,
+   "signalLost": 1,
+   "signalNew": 1,
+   "signalAgreementCi": [
+    0.9444,
+    1.0
+   ],
+   "ledeIdentical": 0.5111,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.9887,
+     "recall": 0.9991,
+     "leakage": 0.0211,
+     "p50Ms": 13.69,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9985,
+     "recall": 0.997,
+     "leakage": 0.0,
+     "p50Ms": 8.837,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 2.213,
+     "signalAgreement": 1.0,
+     "methods": {
+      "jsonld": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9764,
+     "recall": 0.9554,
+     "leakage": 0.0092,
+     "p50Ms": 17.523,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9939,
+     "recall": 0.9918,
+     "leakage": 0.0038,
+     "p50Ms": 12.548,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9178,
+     "recall": 1.0,
+     "leakage": 0.1309,
+     "p50Ms": 7.503,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 15.816,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9102,
+     "recall": 0.9662,
+     "leakage": 0.1327,
+     "p50Ms": 31.941,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9084,
+     "recall": 0.9077,
+     "leakage": 0.0657,
+     "p50Ms": 2.901,
+     "signalAgreement": 0.7778,
+     "methods": {
+      "profile": 6,
+      "density": 3
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.9043,
+     "recall": 0.9952,
+     "leakage": 0.1488,
+     "p50Ms": 36.833,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": "selectolax",
+   "extractor": "density",
+   "n": 90,
+   "p50Ms": 1.6355,
+   "p95Ms": 11.5536,
+   "precision": 0.936,
+   "recall": 0.9774,
+   "f1": 0.9527,
+   "leakage": 0.061,
+   "tokensToLlm": 704.5,
+   "failureRate": 0.0,
+   "installMb": 7.4833,
+   "name": "selectolax/density",
+   "f1Ci": [
+    0.9362,
+    0.9672
+   ],
+   "precisionOk": 0.936,
+   "recallOk": 0.9774,
+   "f1Ok": 0.9527,
+   "tokenLeakage": 0.064,
+   "failures": {},
+   "tokensToLlmP95": 1585.0,
+   "ledeTokens": 121.5,
+   "parseMsP50": 0.6495,
+   "parserMb": 7.4833,
+   "extractorMb": 0.0,
+   "methods": {
+    "density": 90
+   },
+   "titleMatchesGold": 0.8667,
+   "unstable": 0,
+   "signalAgreement": 0.9667,
+   "signalAgreementOk": 0.9667,
+   "signalN": 90,
+   "signalMissing": 0,
+   "signalFlips": 0,
+   "signalLost": 2,
+   "signalNew": 1,
+   "signalAgreementCi": [
+    0.9333,
+    1.0
+   ],
+   "ledeIdentical": 0.6444,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.9932,
+     "recall": 0.9953,
+     "leakage": 0.0088,
+     "p50Ms": 1.356,
+     "signalAgreement": 0.875,
+     "methods": {
+      "density": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.998,
+     "recall": 0.9961,
+     "leakage": 0.0,
+     "p50Ms": 1.427,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9956,
+     "recall": 0.9935,
+     "leakage": 0.0026,
+     "p50Ms": 11.552,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9271,
+     "recall": 0.9657,
+     "leakage": 0.109,
+     "p50Ms": 1.843,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9656,
+     "recall": 0.9923,
+     "leakage": 0.0598,
+     "p50Ms": 1.762,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9217,
+     "recall": 0.9996,
+     "leakage": 0.1252,
+     "p50Ms": 1.032,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 1.656,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9125,
+     "recall": 0.9642,
+     "leakage": 0.1271,
+     "p50Ms": 1.341,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.911,
+     "recall": 0.916,
+     "leakage": 0.0647,
+     "p50Ms": 0.747,
+     "signalAgreement": 0.7778,
+     "methods": {
+      "density": 9
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.9114,
+     "recall": 0.956,
+     "leakage": 0.1027,
+     "p50Ms": 2.007,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": "lxml",
+   "extractor": "density",
+   "n": 90,
+   "p50Ms": 2.8065,
+   "p95Ms": 25.1344,
+   "precision": 0.936,
+   "recall": 0.9774,
+   "f1": 0.9527,
+   "leakage": 0.061,
+   "tokensToLlm": 704.5,
+   "failureRate": 0.0,
+   "installMb": 19.9983,
+   "name": "lxml/density",
+   "f1Ci": [
+    0.9362,
+    0.9672
+   ],
+   "precisionOk": 0.936,
+   "recallOk": 0.9774,
+   "f1Ok": 0.9527,
+   "tokenLeakage": 0.064,
+   "failures": {},
+   "tokensToLlmP95": 1585.0,
+   "ledeTokens": 121.5,
+   "parseMsP50": 1.2825,
+   "parserMb": 19.9983,
+   "extractorMb": 0.0,
+   "methods": {
+    "density": 90
+   },
+   "titleMatchesGold": 0.8667,
+   "unstable": 0,
+   "signalAgreement": 0.9667,
+   "signalAgreementOk": 0.9667,
+   "signalN": 90,
+   "signalMissing": 0,
+   "signalFlips": 0,
+   "signalLost": 2,
+   "signalNew": 1,
+   "signalAgreementCi": [
+    0.9333,
+    1.0
+   ],
+   "ledeIdentical": 0.6444,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.9932,
+     "recall": 0.9953,
+     "leakage": 0.0088,
+     "p50Ms": 2.2855,
+     "signalAgreement": 0.875,
+     "methods": {
+      "density": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.998,
+     "recall": 0.9961,
+     "leakage": 0.0,
+     "p50Ms": 2.095,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9956,
+     "recall": 0.9935,
+     "leakage": 0.0026,
+     "p50Ms": 25.147,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9271,
+     "recall": 0.9657,
+     "leakage": 0.109,
+     "p50Ms": 3.558,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9656,
+     "recall": 0.9923,
+     "leakage": 0.0598,
+     "p50Ms": 2.826,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9217,
+     "recall": 0.9996,
+     "leakage": 0.1252,
+     "p50Ms": 1.464,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 2.922,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9125,
+     "recall": 0.9642,
+     "leakage": 0.1271,
+     "p50Ms": 2.655,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.911,
+     "recall": 0.916,
+     "leakage": 0.0647,
+     "p50Ms": 0.785,
+     "signalAgreement": 0.7778,
+     "methods": {
+      "density": 9
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.9114,
+     "recall": 0.956,
+     "leakage": 0.1027,
+     "p50Ms": 4.1045,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": "bs4-lxml",
+   "extractor": "density",
+   "n": 90,
+   "p50Ms": 14.0615,
+   "p95Ms": 42.7929,
+   "precision": 0.936,
+   "recall": 0.9774,
+   "f1": 0.9527,
+   "leakage": 0.061,
+   "tokensToLlm": 704.5,
+   "failureRate": 0.0,
+   "installMb": 20.4799,
+   "name": "bs4-lxml/density",
+   "f1Ci": [
+    0.9362,
+    0.9672
+   ],
+   "precisionOk": 0.936,
+   "recallOk": 0.9774,
+   "f1Ok": 0.9527,
+   "tokenLeakage": 0.064,
+   "failures": {},
+   "tokensToLlmP95": 1585.0,
+   "ledeTokens": 121.5,
+   "parseMsP50": 7.9745,
+   "parserMb": 20.4799,
+   "extractorMb": 0.0,
+   "methods": {
+    "density": 90
+   },
+   "titleMatchesGold": 0.8667,
+   "unstable": 0,
+   "signalAgreement": 0.9667,
+   "signalAgreementOk": 0.9667,
+   "signalN": 90,
+   "signalMissing": 0,
+   "signalFlips": 0,
+   "signalLost": 2,
+   "signalNew": 1,
+   "signalAgreementCi": [
+    0.9333,
+    1.0
+   ],
+   "ledeIdentical": 0.6444,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.9932,
+     "recall": 0.9953,
+     "leakage": 0.0088,
+     "p50Ms": 13.6435,
+     "signalAgreement": 0.875,
+     "methods": {
+      "density": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.998,
+     "recall": 0.9961,
+     "leakage": 0.0,
+     "p50Ms": 8.677,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9956,
+     "recall": 0.9935,
+     "leakage": 0.0026,
+     "p50Ms": 41.699,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9271,
+     "recall": 0.9657,
+     "leakage": 0.109,
+     "p50Ms": 15.152,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9656,
+     "recall": 0.9923,
+     "leakage": 0.0598,
+     "p50Ms": 12.766,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9217,
+     "recall": 0.9996,
+     "leakage": 0.1252,
+     "p50Ms": 6.784,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 13.806,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9125,
+     "recall": 0.9642,
+     "leakage": 0.1271,
+     "p50Ms": 21.927,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.911,
+     "recall": 0.916,
+     "leakage": 0.0647,
+     "p50Ms": 2.724,
+     "signalAgreement": 0.7778,
+     "methods": {
+      "density": 9
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.9114,
+     "recall": 0.956,
+     "leakage": 0.1027,
+     "p50Ms": 26.5885,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": "bs4",
+   "extractor": "density",
+   "n": 90,
+   "p50Ms": 18.3135,
+   "p95Ms": 48.85,
+   "precision": 0.936,
+   "recall": 0.9774,
+   "f1": 0.9527,
+   "leakage": 0.061,
+   "tokensToLlm": 704.5,
+   "failureRate": 0.0,
+   "installMb": 0.5666,
+   "name": "bs4/density",
+   "f1Ci": [
+    0.9362,
+    0.9672
+   ],
+   "precisionOk": 0.936,
+   "recallOk": 0.9774,
+   "f1Ok": 0.9527,
+   "tokenLeakage": 0.064,
+   "failures": {},
+   "tokensToLlmP95": 1585.0,
+   "ledeTokens": 121.5,
+   "parseMsP50": 11.4235,
+   "parserMb": 0.5666,
+   "extractorMb": 0.0,
+   "methods": {
+    "density": 90
+   },
+   "titleMatchesGold": 0.8667,
+   "unstable": 0,
+   "signalAgreement": 0.9667,
+   "signalAgreementOk": 0.9667,
+   "signalN": 90,
+   "signalMissing": 0,
+   "signalFlips": 0,
+   "signalLost": 2,
+   "signalNew": 1,
+   "signalAgreementCi": [
+    0.9333,
+    1.0
+   ],
+   "ledeIdentical": 0.6444,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.9932,
+     "recall": 0.9953,
+     "leakage": 0.0088,
+     "p50Ms": 17.042,
+     "signalAgreement": 0.875,
+     "methods": {
+      "density": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.998,
+     "recall": 0.9961,
+     "leakage": 0.0,
+     "p50Ms": 10.172,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9956,
+     "recall": 0.9935,
+     "leakage": 0.0026,
+     "p50Ms": 47.443,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9271,
+     "recall": 0.9657,
+     "leakage": 0.109,
+     "p50Ms": 18.523,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9656,
+     "recall": 0.9923,
+     "leakage": 0.0598,
+     "p50Ms": 15.241,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9217,
+     "recall": 0.9996,
+     "leakage": 0.1252,
+     "p50Ms": 8.031,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 19.427,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9125,
+     "recall": 0.9642,
+     "leakage": 0.1271,
+     "p50Ms": 28.02,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.911,
+     "recall": 0.916,
+     "leakage": 0.0647,
+     "p50Ms": 3.251,
+     "signalAgreement": 0.7778,
+     "methods": {
+      "density": 9
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.9114,
+     "recall": 0.956,
+     "leakage": 0.1027,
+     "p50Ms": 37.357,
+     "signalAgreement": 1.0,
+     "methods": {
+      "density": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": "selectolax",
+   "extractor": "profile",
+   "n": 90,
+   "p50Ms": 1.097,
+   "p95Ms": 10.9962,
+   "precision": 0.9151,
+   "recall": 0.9473,
+   "f1": 0.927,
+   "leakage": 0.0516,
+   "tokensToLlm": 723.0,
+   "failureRate": 0.0333,
+   "installMb": 7.4833,
+   "name": "selectolax/profile",
+   "f1Ci": [
+    0.8881,
+    0.9614
+   ],
+   "precisionOk": 0.9467,
+   "recallOk": 0.9799,
+   "f1Ok": 0.959,
+   "tokenLeakage": 0.0533,
+   "failures": {
+    "ExtractionEmpty": 3
+   },
+   "tokensToLlmP95": 1448.5,
+   "ledeTokens": 122.0,
+   "parseMsP50": 0.646,
+   "parserMb": 7.4833,
+   "extractorMb": 0.0,
+   "methods": {
+    "profile": 87
+   },
+   "titleMatchesGold": 0.8966,
+   "unstable": 0,
+   "signalAgreement": 0.9556,
+   "signalAgreementOk": 0.9885,
+   "signalN": 90,
+   "signalMissing": 3,
+   "signalFlips": 0,
+   "signalLost": 1,
+   "signalNew": 0,
+   "signalAgreementCi": [
+    0.9111,
+    0.9889
+   ],
+   "ledeIdentical": 0.6,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.9887,
+     "recall": 0.9991,
+     "leakage": 0.0211,
+     "p50Ms": 0.984,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9985,
+     "recall": 0.997,
+     "leakage": 0.0,
+     "p50Ms": 1.131,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9956,
+     "recall": 0.9935,
+     "leakage": 0.0026,
+     "p50Ms": 11.021,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9764,
+     "recall": 0.9554,
+     "leakage": 0.0092,
+     "p50Ms": 1.124,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9939,
+     "recall": 0.9918,
+     "leakage": 0.0038,
+     "p50Ms": 0.968,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9178,
+     "recall": 1.0,
+     "leakage": 0.1309,
+     "p50Ms": 0.629,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 1.219,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9102,
+     "recall": 0.9662,
+     "leakage": 0.1327,
+     "p50Ms": 0.988,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 3,
+     "f1": 0.5942,
+     "recall": 0.5748,
+     "leakage": 0.053,
+     "p50Ms": 0.544,
+     "signalAgreement": 0.5556,
+     "methods": {
+      "profile": 6
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.9043,
+     "recall": 0.9952,
+     "leakage": 0.1488,
+     "p50Ms": 1.7325,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": "lxml",
+   "extractor": "profile",
+   "n": 90,
+   "p50Ms": 2.065,
+   "p95Ms": 24.5947,
+   "precision": 0.9151,
+   "recall": 0.9473,
+   "f1": 0.927,
+   "leakage": 0.0516,
+   "tokensToLlm": 723.0,
+   "failureRate": 0.0333,
+   "installMb": 19.9983,
+   "name": "lxml/profile",
+   "f1Ci": [
+    0.8881,
+    0.9614
+   ],
+   "precisionOk": 0.9467,
+   "recallOk": 0.9799,
+   "f1Ok": 0.959,
+   "tokenLeakage": 0.0533,
+   "failures": {
+    "ExtractionEmpty": 3
+   },
+   "tokensToLlmP95": 1448.5,
+   "ledeTokens": 122.0,
+   "parseMsP50": 1.276,
+   "parserMb": 19.9983,
+   "extractorMb": 0.0,
+   "methods": {
+    "profile": 87
+   },
+   "titleMatchesGold": 0.8966,
+   "unstable": 0,
+   "signalAgreement": 0.9556,
+   "signalAgreementOk": 0.9885,
+   "signalN": 90,
+   "signalMissing": 3,
+   "signalFlips": 0,
+   "signalLost": 1,
+   "signalNew": 0,
+   "signalAgreementCi": [
+    0.9111,
+    0.9889
+   ],
+   "ledeIdentical": 0.6,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.9887,
+     "recall": 0.9991,
+     "leakage": 0.0211,
+     "p50Ms": 1.77,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9985,
+     "recall": 0.997,
+     "leakage": 0.0,
+     "p50Ms": 1.968,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9956,
+     "recall": 0.9935,
+     "leakage": 0.0026,
+     "p50Ms": 24.632,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9764,
+     "recall": 0.9554,
+     "leakage": 0.0092,
+     "p50Ms": 2.773,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9939,
+     "recall": 0.9918,
+     "leakage": 0.0038,
+     "p50Ms": 1.831,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9178,
+     "recall": 1.0,
+     "leakage": 0.1309,
+     "p50Ms": 0.909,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 2.189,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9102,
+     "recall": 0.9662,
+     "leakage": 0.1327,
+     "p50Ms": 2.076,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 3,
+     "f1": 0.5942,
+     "recall": 0.5748,
+     "leakage": 0.053,
+     "p50Ms": 0.601,
+     "signalAgreement": 0.5556,
+     "methods": {
+      "profile": 6
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.9043,
+     "recall": 0.9952,
+     "leakage": 0.1488,
+     "p50Ms": 3.7725,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": "bs4-lxml",
+   "extractor": "profile",
+   "n": 90,
+   "p50Ms": 10.6575,
+   "p95Ms": 46.8952,
+   "precision": 0.9151,
+   "recall": 0.9473,
+   "f1": 0.927,
+   "leakage": 0.0516,
+   "tokensToLlm": 723.0,
+   "failureRate": 0.0333,
+   "installMb": 20.4799,
+   "name": "bs4-lxml/profile",
+   "f1Ci": [
+    0.8881,
+    0.9614
+   ],
+   "precisionOk": 0.9467,
+   "recallOk": 0.9799,
+   "f1Ok": 0.959,
+   "tokenLeakage": 0.0533,
+   "failures": {
+    "ExtractionEmpty": 3
+   },
+   "tokensToLlmP95": 1448.5,
+   "ledeTokens": 122.0,
+   "parseMsP50": 7.978,
+   "parserMb": 20.4799,
+   "extractorMb": 0.0,
+   "methods": {
+    "profile": 87
+   },
+   "titleMatchesGold": 0.8966,
+   "unstable": 0,
+   "signalAgreement": 0.9556,
+   "signalAgreementOk": 0.9885,
+   "signalN": 90,
+   "signalMissing": 3,
+   "signalFlips": 0,
+   "signalLost": 1,
+   "signalNew": 0,
+   "signalAgreementCi": [
+    0.9111,
+    0.9889
+   ],
+   "ledeIdentical": 0.6,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.9887,
+     "recall": 0.9991,
+     "leakage": 0.0211,
+     "p50Ms": 10.568,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9985,
+     "recall": 0.997,
+     "leakage": 0.0,
+     "p50Ms": 7.493,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9956,
+     "recall": 0.9935,
+     "leakage": 0.0026,
+     "p50Ms": 45.033,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9764,
+     "recall": 0.9554,
+     "leakage": 0.0092,
+     "p50Ms": 14.333,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9939,
+     "recall": 0.9918,
+     "leakage": 0.0038,
+     "p50Ms": 9.861,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9178,
+     "recall": 1.0,
+     "leakage": 0.1309,
+     "p50Ms": 6.379,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 10.514,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9102,
+     "recall": 0.9662,
+     "leakage": 0.1327,
+     "p50Ms": 26.26,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 3,
+     "f1": 0.5942,
+     "recall": 0.5748,
+     "leakage": 0.053,
+     "p50Ms": 1.863,
+     "signalAgreement": 0.5556,
+     "methods": {
+      "profile": 6
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.9043,
+     "recall": 0.9952,
+     "leakage": 0.1488,
+     "p50Ms": 25.1475,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": "bs4",
+   "extractor": "profile",
+   "n": 90,
+   "p50Ms": 15.834,
+   "p95Ms": 50.8108,
+   "precision": 0.9151,
+   "recall": 0.9473,
+   "f1": 0.927,
+   "leakage": 0.0516,
+   "tokensToLlm": 723.0,
+   "failureRate": 0.0333,
+   "installMb": 0.5666,
+   "name": "bs4/profile",
+   "f1Ci": [
+    0.8881,
+    0.9614
+   ],
+   "precisionOk": 0.9467,
+   "recallOk": 0.9799,
+   "f1Ok": 0.959,
+   "tokenLeakage": 0.0533,
+   "failures": {
+    "ExtractionEmpty": 3
+   },
+   "tokensToLlmP95": 1448.5,
+   "ledeTokens": 122.0,
+   "parseMsP50": 11.43,
+   "parserMb": 0.5666,
+   "extractorMb": 0.0,
+   "methods": {
+    "profile": 87
+   },
+   "titleMatchesGold": 0.8966,
+   "unstable": 0,
+   "signalAgreement": 0.9556,
+   "signalAgreementOk": 0.9885,
+   "signalN": 90,
+   "signalMissing": 3,
+   "signalFlips": 0,
+   "signalLost": 1,
+   "signalNew": 0,
+   "signalAgreementCi": [
+    0.9111,
+    0.9889
+   ],
+   "ledeIdentical": 0.6,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.9887,
+     "recall": 0.9991,
+     "leakage": 0.0211,
+     "p50Ms": 13.8605,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9985,
+     "recall": 0.997,
+     "leakage": 0.0,
+     "p50Ms": 8.785,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9956,
+     "recall": 0.9935,
+     "leakage": 0.0026,
+     "p50Ms": 50.241,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9764,
+     "recall": 0.9554,
+     "leakage": 0.0092,
+     "p50Ms": 17.151,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9939,
+     "recall": 0.9918,
+     "leakage": 0.0038,
+     "p50Ms": 12.398,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9178,
+     "recall": 1.0,
+     "leakage": 0.1309,
+     "p50Ms": 7.532,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 16.029,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9102,
+     "recall": 0.9662,
+     "leakage": 0.1327,
+     "p50Ms": 32.03,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 3,
+     "f1": 0.5942,
+     "recall": 0.5748,
+     "leakage": 0.053,
+     "p50Ms": 2.301,
+     "signalAgreement": 0.5556,
+     "methods": {
+      "profile": 6
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.9043,
+     "recall": 0.9952,
+     "leakage": 0.1488,
+     "p50Ms": 36.9145,
+     "signalAgreement": 1.0,
+     "methods": {
+      "profile": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": null,
+   "extractor": "trafilatura-precision",
+   "n": 90,
+   "p50Ms": 16.529,
+   "p95Ms": 61.5255,
+   "precision": 0.8196,
+   "recall": 0.9843,
+   "f1": 0.8644,
+   "leakage": 0.1772,
+   "tokensToLlm": 796.0,
+   "failureRate": 0.0,
+   "installMb": 60.8337,
+   "name": "trafilatura-precision",
+   "f1Ci": [
+    0.8256,
+    0.9049
+   ],
+   "precisionOk": 0.8196,
+   "recallOk": 0.9843,
+   "f1Ok": 0.8644,
+   "tokenLeakage": 0.1804,
+   "failures": {},
+   "tokensToLlmP95": 3802.7,
+   "ledeTokens": 121.5,
+   "parseMsP50": null,
+   "parserMb": 0.0,
+   "extractorMb": 60.8337,
+   "methods": {
+    "trafilatura-precision": 90
+   },
+   "titleMatchesGold": 0.8667,
+   "unstable": 0,
+   "signalAgreement": 0.9889,
+   "signalAgreementOk": 0.9889,
+   "signalN": 90,
+   "signalMissing": 0,
+   "signalFlips": 0,
+   "signalLost": 1,
+   "signalNew": 0,
+   "signalAgreementCi": [
+    0.9667,
+    1.0
+   ],
+   "ledeIdentical": 0.6,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.9959,
+     "recall": 1.0,
+     "leakage": 0.0081,
+     "p50Ms": 16.844,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura-precision": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9985,
+     "recall": 0.997,
+     "leakage": 0.0,
+     "p50Ms": 11.74,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura-precision": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9987,
+     "recall": 1.0,
+     "leakage": 0.0025,
+     "p50Ms": 60.532,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura-precision": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9979,
+     "recall": 1.0,
+     "leakage": 0.0041,
+     "p50Ms": 19.23,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura-precision": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9981,
+     "recall": 1.0,
+     "leakage": 0.0038,
+     "p50Ms": 18.952,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura-precision": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.6219,
+     "recall": 1.0,
+     "leakage": 0.5088,
+     "p50Ms": 6.788,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura-precision": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 15.306,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura-precision": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.5454,
+     "recall": 0.9662,
+     "leakage": 0.5876,
+     "p50Ms": 14.678,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura-precision": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.6235,
+     "recall": 0.96,
+     "leakage": 0.517,
+     "p50Ms": 4.137,
+     "signalAgreement": 0.8889,
+     "methods": {
+      "trafilatura-precision": 9
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.8773,
+     "recall": 0.9276,
+     "leakage": 0.1265,
+     "p50Ms": 24.6335,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura-precision": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": null,
+   "extractor": "trafilatura",
+   "n": 90,
+   "p50Ms": 12.446,
+   "p95Ms": 56.5496,
+   "precision": 0.8097,
+   "recall": 0.9847,
+   "f1": 0.8592,
+   "leakage": 0.1868,
+   "tokensToLlm": 796.0,
+   "failureRate": 0.0,
+   "installMb": 60.8337,
+   "name": "trafilatura",
+   "f1Ci": [
+    0.8206,
+    0.8993
+   ],
+   "precisionOk": 0.8097,
+   "recallOk": 0.9847,
+   "f1Ok": 0.8592,
+   "tokenLeakage": 0.1903,
+   "failures": {},
+   "tokensToLlmP95": 3802.7,
+   "ledeTokens": 122.5,
+   "parseMsP50": null,
+   "parserMb": 0.0,
+   "extractorMb": 60.8337,
+   "methods": {
+    "trafilatura": 90
+   },
+   "titleMatchesGold": 0.8667,
+   "unstable": 0,
+   "signalAgreement": 0.9667,
+   "signalAgreementOk": 0.9667,
+   "signalN": 90,
+   "signalMissing": 0,
+   "signalFlips": 0,
+   "signalLost": 3,
+   "signalNew": 0,
+   "signalAgreementCi": [
+    0.9333,
+    1.0
+   ],
+   "ledeIdentical": 0.5778,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.9645,
+     "recall": 1.0,
+     "leakage": 0.0658,
+     "p50Ms": 13.66,
+     "signalAgreement": 0.875,
+     "methods": {
+      "trafilatura": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 10.468,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9987,
+     "recall": 1.0,
+     "leakage": 0.0025,
+     "p50Ms": 56.551,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9782,
+     "recall": 1.0,
+     "leakage": 0.0426,
+     "p50Ms": 17.147,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9981,
+     "recall": 1.0,
+     "leakage": 0.0038,
+     "p50Ms": 12.278,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.6219,
+     "recall": 1.0,
+     "leakage": 0.5088,
+     "p50Ms": 5.056,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 10.808,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.5411,
+     "recall": 0.9669,
+     "leakage": 0.5916,
+     "p50Ms": 11.284,
+     "signalAgreement": 0.8889,
+     "methods": {
+      "trafilatura": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.6233,
+     "recall": 0.96,
+     "leakage": 0.5172,
+     "p50Ms": 2.98,
+     "signalAgreement": 0.8889,
+     "methods": {
+      "trafilatura": 9
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.8762,
+     "recall": 0.9276,
+     "leakage": 0.1284,
+     "p50Ms": 22.448,
+     "signalAgreement": 1.0,
+     "methods": {
+      "trafilatura": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": null,
+   "extractor": "newspaper",
+   "n": 90,
+   "p50Ms": 71.5415,
+   "p95Ms": 153.7113,
+   "precision": 0.7759,
+   "recall": 0.9106,
+   "f1": 0.8002,
+   "leakage": 0.2132,
+   "tokensToLlm": 742.5,
+   "failureRate": 0.0222,
+   "installMb": 37.0744,
+   "name": "newspaper",
+   "f1Ci": [
+    0.7498,
+    0.8529
+   ],
+   "precisionOk": 0.7936,
+   "recallOk": 0.9313,
+   "f1Ok": 0.8184,
+   "tokenLeakage": 0.2064,
+   "failures": {
+    "ExtractionEmpty": 2
+   },
+   "tokensToLlmP95": 3622.95,
+   "ledeTokens": 121.5,
+   "parseMsP50": null,
+   "parserMb": 0.0,
+   "extractorMb": 37.0744,
+   "methods": {
+    "newspaper": 88
+   },
+   "titleMatchesGold": 0.875,
+   "unstable": 1,
+   "signalAgreement": 0.9556,
+   "signalAgreementOk": 0.9773,
+   "signalN": 90,
+   "signalMissing": 2,
+   "signalFlips": 0,
+   "signalLost": 1,
+   "signalNew": 1,
+   "signalAgreementCi": [
+    0.9111,
+    0.9889
+   ],
+   "ledeIdentical": 0.5667,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.9464,
+     "recall": 0.9118,
+     "leakage": 0.0,
+     "p50Ms": 67.869,
+     "signalAgreement": 1.0,
+     "methods": {
+      "newspaper": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.992,
+     "recall": 0.9872,
+     "leakage": 0.0027,
+     "p50Ms": 40.62,
+     "signalAgreement": 1.0,
+     "methods": {
+      "newspaper": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9831,
+     "recall": 0.9687,
+     "leakage": 0.0,
+     "p50Ms": 148.007,
+     "signalAgreement": 1.0,
+     "methods": {
+      "newspaper": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.8756,
+     "recall": 0.9598,
+     "leakage": 0.1963,
+     "p50Ms": 77.198,
+     "signalAgreement": 1.0,
+     "methods": {
+      "newspaper": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9487,
+     "recall": 0.9074,
+     "leakage": 0.0043,
+     "p50Ms": 72.575,
+     "signalAgreement": 0.8889,
+     "methods": {
+      "newspaper": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.5991,
+     "recall": 1.0,
+     "leakage": 0.5333,
+     "p50Ms": 30.331,
+     "signalAgreement": 1.0,
+     "methods": {
+      "newspaper": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9859,
+     "recall": 0.9729,
+     "leakage": 0.0,
+     "p50Ms": 59.438,
+     "signalAgreement": 1.0,
+     "methods": {
+      "newspaper": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.543,
+     "recall": 0.9662,
+     "leakage": 0.5893,
+     "p50Ms": 75.514,
+     "signalAgreement": 1.0,
+     "methods": {
+      "newspaper": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 1,
+     "f1": 0.5243,
+     "recall": 0.7793,
+     "leakage": 0.5196,
+     "p50Ms": 15.98,
+     "signalAgreement": 0.7778,
+     "methods": {
+      "newspaper": 8
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 1,
+     "f1": 0.6386,
+     "recall": 0.6785,
+     "leakage": 0.2974,
+     "p50Ms": 93.147,
+     "signalAgreement": 0.9,
+     "methods": {
+      "newspaper": 9
+     }
+    }
+   }
+  },
+  {
+   "parser": null,
+   "extractor": "justext",
+   "n": 90,
+   "p50Ms": 9.7675,
+   "p95Ms": 45.0176,
+   "precision": 0.7325,
+   "recall": 0.8794,
+   "f1": 0.7595,
+   "leakage": 0.2661,
+   "tokensToLlm": 806.0,
+   "failureRate": 0.0111,
+   "installMb": 22.3894,
+   "name": "justext",
+   "f1Ci": [
+    0.7137,
+    0.8051
+   ],
+   "precisionOk": 0.7407,
+   "recallOk": 0.8893,
+   "f1Ok": 0.768,
+   "tokenLeakage": 0.2593,
+   "failures": {
+    "ExtractionEmpty": 1
+   },
+   "tokensToLlmP95": 3982.6,
+   "ledeTokens": 119.0,
+   "parseMsP50": null,
+   "parserMb": 0.0,
+   "extractorMb": 22.3894,
+   "methods": {
+    "justext": 89
+   },
+   "titleMatchesGold": 0.8764,
+   "unstable": 0,
+   "signalAgreement": 0.9333,
+   "signalAgreementOk": 0.9438,
+   "signalN": 90,
+   "signalMissing": 1,
+   "signalFlips": 0,
+   "signalLost": 4,
+   "signalNew": 1,
+   "signalAgreementCi": [
+    0.8778,
+    0.9778
+   ],
+   "ledeIdentical": 0.2111,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 1,
+     "f1": 0.6981,
+     "recall": 0.6376,
+     "leakage": 0.0342,
+     "p50Ms": 8.807,
+     "signalAgreement": 0.75,
+     "methods": {
+      "justext": 7
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9369,
+     "recall": 0.9426,
+     "leakage": 0.0531,
+     "p50Ms": 6.301,
+     "signalAgreement": 1.0,
+     "methods": {
+      "justext": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.8607,
+     "recall": 0.9802,
+     "leakage": 0.2322,
+     "p50Ms": 44.231,
+     "signalAgreement": 1.0,
+     "methods": {
+      "justext": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.7766,
+     "recall": 0.8469,
+     "leakage": 0.2889,
+     "p50Ms": 10.185,
+     "signalAgreement": 1.0,
+     "methods": {
+      "justext": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.905,
+     "recall": 0.9184,
+     "leakage": 0.0944,
+     "p50Ms": 8.645,
+     "signalAgreement": 0.8889,
+     "methods": {
+      "justext": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.5905,
+     "recall": 0.8882,
+     "leakage": 0.5072,
+     "p50Ms": 4.964,
+     "signalAgreement": 0.8889,
+     "methods": {
+      "justext": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.8468,
+     "recall": 0.8041,
+     "leakage": 0.0572,
+     "p50Ms": 9.374,
+     "signalAgreement": 0.8889,
+     "methods": {
+      "justext": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.487,
+     "recall": 0.8707,
+     "leakage": 0.6427,
+     "p50Ms": 13.941,
+     "signalAgreement": 0.8889,
+     "methods": {
+      "justext": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.6348,
+     "recall": 0.9698,
+     "leakage": 0.4964,
+     "p50Ms": 2.996,
+     "signalAgreement": 1.0,
+     "methods": {
+      "justext": 9
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.8423,
+     "recall": 0.9055,
+     "leakage": 0.2089,
+     "p50Ms": 13.7205,
+     "signalAgreement": 1.0,
+     "methods": {
+      "justext": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": null,
+   "extractor": "readability",
+   "n": 90,
+   "p50Ms": 16.063,
+   "p95Ms": 132.4057,
+   "precision": 0.6233,
+   "recall": 0.7814,
+   "f1": 0.6439,
+   "leakage": 0.3445,
+   "tokensToLlm": 822.0,
+   "failureRate": 0.1,
+   "installMb": 23.396,
+   "name": "readability",
+   "f1Ci": [
+    0.567,
+    0.7161
+   ],
+   "precisionOk": 0.6926,
+   "recallOk": 0.8682,
+   "f1Ok": 0.7155,
+   "tokenLeakage": 0.3074,
+   "failures": {
+    "ExtractionEmpty": 9
+   },
+   "tokensToLlmP95": 4281.0,
+   "ledeTokens": 121.0,
+   "parseMsP50": null,
+   "parserMb": 0.0,
+   "extractorMb": 23.396,
+   "methods": {
+    "readability": 81
+   },
+   "titleMatchesGold": 0.8519,
+   "unstable": 0,
+   "signalAgreement": 0.8556,
+   "signalAgreementOk": 0.9506,
+   "signalN": 90,
+   "signalMissing": 9,
+   "signalFlips": 0,
+   "signalLost": 3,
+   "signalNew": 1,
+   "signalAgreementCi": [
+    0.7778,
+    0.9222
+   ],
+   "ledeIdentical": 0.4,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.8618,
+     "recall": 0.8058,
+     "leakage": 0.0053,
+     "p50Ms": 25.416,
+     "signalAgreement": 0.875,
+     "methods": {
+      "readability": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9587,
+     "recall": 1.0,
+     "leakage": 0.0783,
+     "p50Ms": 29.465,
+     "signalAgreement": 1.0,
+     "methods": {
+      "readability": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9959,
+     "recall": 0.9933,
+     "leakage": 0.0014,
+     "p50Ms": 132.408,
+     "signalAgreement": 1.0,
+     "methods": {
+      "readability": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 13.848,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.0849,
+     "recall": 0.0486,
+     "leakage": 1.0,
+     "p50Ms": 11.144,
+     "signalAgreement": 0.8889,
+     "methods": {
+      "readability": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.5981,
+     "recall": 1.0,
+     "leakage": 0.5334,
+     "p50Ms": 7.54,
+     "signalAgreement": 1.0,
+     "methods": {
+      "readability": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.9571,
+     "recall": 1.0,
+     "leakage": 0.0756,
+     "p50Ms": 14.517,
+     "signalAgreement": 1.0,
+     "methods": {
+      "readability": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.5426,
+     "recall": 1.0,
+     "leakage": 0.584,
+     "p50Ms": 16.097,
+     "signalAgreement": 1.0,
+     "methods": {
+      "readability": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.5799,
+     "recall": 0.945,
+     "leakage": 0.574,
+     "p50Ms": 2.817,
+     "signalAgreement": 0.7778,
+     "methods": {
+      "readability": 9
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.8604,
+     "recall": 1.0,
+     "leakage": 0.2242,
+     "p50Ms": 20.952,
+     "signalAgreement": 1.0,
+     "methods": {
+      "readability": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": null,
+   "extractor": "strip-tags",
+   "n": 90,
+   "p50Ms": 2.0185,
+   "p95Ms": 12.9008,
+   "precision": 0.3609,
+   "recall": 1.0,
+   "f1": 0.5123,
+   "leakage": 0.6293,
+   "tokensToLlm": 2116.0,
+   "failureRate": 0.0,
+   "installMb": 7.4833,
+   "name": "strip-tags",
+   "f1Ci": [
+    0.4793,
+    0.5456
+   ],
+   "precisionOk": 0.3609,
+   "recallOk": 1.0,
+   "f1Ok": 0.5123,
+   "tokenLeakage": 0.6391,
+   "failures": {},
+   "tokensToLlmP95": 4885.3,
+   "ledeTokens": 85.5,
+   "parseMsP50": null,
+   "parserMb": 0.0,
+   "extractorMb": 7.4833,
+   "methods": {
+    "strip-tags": 90
+   },
+   "titleMatchesGold": 0.8667,
+   "unstable": 0,
+   "signalAgreement": 0.8333,
+   "signalAgreementOk": 0.8333,
+   "signalN": 90,
+   "signalMissing": 0,
+   "signalFlips": 0,
+   "signalLost": 14,
+   "signalNew": 1,
+   "signalAgreementCi": [
+    0.7444,
+    0.9111
+   ],
+   "ledeIdentical": 0.0,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 0,
+     "f1": 0.4718,
+     "recall": 1.0,
+     "leakage": 0.6835,
+     "p50Ms": 1.8975,
+     "signalAgreement": 0.75,
+     "methods": {
+      "strip-tags": 8
+     }
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.6352,
+     "recall": 1.0,
+     "leakage": 0.5142,
+     "p50Ms": 1.761,
+     "signalAgreement": 1.0,
+     "methods": {
+      "strip-tags": 9
+     }
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.5464,
+     "recall": 1.0,
+     "leakage": 0.6165,
+     "p50Ms": 12.887,
+     "signalAgreement": 0.7778,
+     "methods": {
+      "strip-tags": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.3732,
+     "recall": 1.0,
+     "leakage": 0.7646,
+     "p50Ms": 2.166,
+     "signalAgreement": 0.8889,
+     "methods": {
+      "strip-tags": 9
+     }
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.6963,
+     "recall": 1.0,
+     "leakage": 0.4556,
+     "p50Ms": 1.642,
+     "signalAgreement": 0.8889,
+     "methods": {
+      "strip-tags": 9
+     }
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.4343,
+     "recall": 1.0,
+     "leakage": 0.6988,
+     "p50Ms": 1.092,
+     "signalAgreement": 0.6667,
+     "methods": {
+      "strip-tags": 9
+     }
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.6424,
+     "recall": 1.0,
+     "leakage": 0.5138,
+     "p50Ms": 2.025,
+     "signalAgreement": 0.7778,
+     "methods": {
+      "strip-tags": 9
+     }
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.252,
+     "recall": 1.0,
+     "leakage": 0.8359,
+     "p50Ms": 3.303,
+     "signalAgreement": 0.7778,
+     "methods": {
+      "strip-tags": 9
+     }
+    },
+    "sec": {
+     "n": 9,
+     "failures": 0,
+     "f1": 0.5891,
+     "recall": 1.0,
+     "leakage": 0.5371,
+     "p50Ms": 0.651,
+     "signalAgreement": 0.8889,
+     "methods": {
+      "strip-tags": 9
+     }
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 0,
+     "f1": 0.4808,
+     "recall": 1.0,
+     "leakage": 0.6739,
+     "p50Ms": 3.1885,
+     "signalAgreement": 0.9,
+     "methods": {
+      "strip-tags": 10
+     }
+    }
+   }
+  },
+  {
+   "parser": "selectolax",
+   "extractor": "jsonld",
+   "n": 90,
+   "p50Ms": 0.2395,
+   "p95Ms": 2.2687,
+   "precision": 0.1,
+   "recall": 0.1,
+   "f1": 0.1,
+   "leakage": 0.0,
+   "tokensToLlm": 917.0,
+   "failureRate": 0.9,
+   "installMb": 7.4833,
+   "name": "selectolax/jsonld",
+   "f1Ci": [
+    0.0444,
+    0.1667
+   ],
+   "precisionOk": 1.0,
+   "recallOk": 1.0,
+   "f1Ok": 1.0,
+   "tokenLeakage": 0.0,
+   "failures": {
+    "ExtractionEmpty": 81
+   },
+   "tokensToLlmP95": 1622.8,
+   "ledeTokens": 194.0,
+   "parseMsP50": 0.0,
+   "parserMb": 7.4833,
+   "extractorMb": 0.0,
+   "methods": {
+    "jsonld": 9
+   },
+   "titleMatchesGold": 1.0,
+   "unstable": 0,
+   "signalAgreement": 0.1,
+   "signalAgreementOk": 1.0,
+   "signalN": 90,
+   "signalMissing": 81,
+   "signalFlips": 0,
+   "signalLost": 0,
+   "signalNew": 0,
+   "signalAgreementCi": [
+    0.0444,
+    0.1667
+   ],
+   "ledeIdentical": 0.0111,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 8,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.26,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.294,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 2.27,
+     "signalAgreement": 1.0,
+     "methods": {
+      "jsonld": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.245,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.229,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.108,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.222,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.144,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "sec": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.014,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 10,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.3225,
+     "signalAgreement": 0.0,
+     "methods": {}
+    }
+   }
+  },
+  {
+   "parser": "bs4",
+   "extractor": "jsonld",
+   "n": 90,
+   "p50Ms": 0.242,
+   "p95Ms": 2.2226,
+   "precision": 0.1,
+   "recall": 0.1,
+   "f1": 0.1,
+   "leakage": 0.0,
+   "tokensToLlm": 917.0,
+   "failureRate": 0.9,
+   "installMb": 0.5666,
+   "name": "bs4/jsonld",
+   "f1Ci": [
+    0.0444,
+    0.1667
+   ],
+   "precisionOk": 1.0,
+   "recallOk": 1.0,
+   "f1Ok": 1.0,
+   "tokenLeakage": 0.0,
+   "failures": {
+    "ExtractionEmpty": 81
+   },
+   "tokensToLlmP95": 1622.8,
+   "ledeTokens": 194.0,
+   "parseMsP50": 0.0,
+   "parserMb": 0.5666,
+   "extractorMb": 0.0,
+   "methods": {
+    "jsonld": 9
+   },
+   "titleMatchesGold": 1.0,
+   "unstable": 0,
+   "signalAgreement": 0.1,
+   "signalAgreementOk": 1.0,
+   "signalN": 90,
+   "signalMissing": 81,
+   "signalFlips": 0,
+   "signalLost": 0,
+   "signalNew": 0,
+   "signalAgreementCi": [
+    0.0444,
+    0.1667
+   ],
+   "ledeIdentical": 0.0111,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 8,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.2575,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.287,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 2.237,
+     "signalAgreement": 1.0,
+     "methods": {
+      "jsonld": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.244,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.23,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.111,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.226,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.145,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "sec": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.013,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 10,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.3225,
+     "signalAgreement": 0.0,
+     "methods": {}
+    }
+   }
+  },
+  {
+   "parser": "lxml",
+   "extractor": "jsonld",
+   "n": 90,
+   "p50Ms": 0.2435,
+   "p95Ms": 2.2731,
+   "precision": 0.1,
+   "recall": 0.1,
+   "f1": 0.1,
+   "leakage": 0.0,
+   "tokensToLlm": 917.0,
+   "failureRate": 0.9,
+   "installMb": 19.9983,
+   "name": "lxml/jsonld",
+   "f1Ci": [
+    0.0444,
+    0.1667
+   ],
+   "precisionOk": 1.0,
+   "recallOk": 1.0,
+   "f1Ok": 1.0,
+   "tokenLeakage": 0.0,
+   "failures": {
+    "ExtractionEmpty": 81
+   },
+   "tokensToLlmP95": 1622.8,
+   "ledeTokens": 194.0,
+   "parseMsP50": 0.0,
+   "parserMb": 19.9983,
+   "extractorMb": 0.0,
+   "methods": {
+    "jsonld": 9
+   },
+   "titleMatchesGold": 1.0,
+   "unstable": 0,
+   "signalAgreement": 0.1,
+   "signalAgreementOk": 1.0,
+   "signalN": 90,
+   "signalMissing": 81,
+   "signalFlips": 0,
+   "signalLost": 0,
+   "signalNew": 0,
+   "signalAgreementCi": [
+    0.0444,
+    0.1667
+   ],
+   "ledeIdentical": 0.0111,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 8,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.2555,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.286,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 2.278,
+     "signalAgreement": 1.0,
+     "methods": {
+      "jsonld": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.246,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.225,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.11,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.225,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.145,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "sec": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.013,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 10,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.3145,
+     "signalAgreement": 0.0,
+     "methods": {}
+    }
+   }
+  },
+  {
+   "parser": "bs4-lxml",
+   "extractor": "jsonld",
+   "n": 90,
+   "p50Ms": 0.244,
+   "p95Ms": 2.2268,
+   "precision": 0.1,
+   "recall": 0.1,
+   "f1": 0.1,
+   "leakage": 0.0,
+   "tokensToLlm": 917.0,
+   "failureRate": 0.9,
+   "installMb": 20.4799,
+   "name": "bs4-lxml/jsonld",
+   "f1Ci": [
+    0.0444,
+    0.1667
+   ],
+   "precisionOk": 1.0,
+   "recallOk": 1.0,
+   "f1Ok": 1.0,
+   "tokenLeakage": 0.0,
+   "failures": {
+    "ExtractionEmpty": 81
+   },
+   "tokensToLlmP95": 1622.8,
+   "ledeTokens": 194.0,
+   "parseMsP50": 0.0,
+   "parserMb": 20.4799,
+   "extractorMb": 0.0,
+   "methods": {
+    "jsonld": 9
+   },
+   "titleMatchesGold": 1.0,
+   "unstable": 0,
+   "signalAgreement": 0.1,
+   "signalAgreementOk": 1.0,
+   "signalN": 90,
+   "signalMissing": 81,
+   "signalFlips": 0,
+   "signalLost": 0,
+   "signalNew": 0,
+   "signalAgreementCi": [
+    0.0444,
+    0.1667
+   ],
+   "ledeIdentical": 0.0111,
+   "perSource": {
+    "bbc": {
+     "n": 8,
+     "failures": 8,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.2575,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "cnbc": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.295,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "cnn": {
+     "n": 9,
+     "failures": 0,
+     "f1": 1.0,
+     "recall": 1.0,
+     "leakage": 0.0,
+     "p50Ms": 2.239,
+     "signalAgreement": 1.0,
+     "methods": {
+      "jsonld": 9
+     }
+    },
+    "fool": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.245,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "fortune": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.224,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "globenewswire": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.106,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "guardian": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.223,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "prnewswire": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.143,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "sec": {
+     "n": 9,
+     "failures": 9,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.013,
+     "signalAgreement": 0.0,
+     "methods": {}
+    },
+    "yahoo": {
+     "n": 10,
+     "failures": 10,
+     "f1": 0.0,
+     "recall": 0.0,
+     "leakage": null,
+     "p50Ms": 0.3245,
+     "signalAgreement": 0.0,
+     "methods": {}
+    }
+   }
+  }
+ ]
+}

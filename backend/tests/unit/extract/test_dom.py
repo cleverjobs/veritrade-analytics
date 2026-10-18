@@ -67,6 +67,23 @@ def test_blocks_carry_link_density_and_container_path(parser: ParserName) -> Non
 
 
 @pytest.mark.parametrize("parser", PARSERS)
+def test_node_link_density_counts_link_text_like_blocks(parser: ParserName) -> None:
+    page = """<html><body>
+      <p id="mixed">Read the <a href="/a">full <b>report</b></a> today</p>
+      <p id="links"><a href="/b">Related one</a> <a href="/c">Related two</a></p>
+      <p id="plain">No links <script>var a = "x";</script>here</p>
+      <p id="empty"> </p>
+    </body></html>"""
+    dom = parse(page, parser)
+    density = {node.attr("id"): node.link_density() for node in dom.select("p")}
+
+    assert density["mixed"] == pytest.approx(len("full report") / len("Read the full report today"), abs=0.05)
+    assert density["links"] == pytest.approx(1.0, abs=0.05)
+    assert density["plain"] == 0.0
+    assert density["empty"] == 0.0
+
+
+@pytest.mark.parametrize("parser", PARSERS)
 def test_title_prefers_og_title(parser: ParserName) -> None:
     assert parse(PAGE, parser).title() == "Social & title"
     assert parse("<html><head><title> Only  title </title></head></html>", parser).title() == "Only title"

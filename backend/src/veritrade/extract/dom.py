@@ -122,6 +122,8 @@ class Node(Protocol):
 
     def attr(self, name: str) -> str | None: ...
 
+    def link_density(self) -> float: ...
+
 
 class Container:
     """A non-inline element on the path of a text block; density scores these."""
@@ -189,6 +191,9 @@ class _Node[E]:
 
     def attr(self, name: str) -> str | None:
         return self._dom._attr(self.native, name)
+
+    def link_density(self) -> float:
+        return self._dom._link_density(self.native)
 
 
 class _TreeDom[E](ABC):
@@ -302,6 +307,23 @@ class _TreeDom[E](ABC):
                     parts.append(" ")
                 stack.append((self._content(item), block))
         return normalize("".join(parts))
+
+    def _link_density(self, el: E) -> float:
+        """Share of visible characters inside links, counted like Block.link_chars."""
+        total = links = 0
+        stack: list[tuple[Iterator[E | str], bool]] = [(self._content(el), False)]
+        while stack:
+            children, in_link = stack[-1]
+            item = next(children, None)
+            if item is None:
+                stack.pop()
+            elif isinstance(item, str):
+                size = len(item.strip())
+                total += size
+                links += size if in_link else 0
+            elif (tag := self._tag(item)) not in SKIP_TAGS:
+                stack.append((self._content(item), in_link or tag == "a"))
+        return links / total if total else 0.0
 
     def _blocks(self, root: E) -> list[Block]:
         """Split visible text at every non-inline boundary; each run remembers its container path."""

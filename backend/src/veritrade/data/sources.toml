@@ -19,6 +19,7 @@
 #                   (press-release About / forward-looking / contacts, partner promo pitches)
 # paywall           selector of the region the publisher marks as gated (JSON-LD hasPart); missing or
 #                   empty means the server sent a teaser
+# max_link_density  body paragraphs whose share of link text exceeds this are dropped (promo links)
 # notes             what the probe saw that a selector cannot express
 
 # --- primary: the final 10, in plan order with backups swapped in for rejected sources ---------------
@@ -37,12 +38,18 @@ body = 'div[data-testid="article-body"] p'
 drop = ['div[data-testid="inarticle-ad"]', 'div[data-testid="ad-container"]', "figure", "div.readmore"]
 title = "h1.cover-title"
 lede_paragraphs = 2
-stop_markers = ["Before you buy stock in", "Should you invest $1,000 in", "Should you buy stock in"]
+max_link_density = 0.5
+stop_markers = [
+    "Before you buy stock in", "Should you invest $1,000 in", "Should you buy stock in", "More Top Reads From",
+    "This article by Simply Wall St", "For updates and corrections",
+]
 notes = """Most stock-market stories are partner copy (Motley Fool, Insider Monkey, 24/7 Wall St); the page \
 JSON names the partner in providerId and partner promos survive inside the body. The second half of the \
 text sits in div[data-testid=read-more] behind a 'Story continues' button and must be kept. No RSS any \
 more (/news/rssindex is 404) and no JSON-LD articleBody. No consent redirect from the BG test IP in \
-Oct 2026; the reject-all flow still works when Yahoo does redirect."""
+Oct 2026; the reject-all flow still works when Yahoo does redirect. Related-story promos and partner link \
+lists are link-only paragraphs, hence max_link_density; partner sign-offs (OilPrice, Simply Wall St, \
+Stocktwits) end the body by stop marker."""
 
 [sources.cnbc]
 name = "CNBC"
@@ -95,19 +102,20 @@ feeds = [
 article_pattern = '^https://www\.prnewswire\.com/news-releases/[a-z0-9-]+-\d+\.html$'
 
 [sources.prnewswire.profile]
-body = "section.release-body p"
-drop = ["div.continue-reading", "div.inline-gallery-container", "table"]
+body = "section.release-body p, section.release-body li"
+drop = ["div.continue-reading", "div.inline-gallery-container", "table", "p.prntac"]
 title = "h1"
 lede_paragraphs = 2
 stop_markers = [
-    "About ", "Forward-Looking Statement", "Forward Looking Statement", "Cautionary Statement", "Safe Harbor",
-    "Media Contact", "Investor Contact", "Investors Contact", "Contact:", "Contacts", "For investor",
-    "For media", "SOURCE ", "View original content", "Photos accompanying", "A photo accompanying",
-    "Attachment", "Website",
+    "About ", "Forward-Looking Statement", "Forward Looking Statement", "Forward-looking", "Cautionary Statement",
+    "Safe Harbor", "Media Contact", "Investor Contact", "Investors Contact", "Contact:", "Contacts",
+    "For investor", "For media", "For further information", "SOURCE ", "View original content",
+    "Photos accompanying", "A photo accompanying", "Attachment", "Website", "Conference Call",
 ]
 notes = """The first paragraph opens with the dateline 'CITY, Mon. DD, YYYY /PRNewswire/ --'. Feeds mix \
 translated copies of the same release (dc:language), which discovery filters out. One cache-miss \
-fetch took 6.8 s, so the 8 s fetch deadline is tight here."""
+fetch took 6.8 s, so the 8 s fetch deadline is tight here. Bulleted highlights are <li>, hence the li in \
+body; p.prntac (centred) holds deks and logo lines, not story text."""
 
 [sources.globenewswire]
 name = "GlobeNewswire"
@@ -120,18 +128,19 @@ article_pattern = '^https://www\.globenewswire\.com/news-release/20\d\d/\d\d/\d\
 
 [sources.globenewswire.profile]
 body = "div#main-body-container p, div#main-body-container li"
-drop = ["table"]
+drop = ["table", "p#gnw_attachments_section-header", "ul#gnw_attachments_section-items"]
 title = 'h1[itemprop="headline"]'
 lede_paragraphs = 2
 stop_markers = [
-    "About ", "Forward-Looking Statement", "Forward Looking Statement", "Cautionary Statement", "Safe Harbor",
-    "Media Contact", "Investor Contact", "Investors Contact", "Contact:", "Contacts", "For investor",
-    "For media", "SOURCE ", "View original content", "Photos accompanying", "A photo accompanying",
-    "Attachment", "Website",
+    "About ", "Forward-Looking Statement", "Forward Looking Statement", "Forward-looking", "Cautionary Statement",
+    "Safe Harbor", "Media Contact", "Investor Contact", "Investors Contact", "Contact:", "Contacts",
+    "For investor", "For media", "For further information", "SOURCE ", "View original content",
+    "Photos accompanying", "A photo accompanying", "Attachment", "Website", "Conference Call",
 ]
 notes = """Resolutions and highlights are often <ol>/<ul> items rather than paragraphs, hence the li in \
 body (a selector list; both parsers keep document order). JSON-LD marks releases free; slowest of the \
-primaries at 0.6 to 1.0 s per page."""
+primaries at 0.6 to 1.0 s per page. The attachments block (#gnw_attachments_section-*) is dropped, and \
+'Forward-looking' also ends the body when the safe-harbor heading is run into the paragraph text."""
 
 [sources.sec]
 name = "SEC EDGAR 8-K EX-99.1"

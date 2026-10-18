@@ -106,6 +106,48 @@ def test_profile_strategy_applies_drops_and_stops(parser: ParserName) -> None:
     ]
 
 
+@pytest.mark.parametrize("parser", PARSERS)
+def test_link_heavy_paragraphs_are_dropped_without_ending_the_body(parser: ParserName) -> None:
+    page = """<html><body><div class="story">
+      <p>First paragraph of the story has words.</p>
+      <p>Second paragraph cites <a href="/s">a source</a> once.</p>
+      <p><a href="/r">Related: another story about other things</a></p>
+      <p>Third paragraph of the story has words.</p>
+    </div></body></html>"""
+    capped = Profile(source="x", body="div.story p", max_link_density=0.5)
+
+    assert profiles.refine([n.text() for n in profiles.select_body(parse(page, parser), capped)], capped) == [
+        "First paragraph of the story has words.",
+        "Second paragraph cites a source once.",
+        "Third paragraph of the story has words.",
+    ]
+    uncapped = Profile(source="x", body="div.story p")
+    assert len(profiles.select_body(parse(page, parser), uncapped)) == 4
+
+
+def test_link_density_cap_is_read_from_sources_toml() -> None:
+    yahoo = profiles.profile_for("yahoo")
+    assert yahoo is not None
+    assert yahoo.max_link_density == 0.5
+    assert profiles.profile_for("cnbc").max_link_density is None  # type: ignore[union-attr]
+
+
+@pytest.mark.parametrize(
+    ("source", "text"),
+    [
+        ("globenewswire", "Forward-looking information in this release is subject to risks."),
+        ("prnewswire", "Forward-looking statements in this release are subject to risks."),
+        ("prnewswire", "For further information, please contact the company."),
+        ("yahoo", "More Top Reads From the partner site"),
+    ],
+)
+def test_release_and_partner_tails_end_the_body(source: str, text: str) -> None:
+    profile = profiles.profile_for(source)
+    assert profile is not None
+
+    assert stop_marker(text, profile.stops) is not None
+
+
 def test_profile_strategy_is_empty_for_unknown_sources() -> None:
     assert profiles.extract(parse("<p>text</p>"), "https://example.com/", None) == []
 
