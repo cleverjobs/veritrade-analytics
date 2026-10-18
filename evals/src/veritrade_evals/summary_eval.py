@@ -56,6 +56,7 @@ from veritrade_evals.articles import (
     rel,
 )
 from veritrade_evals.articles_validate import gold_check
+from veritrade_evals.metrics import bootstrap_ci
 from veritrade_evals.paths import PRIVATE_DIR, RESULTS_DIR
 from veritrade_evals.predcache import PredCache, PredError, canonical_json
 from veritrade_evals.runner import model_digest
@@ -88,6 +89,8 @@ STRICT_THRESHOLD = 0.75
 SENSITIVITY = (0.65, 0.70, 0.80)
 AGREEMENT_THRESHOLDS = (0.55, 0.60, 0.65, 0.70, 0.75, 0.80)
 PASS_GATE = 0.8
+# 50-judge.md: faithfulness 3 or lower means at least one material problem, not a minor slip.
+MATERIAL_MAX_FAITHFULNESS = 3
 SPOT_CHECK_N = 10
 # Ollama is shared with the grid run, so calls may queue; latency is not measured here.
 TIMEOUT_S = 300.0
@@ -803,6 +806,28 @@ def _mean(values: Sequence[float]) -> float | None:
     return round(statistics.fmean(values), 3) if values else None
 
 
+def mean_ci(values: Mapping[str, float], strata: Mapping[str, str] | None = None) -> list[float] | None:
+    """95% percentile bootstrap CI of a per-article mean, resampled within article label strata."""
+    if len(values) < 2:
+        return None
+    ids = sorted(values)
+    arr = np.asarray([values[i] for i in ids], dtype=np.float64)
+    gold = [(strata or {}).get(i, "all") for i in ids]
+    ci = bootstrap_ci(lambda idx: float(arr[idx].mean()), gold)
+    return [round(ci.low, 3), round(ci.high, 3)]
+
+
+def paired_gap(
+    a: Mapping[str, float], b: Mapping[str, float], strata: Mapping[str, str] | None = None
+) -> dict[str, Any] | None:
+    """Mean a - b over articles both candidates were judged on, with a paired bootstrap CI."""
+    shared = sorted(a.keys() & b.keys())
+    if len(shared) < 2:
+        return None
+    gaps = {i: a[i] - b[i] for i in shared}
+    return {"mean": round(statistics.fmean(gaps.values()), 3), "ci": mean_ci(gaps, strata), "n": len(shared)}
+
+
 def _coverage(rows: Sequence[ScoreRow], threshold: float) -> float:
     return round(statistics.fmean(coverage(r.fact_cosines, threshold) for r in rows), 4) if rows else 0.0
 
@@ -813,6 +838,7 @@ def aggregate(
     ids: Sequence[str],
     judged: Sequence[JudgeRow] = (),
     entry: ManifestEntry | None = None,
+    strata: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
     """Rates over all articles in `ids`: a missing or failed summary fails every check and covers nothing."""
     by_id = {r.id: r for r in rows if r.candidate == pair.key}
@@ -830,6 +856,9 @@ def aggregate(
         "judgeFaithfulness": _mean([j.faithfulness for j in mine]),
         "judgeCoverage": _mean([j.coverage for j in mine]),
         "hallucinationRate": _rate([j.hallucinations > 0 for j in mine]) if mine else None,
+        "materialErrorRate": _rate([j.faithfulness <= MATERIAL_MAX_FAITHFULNESS for j in mine])
+        if mine
+        else None,
         "wordsOkRate": _rate([r.words_ok for r in padded]),
         "sentencesOkRate": _rate([r.sentences_ok for r in padded]),
         "numbersGroundedRate": _rate([r.numbers_ok for r in padded]),
@@ -843,6 +872,12 @@ def aggregate(
         "keyFactCoverageAt": {f"{t:.2f}": _coverage(padded, t) for t in SENSITIVITY},
         "judgeN": len(mine),
         "judgeLeadsRate": _rate([j.leads for j in mine]) if mine else None,
+        "judgeFaithfulnessCi": mean_ci({j.id: j.faithfulness for j in mine}, strata),
+        "judgeCoverageCi": mean_ci({j.id: j.coverage for j in mine}, strata),
+        "hallucinationRateCi": mean_ci({j.id: float(j.hallucinations > 0) for j in mine}, strata),
+        "materialErrorRateCi": mean_ci(
+            {j.id: float(j.faithfulness <= MATERIAL_MAX_FAITHFULNESS) for j in mine}, strata
+        ),
     }
     row["passesGate"] = row["deterministicPassRate"] >= PASS_GATE
     if entry is not None:
@@ -1023,6 +1058,9 @@ blind judge. Summaries come from the serving adapters (`/api/summary`, `/api/ana
 Written by `uv run python -m veritrade_evals.summary_eval report`; no article or summary text is committed.
 Every check scores the served summary: serving caps it at {MAX_SENTENCES} sentences and {MAX_WORDS} words
 (`cap_summary` in `veritrade.inference.adapters`), and `score` applies the same cap to cached generations.
+
+- **Halluc.** (`hallucinationRate`): share of summaries with any unsupported detail, minor slips included.
+- **Material** (`materialErrorRate`): share at faithfulness <= {MATERIAL_MAX_FAITHFULNESS}: a material error.
 """
 DEFINITIONS = f"""## Definitions
 
@@ -1047,13 +1085,14 @@ DEFINITIONS = f"""## Definitions
   that agreed best with hand labels in the spot check. Mean share per article. **Key facts (strict)** uses
   {STRICT_THRESHOLD:.2f}, where every flagged fact was really stated: a conservative lower bound.
 - **Faithful / Cover**: Opus judge scores 1-5 (`evals/opus_prompts/50-judge.md`), candidates anonymised and
-  shuffled per article. **Halluc.**: share of judged summaries with at least one unsupported claim.
-  **Leads**: share the judge found leading with the market-moving fact.
+  shuffled per article. **Halluc.** and **Material** are defined at the top: a minor slip such as a
+  loosely worded detail counts towards the first only. **Leads**: share the judge found leading with the
+  market-moving fact.
 """
 TABLE_HEAD = (
     "| Endpoint | Model | Pass | <=60 words | <=3 sent. | Numbers | Entity | Truncated | Capped | Errors "
-    "| Median words | Key facts | Key facts (strict) | Faithful | Cover | Halluc. | Leads |\n"
-    "|---|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|"
+    "| Median words | Key facts | Key facts (strict) | Faithful | Cover | Halluc. | Material | Leads |\n"
+    "|---|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|"
 )
 TABLE_COLUMNS = (
     ("deterministicPassRate", "pct"),
@@ -1070,6 +1109,7 @@ TABLE_COLUMNS = (
     ("judgeFaithfulness", "num"),
     ("judgeCoverage", "num"),
     ("hallucinationRate", "pct"),
+    ("materialErrorRate", "pct"),
     ("judgeLeadsRate", "pct"),
 )
 
@@ -1090,6 +1130,32 @@ def _spot_lines(spot: Mapping[str, Any] | None) -> list[str]:
             f"{counts['falseCovered']} wrongly covered, {counts['falseNotCovered']} wrongly not covered"
         )
     return [*lines, f"- {spot['note']}"] if spot.get("note") else lines
+
+
+def _ci(value: float | None, ci: Sequence[float] | None, kind: str = "num") -> str:
+    return f"{_fmt(value, kind)} [{_fmt(ci[0], kind)}, {_fmt(ci[1], kind)}]" if ci else _fmt(value, kind)
+
+
+def _judge_lines(rows: Sequence[Mapping[str, Any]], gaps: Mapping[str, Mapping[str, Any]]) -> list[str]:
+    lines = ["", "Judge means with 95% bootstrap CIs (articles resampled within their sentiment label):", ""]
+    for r in rows:
+        faithful = _ci(r["judgeFaithfulness"], r["judgeFaithfulnessCi"])
+        lines.append(
+            f"- {r['endpoint']} `{r['model']}`: faithfulness {faithful}"
+            f", coverage {_ci(r['judgeCoverage'], r['judgeCoverageCi'])}, hallucination rate "
+            f"{_ci(r['hallucinationRate'], r['hallucinationRateCi'], 'pct')}, material error rate "
+            f"{_ci(r['materialErrorRate'], r['materialErrorRateCi'], 'pct')} (n={r['judgeN']})"
+        )
+    if gaps:
+        lines += ["", "Leader minus runner-up, paired by article:", ""]
+    for endpoint, gap in gaps.items():
+        parts = [
+            f"{name} {_ci(gap[name]['mean'], gap[name]['ci'])}"
+            for name in ("faithfulness", "coverage")
+            if gap.get(name)
+        ]
+        lines.append(f"- /{endpoint}: `{gap['leader']}` vs `{gap['runnerUp']}`: {', '.join(parts)}")
+    return lines
 
 
 def render_markdown(report: Mapping[str, Any]) -> str:
@@ -1124,18 +1190,50 @@ def render_markdown(report: Mapping[str, Any]) -> str:
         for endpoint, models in block["qualityRanking"].items():
             ranked = ", ".join(f"`{m}`" for m in models) or "no candidate passes the gate"
             lines.append(f"- /{endpoint}: {ranked}{pending}")
+        if block["judged"]:
+            lines += _judge_lines(rows, block.get("leaderGaps", {}))
         lines += ["", "Coverage threshold spot check:", "", *_spot_lines(block.get("spotCheck")), ""]
     lines.append(DEFINITIONS)
     return "\n".join(lines)
 
 
+def leader_gaps(
+    ranking: Mapping[str, Sequence[str]], judged: Sequence[JudgeRow], strata: Mapping[str, str] | None = None
+) -> dict[str, dict[str, Any]]:
+    """Per endpoint: the ranked leader minus the runner-up on judge faithfulness and coverage, paired."""
+    out = {}
+    for endpoint, models in ranking.items():
+        if len(models) < 2:
+            continue
+        leader, runner_up = (f"{endpoint}/{m}" for m in models[:2])
+        by = {key: [j for j in judged if j.candidate == key] for key in (leader, runner_up)}
+        out[endpoint] = {
+            "leader": models[0],
+            "runnerUp": models[1],
+            **{
+                name: paired_gap(
+                    {j.id: getattr(j, name) for j in by[leader]},
+                    {j.id: getattr(j, name) for j in by[runner_up]},
+                    strata,
+                )
+                for name in ("faithfulness", "coverage")
+            },
+        }
+    return out
+
+
 def build_report(
-    split: str, pairs: Sequence[Pair], ids: Sequence[str], paths: SummaryPaths
+    split: str,
+    pairs: Sequence[Pair],
+    ids: Sequence[str],
+    paths: SummaryPaths,
+    strata: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
     rows = read_scores(paths, split)
     judged = read_judged(paths.judge, split)
     manifest = read_manifest(paths).get(split, {})
-    table = [aggregate(pair, rows, ids, judged, manifest.get(pair.key)) for pair in pairs]
+    table = [aggregate(pair, rows, ids, judged, manifest.get(pair.key), strata) for pair in pairs]
+    ranking = quality_ranking(table)
     spot = read_json(paths.spot_check(split))
     spot_block = None
     if spot is not None:
@@ -1153,7 +1251,8 @@ def build_report(
         "articleIds": sorted(ids),
         "rows": table,
         "judged": bool(judged),
-        "qualityRanking": quality_ranking(table),
+        "qualityRanking": ranking,
+        "leaderGaps": leader_gaps(ranking, judged, strata) if judged else {},
         "spotCheck": spot_block,
     }
 
@@ -1338,7 +1437,8 @@ def cmd_report(args: argparse.Namespace) -> int:
     articles = load_eval_articles(args.split, ArticlePaths())
     existing = read_json(paths.summary_json) or {}
     splits = dict(existing.get("splits", {}))
-    splits[args.split] = build_report(args.split, args.models, [a.id for a in articles], paths)
+    strata = {a.id: a.example.label for a in articles}
+    splits[args.split] = build_report(args.split, args.models, [a.id for a in articles], paths, strata)
     report = {
         "version": 1,
         "generatedAt": datetime.now(UTC).isoformat(timespec="seconds"),

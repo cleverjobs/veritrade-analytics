@@ -35,8 +35,11 @@ from veritrade_evals.summary_eval import (
     generate,
     grounding,
     label_agreement,
+    leader_gaps,
     load_summaries,
+    mean_ci,
     names_entity,
+    paired_gap,
     parse_labels,
     parse_pair,
     prepare_packets,
@@ -398,9 +401,10 @@ def test_aggregate_counts_every_article_and_gates() -> None:
     assert row["keyFactCoverageAt"]["0.70"] == pytest.approx((0.5 + 1.0) / 4)
     assert row["medianWords"] == 20
     assert (row["judgeFaithfulness"], row["judgeCoverage"], row["hallucinationRate"]) == (4.0, 3.5, 0.5)
+    assert row["materialErrorRate"] == 0.5
     assert row["passesGate"] is False
     empty = aggregate(ANALYZE, [], ids)
-    assert empty["judgeFaithfulness"] is None
+    assert (empty["judgeFaithfulness"], empty["materialErrorRate"]) == (None, None)
     assert empty["errorRate"] == 1.0
 
 
@@ -502,3 +506,23 @@ def test_hand_labels_give_agreement_per_threshold() -> None:
     for bad in ("110", "11,11", "1x0,11"):
         with pytest.raises(SummaryEvalError):
             parse_labels(bad, sample)
+
+
+def test_bootstrap_cis_and_leader_gaps() -> None:
+    strata = {f"art-{i}": "bullish" if i % 2 else "bearish" for i in range(10)}
+    values = {f"art-{i}": float(4 + i % 2) for i in range(10)}
+    ci = mean_ci(values, strata)
+    assert ci is not None
+    assert ci[0] <= 4.5 <= ci[1]
+    assert mean_ci({f"art-{i}": 5.0 for i in range(10)}, strata) == [5.0, 5.0]
+    assert mean_ci({"art-0": 3.0}) is None
+    judged = [
+        JudgeRow(id=f"art-{i}", candidate=key, faithfulness=f, coverage=4, hallucinations=0, leads=True)
+        for i in range(10)
+        for key, f in ((SUMMARY.key, 5), ("summary/qwen3.5:4b-q4_K_M", 4))
+    ]
+    gaps = leader_gaps({"summary": ["qwen3.5:2b-q4_K_M", "qwen3.5:4b-q4_K_M"], "analyze": []}, judged, strata)
+    assert set(gaps) == {"summary"}
+    assert gaps["summary"]["faithfulness"] == {"mean": 1.0, "ci": [1.0, 1.0], "n": 10}
+    assert gaps["summary"]["coverage"]["mean"] == 0.0
+    assert paired_gap({"art-0": 1.0}, {"art-1": 2.0}) is None

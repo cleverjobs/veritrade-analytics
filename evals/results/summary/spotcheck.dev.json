@@ -1,0 +1,210 @@
+{
+  "split": "dev",
+  "embeddingModel": "qwen3-embedding:0.6b",
+  "threshold": 0.75,
+  "sample": [
+    {
+      "id": "art-1fb0cdf88380",
+      "candidate": "summary/qwen3.5:2b-q4_K_M",
+      "cosines": [
+        0.787,
+        0.6107,
+        0.5473,
+        0.699
+      ],
+      "stated": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "art-2834a5031b24",
+      "candidate": "summary/qwen3.5:4b-q4_K_M",
+      "cosines": [
+        0.9117,
+        0.5262,
+        0.795,
+        0.4134
+      ],
+      "stated": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "art-5e98c4dd3d5b",
+      "candidate": "analyze/qwen3.5:4b-q4_K_M",
+      "cosines": [
+        0.886,
+        0.5941,
+        0.589,
+        0.7771
+      ],
+      "stated": [
+        true,
+        false,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "art-84b60948c0a3",
+      "candidate": "analyze/qwen3:4b-instruct-2507-q4_K_M",
+      "cosines": [
+        0.6554,
+        0.7368,
+        0.5867,
+        0.6336
+      ],
+      "stated": [
+        false,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "id": "art-b9ad8d2c5513",
+      "candidate": "analyze/ministral-3:3b",
+      "cosines": [
+        0.9041,
+        0.5481,
+        0.6247,
+        0.3741,
+        0.5155
+      ],
+      "stated": [
+        true,
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "id": "art-cc39122612eb",
+      "candidate": "summary/qwen3.5:2b-q4_K_M",
+      "cosines": [
+        0.9294,
+        0.512,
+        0.4928,
+        0.678,
+        0.5103
+      ],
+      "stated": [
+        true,
+        true,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "id": "art-ccbd42c00729",
+      "candidate": "summary/qwen3.5:4b-q4_K_M",
+      "cosines": [
+        0.7453,
+        0.6162,
+        0.3689,
+        0.3466,
+        0.2329
+      ],
+      "stated": [
+        true,
+        true,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "id": "art-ea1b3afb94a6",
+      "candidate": "analyze/qwen3.5:4b-q4_K_M",
+      "cosines": [
+        0.6967,
+        0.707,
+        0.5027,
+        0.6228
+      ],
+      "stated": [
+        true,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "id": "art-ea48af0533bb",
+      "candidate": "analyze/qwen3:4b-instruct-2507-q4_K_M",
+      "cosines": [
+        0.8531,
+        0.6826,
+        0.7128,
+        0.6155,
+        0.7451
+      ],
+      "stated": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ]
+    },
+    {
+      "id": "art-f821720e67f1",
+      "candidate": "analyze/ministral-3:3b",
+      "cosines": [
+        0.7514,
+        0.6419,
+        0.4723,
+        0.7336,
+        0.5311
+      ],
+      "stated": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ]
+    }
+  ],
+  "agreement": {
+    "0.55": {
+      "right": 34,
+      "falseCovered": 6,
+      "falseNotCovered": 5
+    },
+    "0.60": {
+      "right": 33,
+      "falseCovered": 5,
+      "falseNotCovered": 7
+    },
+    "0.65": {
+      "right": 30,
+      "falseCovered": 3,
+      "falseNotCovered": 12
+    },
+    "0.70": {
+      "right": 29,
+      "falseCovered": 1,
+      "falseNotCovered": 15
+    },
+    "0.75": {
+      "right": 25,
+      "falseCovered": 0,
+      "falseNotCovered": 20
+    },
+    "0.80": {
+      "right": 21,
+      "falseCovered": 0,
+      "falseNotCovered": 24
+    }
+  },
+  "note": "Hand labels from reading the summaries as generated before the serving cap; the flags shown in the review file used 0.75."
+}

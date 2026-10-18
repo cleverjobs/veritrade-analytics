@@ -1,0 +1,369 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-18T18:25:24+00:00",
+  "config": {
+    "embeddingModel": "qwen3-embedding:0.6b",
+    "coverageThreshold": 0.6,
+    "strictCoverageThreshold": 0.75,
+    "servedCap": "cap_summary in veritrade.inference.adapters, applied to cached generations",
+    "maxWords": 60,
+    "maxSentences": 3,
+    "extraction": {
+      "parser": "selectolax",
+      "extractor": "cascade",
+      "scope": "full"
+    },
+    "passGate": 0.8,
+    "selection": "judge faithfulness, then judge coverage, among candidates with deterministicPassRate >= passGate; latency budgets are applied by `select`"
+  },
+  "splits": {
+    "dev": {
+      "n": 30,
+      "articleIds": [
+        "art-0e5309ab6b89",
+        "art-1f09f06f76fa",
+        "art-1fb0cdf88380",
+        "art-2834a5031b24",
+        "art-2b01cd22af92",
+        "art-4b94d222f646",
+        "art-5e98c4dd3d5b",
+        "art-6253298eeaa1",
+        "art-66c7d45c3e8c",
+        "art-69e56660c6c6",
+        "art-84b60948c0a3",
+        "art-880852985987",
+        "art-913fb6384df4",
+        "art-990bfae3c63a",
+        "art-b9ad8d2c5513",
+        "art-bce8187b5ee3",
+        "art-cc39122612eb",
+        "art-ccbd42c00729",
+        "art-d5acda021abc",
+        "art-db7e38a444ad",
+        "art-dc4a994e19a8",
+        "art-de2ed88407fb",
+        "art-e140c6c791b0",
+        "art-e82bef7b5ee6",
+        "art-ea1b3afb94a6",
+        "art-ea48af0533bb",
+        "art-ef28c44b138b",
+        "art-f821720e67f1",
+        "art-f8badbb400d2",
+        "art-f946ea0f6ef4"
+      ],
+      "rows": [
+        {
+          "endpoint": "summary",
+          "model": "qwen3.5:2b-q4_K_M",
+          "n": 30,
+          "deterministicPassRate": 0.9,
+          "keyFactCoverage": 0.5217,
+          "keyFactCoverageStrict": 0.2417,
+          "judgeFaithfulness": 3.967,
+          "judgeCoverage": 4.3,
+          "hallucinationRate": 0.6667,
+          "materialErrorRate": 0.3,
+          "wordsOkRate": 1.0,
+          "sentencesOkRate": 1.0,
+          "numbersGroundedRate": 0.9667,
+          "entityNamedRate": 0.9333,
+          "truncatedRate": 0.0333,
+          "cappedRate": 0.3667,
+          "errorRate": 0.0,
+          "medianWords": 49.0,
+          "unsupportedNumbers": 1,
+          "unsupportedNumbersInInput": 1,
+          "keyFactCoverageAt": {
+            "0.65": 0.4567,
+            "0.70": 0.3317,
+            "0.80": 0.1733
+          },
+          "judgeN": 30,
+          "judgeLeadsRate": 0.9,
+          "judgeFaithfulnessCi": [
+            3.667,
+            4.233
+          ],
+          "judgeCoverageCi": [
+            4.033,
+            4.567
+          ],
+          "hallucinationRateCi": [
+            0.533,
+            0.8
+          ],
+          "materialErrorRateCi": [
+            0.166,
+            0.467
+          ],
+          "passesGate": true,
+          "promptVersion": "summary/qwen3.5:2b-q4_K_M/v2@84ce3858",
+          "modelDigest": "1e2d21a4f03a"
+        },
+        {
+          "endpoint": "summary",
+          "model": "qwen3.5:4b-q4_K_M",
+          "n": 30,
+          "deterministicPassRate": 0.9,
+          "keyFactCoverage": 0.4667,
+          "keyFactCoverageStrict": 0.2317,
+          "judgeFaithfulness": 4.4,
+          "judgeCoverage": 4.567,
+          "hallucinationRate": 0.5,
+          "materialErrorRate": 0.1,
+          "wordsOkRate": 1.0,
+          "sentencesOkRate": 1.0,
+          "numbersGroundedRate": 0.9333,
+          "entityNamedRate": 0.9667,
+          "truncatedRate": 0.0,
+          "cappedRate": 0.0333,
+          "errorRate": 0.0,
+          "medianWords": 40.0,
+          "unsupportedNumbers": 2,
+          "unsupportedNumbersInInput": 0,
+          "keyFactCoverageAt": {
+            "0.65": 0.3883,
+            "0.70": 0.315,
+            "0.80": 0.1633
+          },
+          "judgeN": 30,
+          "judgeLeadsRate": 1.0,
+          "judgeFaithfulnessCi": [
+            4.167,
+            4.6
+          ],
+          "judgeCoverageCi": [
+            4.4,
+            4.733
+          ],
+          "hallucinationRateCi": [
+            0.333,
+            0.667
+          ],
+          "materialErrorRateCi": [
+            0.0,
+            0.2
+          ],
+          "passesGate": true,
+          "promptVersion": "summary/qwen3.5:4b-q4_K_M/v2@84ce3858",
+          "modelDigest": "d8b0f5e9760c"
+        },
+        {
+          "endpoint": "analyze",
+          "model": "qwen3.5:4b-q4_K_M",
+          "n": 30,
+          "deterministicPassRate": 0.9333,
+          "keyFactCoverage": 0.57,
+          "keyFactCoverageStrict": 0.2917,
+          "judgeFaithfulness": 4.467,
+          "judgeCoverage": 4.633,
+          "hallucinationRate": 0.4,
+          "materialErrorRate": 0.1,
+          "wordsOkRate": 1.0,
+          "sentencesOkRate": 1.0,
+          "numbersGroundedRate": 0.9667,
+          "entityNamedRate": 0.9667,
+          "truncatedRate": 0.0,
+          "cappedRate": 0.3333,
+          "errorRate": 0.0,
+          "medianWords": 48.0,
+          "unsupportedNumbers": 1,
+          "unsupportedNumbersInInput": 0,
+          "keyFactCoverageAt": {
+            "0.65": 0.4767,
+            "0.70": 0.3983,
+            "0.80": 0.2317
+          },
+          "judgeN": 30,
+          "judgeLeadsRate": 1.0,
+          "judgeFaithfulnessCi": [
+            4.2,
+            4.7
+          ],
+          "judgeCoverageCi": [
+            4.467,
+            4.8
+          ],
+          "hallucinationRateCi": [
+            0.266,
+            0.567
+          ],
+          "materialErrorRateCi": [
+            0.0,
+            0.2
+          ],
+          "passesGate": true,
+          "promptVersion": "analyze/qwen3.5:4b-q4_K_M/v1@7daf4f28",
+          "modelDigest": "d8b0f5e9760c"
+        },
+        {
+          "endpoint": "analyze",
+          "model": "qwen3:4b-instruct-2507-q4_K_M",
+          "n": 30,
+          "deterministicPassRate": 0.9,
+          "keyFactCoverage": 0.5583,
+          "keyFactCoverageStrict": 0.2467,
+          "judgeFaithfulness": 4.733,
+          "judgeCoverage": 4.433,
+          "hallucinationRate": 0.2,
+          "materialErrorRate": 0.0667,
+          "wordsOkRate": 1.0,
+          "sentencesOkRate": 1.0,
+          "numbersGroundedRate": 0.9,
+          "entityNamedRate": 1.0,
+          "truncatedRate": 0.0,
+          "cappedRate": 0.0667,
+          "errorRate": 0.0,
+          "medianWords": 40.5,
+          "unsupportedNumbers": 3,
+          "unsupportedNumbersInInput": 0,
+          "keyFactCoverageAt": {
+            "0.65": 0.4833,
+            "0.70": 0.3167,
+            "0.80": 0.1717
+          },
+          "judgeN": 30,
+          "judgeLeadsRate": 0.8333,
+          "judgeFaithfulnessCi": [
+            4.533,
+            4.933
+          ],
+          "judgeCoverageCi": [
+            4.167,
+            4.667
+          ],
+          "hallucinationRateCi": [
+            0.067,
+            0.333
+          ],
+          "materialErrorRateCi": [
+            0.0,
+            0.167
+          ],
+          "passesGate": true,
+          "promptVersion": "analyze/qwen3:4b-instruct-2507-q4_K_M/v5@e2b57fc6",
+          "modelDigest": "0edcdef34593"
+        },
+        {
+          "endpoint": "analyze",
+          "model": "ministral-3:3b",
+          "n": 30,
+          "deterministicPassRate": 0.7667,
+          "keyFactCoverage": 0.45,
+          "keyFactCoverageStrict": 0.1883,
+          "judgeFaithfulness": 3.767,
+          "judgeCoverage": 4.267,
+          "hallucinationRate": 0.6333,
+          "materialErrorRate": 0.4,
+          "wordsOkRate": 1.0,
+          "sentencesOkRate": 1.0,
+          "numbersGroundedRate": 0.8,
+          "entityNamedRate": 0.9667,
+          "truncatedRate": 0.0,
+          "cappedRate": 0.0,
+          "errorRate": 0.0,
+          "medianWords": 37.0,
+          "unsupportedNumbers": 8,
+          "unsupportedNumbersInInput": 1,
+          "keyFactCoverageAt": {
+            "0.65": 0.3633,
+            "0.70": 0.2583,
+            "0.80": 0.1433
+          },
+          "judgeN": 30,
+          "judgeLeadsRate": 0.8,
+          "judgeFaithfulnessCi": [
+            3.367,
+            4.2
+          ],
+          "judgeCoverageCi": [
+            3.967,
+            4.6
+          ],
+          "hallucinationRateCi": [
+            0.467,
+            0.8
+          ],
+          "materialErrorRateCi": [
+            0.233,
+            0.567
+          ],
+          "passesGate": false,
+          "promptVersion": "analyze/ministral-3:3b/v5@e2b57fc6",
+          "modelDigest": "f04aa1c738f6"
+        }
+      ],
+      "judged": true,
+      "qualityRanking": {
+        "summary": [
+          "qwen3.5:4b-q4_K_M",
+          "qwen3.5:2b-q4_K_M"
+        ],
+        "analyze": [
+          "qwen3:4b-instruct-2507-q4_K_M",
+          "qwen3.5:4b-q4_K_M"
+        ]
+      },
+      "leaderGaps": {
+        "summary": {
+          "leader": "qwen3.5:4b-q4_K_M",
+          "runnerUp": "qwen3.5:2b-q4_K_M",
+          "faithfulness": {
+            "mean": 0.433,
+            "ci": [
+              0.067,
+              0.767
+            ],
+            "n": 30
+          },
+          "coverage": {
+            "mean": 0.267,
+            "ci": [
+              0.033,
+              0.533
+            ],
+            "n": 30
+          }
+        },
+        "analyze": {
+          "leader": "qwen3:4b-instruct-2507-q4_K_M",
+          "runnerUp": "qwen3.5:4b-q4_K_M",
+          "faithfulness": {
+            "mean": 0.267,
+            "ci": [
+              -0.067,
+              0.6
+            ],
+            "n": 30
+          },
+          "coverage": {
+            "mean": -0.2,
+            "ci": [
+              -0.533,
+              0.1
+            ],
+            "n": 30
+          }
+        }
+      },
+      "spotCheck": {
+        "articles": 10,
+        "facts": 45,
+        "stated": 29,
+        "agreement": {
+          "0.60": {
+            "right": 33,
+            "falseCovered": 5,
+            "falseNotCovered": 7
+          },
+          "0.75": {
+            "right": 25,
+            "falseCovered": 0,
+            "falseNotCovered": 20
+          }
+        },
+        "note": "Hand labels from reading the summaries as generated before the serving cap; the flags shown in the review file used 0.75."
+      }
+    }
+  }
+}
