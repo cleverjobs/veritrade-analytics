@@ -6,6 +6,7 @@ import argparse
 import sys
 from collections.abc import Sequence
 
+from veritrade_evals import articles_cli
 from veritrade_evals.datasets import (
     SPECS,
     DatasetError,
@@ -28,7 +29,6 @@ PLANNED = {
     "select": "pick per-endpoint winners",
     "holdout": "one-shot holdout run",
     "report": "benchmarks.json and results README",
-    "articles": "Opus-labelled article set",
     "opus": "Opus subagent prompts and judgements",
 }
 
@@ -103,6 +103,8 @@ def build_parser() -> argparse.ArgumentParser:
     splits.add_parser("verify", help="re-read datasets and check split hashes").set_defaults(
         func=cmd_splits_verify
     )
+
+    articles_cli.register(commands)
 
     for name, help_text in PLANNED.items():
         planned = commands.add_parser(name, help=f"{help_text} (not implemented yet)")

@@ -15,21 +15,29 @@ import statistics
 import time
 import tomllib
 from collections import Counter
-from collections.abc import Iterable
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-from urllib.parse import urljoin, urlsplit, urlunsplit
+from urllib.parse import urljoin
 
 import httpx
 import lxml.html
-from lxml import etree
 from selectolax.lexbor import LexborHTMLParser, LexborNode
 
 from veritrade.errors import VtError
 from veritrade.fetch import consent, detect
-from veritrade.fetch.headers import accept_encoding, browser_headers, is_sec_host
+from veritrade.fetch.headers import accept_encoding, browser_headers
+from veritrade_evals.discovery import (
+    MIN_GAP_S,
+    SEC_MIN_GAP_S,
+    Politeness,
+    edgar_exhibit,
+    feed_links,
+    normalize,
+    pick,
+    section_links,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES_TOML = ROOT / "backend/src/veritrade/data/sources.toml"
@@ -40,8 +48,6 @@ YAHOO_CONSENT_ENTRY = (
     "https://guce.yahoo.com/consent?brandType=eu&lang=en-US&done=https%3A%2F%2Ffinance.yahoo.com%2F"
 )
 TIMEOUT = httpx.Timeout(15.0, connect=5.0)
-MIN_GAP_S = 1.0
-SEC_MIN_GAP_S = 0.2  # 5 req/s, half of EDGAR's fair-access ceiling
 MAX_REDIRECTS = 5
 MAX_EDGAR_INDEXES = 25
 MIN_P_WORDS = 6
@@ -91,34 +97,7 @@ HASHY_TOKEN = re.compile(r"(?:^|[-_])(?=[a-z0-9]*\d)[a-z0-9]{5,}$|__[A-Za-z0-9]{
 SELECTOR_ATTRS = ("data-testid", "data-component", "itemprop", "data-module", "data-test")
 
 
-# --- polite fetching ------------------------------------------------------------------------------------
-
-
-class Politeness:
-    """Sequential requests per registrable domain with a minimum gap; SEC gets its own faster ceiling."""
-
-    def __init__(self) -> None:
-        self._locks: dict[str, asyncio.Lock] = {}
-        self._last: dict[str, float] = {}
-
-    @staticmethod
-    def domain(url: str) -> str:
-        host = (urlsplit(url).hostname or "").lower()
-        return ".".join(host.split(".")[-3:] if host.endswith(".co.uk") else host.split(".")[-2:])
-
-    async def wait(self, url: str) -> asyncio.Lock:
-        key = self.domain(url)
-        lock = self._locks.setdefault(key, asyncio.Lock())
-        await lock.acquire()
-        gap = SEC_MIN_GAP_S if is_sec_host(urlsplit(url).hostname or "") else MIN_GAP_S
-        delay = self._last.get(key, 0.0) + gap - time.monotonic()
-        if delay > 0:
-            await asyncio.sleep(delay)
-        return lock
-
-    def done(self, url: str, lock: asyncio.Lock) -> None:
-        self._last[self.domain(url)] = time.monotonic()
-        lock.release()
+# --- polite fetching (Politeness lives in veritrade_evals.discovery) -----------------------------------
 
 
 @dataclass
@@ -210,65 +189,7 @@ async def fetch(client: httpx.AsyncClient, polite: Politeness, url: str, *, clas
     return result
 
 
-# --- discovery ------------------------------------------------------------------------------------------
-
-
-def normalize(url: str) -> str:
-    """https, no query or fragment: article URLs here are path-addressed and feeds append tracking params."""
-    parts = urlsplit(url.strip())
-    return urlunsplit(("https", parts.netloc.lower(), parts.path, "", ""))
-
-
-def feed_links(body: bytes) -> list[str]:
-    """Item links of an RSS or Atom document, namespace-agnostic and tolerant of broken XML."""
-    parser = etree.XMLParser(recover=True, resolve_entities=False, no_network=True)
-    root = etree.fromstring(body, parser)
-    if root is None:
-        return []
-    links: list[str] = []
-    for item in root.iter("{*}item", "{*}entry"):
-        # Wires mix translated copies into one feed; the models are evaluated on English only.
-        language = next((str(el.text or "") for el in item.iter("{*}language")), "en")
-        if not language.lower().startswith("en"):
-            continue
-        for link in item.iter("{*}link"):
-            href = link.get("href") or (link.text or "").strip()
-            if href:
-                links.append(href)
-                break
-    return links
-
-
-def section_links(html: str, base: str) -> list[str]:
-    hrefs = re.findall(r"""(?:href=|<loc>)["']?([^"'<> ]+)""", html)
-    return [urljoin(base, href) for href in hrefs]
-
-
-def pick(urls: Iterable[str], cfg: dict[str, Any], limit: int) -> list[str]:
-    pattern = re.compile(cfg["article_pattern"])
-    exclude = re.compile(cfg["exclude_pattern"]) if cfg.get("exclude_pattern") else None
-    chosen: list[str] = []
-    for raw in urls:
-        url = normalize(raw)
-        if url in chosen or not pattern.match(url) or (exclude and exclude.search(url)):
-            continue
-        chosen.append(url)
-        if len(chosen) == limit:
-            break
-    return chosen
-
-
-def edgar_exhibit(index_html: str, index_url: str) -> tuple[str, str] | None:
-    """EX-99.1 document link and description from an EDGAR filing index (inline-XBRL viewer unwrapped)."""
-    doc = lxml.html.fromstring(index_html)
-    for row in doc.cssselect("table.tableFile tr"):
-        cells = [cell.text_content().strip() for cell in row.cssselect("td")]
-        if len(cells) >= 4 and cells[3].upper().startswith("EX-99.1"):
-            links = row.cssselect("a[href]")
-            if links:
-                href = str(links[0].get("href")).replace("/ix?doc=", "")
-                return urljoin(index_url, href), cells[1]
-    return None
+# --- discovery (URL and feed helpers live in veritrade_evals.discovery) ---------------------------------
 
 
 async def discover(

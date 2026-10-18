@@ -77,3 +77,8 @@ Measured during P1/P2, recorded here so the deviations are traceable. Inputs for
   ignores `think:false` when a schema is set, so the field-order dimension runs on `qwen3.5:4b` and
   `ministral-3:3b` only.
 - **Fetch cap** raised from 5 MB to 10 MB: CNN article pages are 5.7-6.6 MB decompressed.
+- **Sampling penalties zeroed**: the qwen3.5 Modelfiles ship `presence_penalty 1.5`, which still applies under
+  greedy decoding. Few-shot answers end in `neutral` / `0`, so the penalty pushed generated labels away from
+  neutral (26 of 60 dev tweets disagreed with the logprob argmax; 0 of 60 with the penalty off). Every chat call
+  now pins `presence_penalty 0`, `frequency_penalty 0`, `repeat_penalty 1`; `num_predict` still bounds runaway
+  output.
