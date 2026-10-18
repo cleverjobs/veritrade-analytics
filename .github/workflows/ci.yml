@@ -62,9 +62,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # The stack needs ~10 GB (Ollama image, models, app image, browser); deleting preinstalled SDKs
+      # costs ~3 minutes, so it only runs when the runner image is short on space.
       - name: Free disk space
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          avail_gb=$(df --output=avail -BG / | tail -1 | tr -dc '0-9')
+          if [ "$avail_gb" -lt 25 ]; then
+            sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          fi
           df -h /
 
       - uses: docker/setup-buildx-action@v3
@@ -91,6 +96,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/ollama-models"
           OLLAMA_MODEL_DIR="$RUNNER_TEMP/ollama-models" docker compose up -d --wait --wait-timeout 900 --no-build
           docker compose ps -a
+          df -h /
           curl -fsS "$E2E_BASE_URL/api/health"
 
       # Saved right after the pull, so a failing test run still caches the models.
