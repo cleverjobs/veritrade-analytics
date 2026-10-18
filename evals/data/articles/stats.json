@@ -1,0 +1,100 @@
+{
+  "reference_date": "2026-10-18",
+  "window": {
+    "since": "2026-08-19",
+    "until": "2026-10-18"
+  },
+  "seed": 20261018,
+  "n": 90,
+  "splits": {
+    "dev": 30,
+    "test": 60
+  },
+  "classes": {
+    "bullish": 30,
+    "bearish": 30,
+    "neutral": 30
+  },
+  "per_source": {
+    "yahoo": {
+      "bullish": 3,
+      "bearish": 4,
+      "neutral": 3
+    },
+    "cnbc": {
+      "bullish": 3,
+      "bearish": 3,
+      "neutral": 3
+    },
+    "fool": {
+      "bullish": 3,
+      "bearish": 3,
+      "neutral": 3
+    },
+    "prnewswire": {
+      "bullish": 3,
+      "bearish": 3,
+      "neutral": 3
+    },
+    "globenewswire": {
+      "bullish": 3,
+      "bearish": 3,
+      "neutral": 3
+    },
+    "sec": {
+      "bullish": 3,
+      "bearish": 3,
+      "neutral": 3
+    },
+    "cnn": {
+      "bullish": 3,
+      "bearish": 3,
+      "neutral": 3
+    },
+    "fortune": {
+      "bullish": 3,
+      "bearish": 3,
+      "neutral": 3
+    },
+    "guardian": {
+      "bullish": 3,
+      "bearish": 3,
+      "neutral": 3
+    },
+    "bbc": {
+      "bullish": 3,
+      "bearish": 2,
+      "neutral": 3
+    }
+  },
+  "quota_adjustments": [
+    {
+      "source": "yahoo",
+      "label": "bearish",
+      "quota": 4
+    },
+    {
+      "source": "bbc",
+      "label": "bearish",
+      "quota": 2
+    }
+  ],
+  "pool": {
+    "gold_usable": 298,
+    "double_labelled": 157,
+    "label_agreement": 151,
+    "raw_agreement": 0.9618,
+    "cohen_kappa": 0.9426,
+    "sent_to_adjudication": 49,
+    "adjudication_rate": 0.3121,
+    "adjudicated": 49,
+    "replaced": 24,
+    "replacement_rate": 0.4898
+  },
+  "final_set": {
+    "raw_agreement": 1.0,
+    "cohen_kappa": 1.0,
+    "adjudicated_kept": 5
+  },
+  "algorithm": "Eligible: gold usable, published in the window, both labellers valid, and either the labels agree with neither flagged ambiguous or the adjudicator kept the article (its label is final). Quotas start at min(3, eligible) per source and class; a source below 2 in any class makes the set impossible. Classes short of 30 (largest deficit first) take a 4th article from the source with the fewest selected so far, then the most spare eligible articles, then source rank. Within a cell, agreed articles precede adjudicated ones, each group in seeded order; one seeded article per cell goes to dev, the rest to test."
+}
