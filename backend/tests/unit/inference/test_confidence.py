@@ -56,6 +56,60 @@ def test_threshold_is_inclusive() -> None:
     assert not ProbabilityPolicy(0.5).decide({"bearish": 0.5, "neutral": 0.3, "bullish": 0.2}).abstained
 
 
+def test_min_p_zero_never_abstains() -> None:
+    verdict = ProbabilityPolicy(0.0).decide({"bullish": 0.34, "neutral": 0.33, "bearish": 0.33})
+    assert (verdict.sentiment, verdict.abstained) == ("bullish", False)
+
+
+@pytest.mark.parametrize(
+    ("probabilities", "expected", "abstained"),
+    [
+        # Neutral argmax, directional class at or above tau: the directional class is called.
+        ({"neutral": 0.6, "bullish": 0.3, "bearish": 0.1}, "bullish", False),
+        ({"neutral": 0.55, "bullish": 0.1, "bearish": 0.35}, "bearish", False),
+        # Below tau the argmax + min_p rule stands.
+        ({"neutral": 0.7, "bullish": 0.2, "bearish": 0.1}, "neutral", False),
+        ({"neutral": 0.4, "bullish": 0.29, "bearish": 0.31}, "bearish", False),
+        ({"neutral": 0.45, "bullish": 0.28, "bearish": 0.27}, "neutral", True),
+        # A directional argmax is never touched by tau, even under min_p.
+        ({"bullish": 0.45, "neutral": 0.4, "bearish": 0.15}, "neutral", True),
+    ],
+)
+def test_directional_tau_only_overrides_a_neutral_argmax(
+    probabilities: dict[Sentiment, float], expected: str, abstained: bool
+) -> None:
+    verdict = ProbabilityPolicy(0.5, directional_tau=0.3).decide(probabilities)
+    assert (verdict.sentiment, verdict.abstained, verdict.policy) == (expected, abstained, "probability")
+    assert verdict.probabilities == pytest.approx(probabilities)
+
+
+def test_directional_tau_ties_between_directions_go_bullish() -> None:
+    verdict = ProbabilityPolicy(0.5, directional_tau=0.3).decide(
+        {"neutral": 0.4, "bullish": 0.3, "bearish": 0.3}
+    )
+    assert verdict.sentiment == "bullish"
+
+
+def test_policy_for_carries_tau_and_leaves_decision_models_alone_when_unset(
+    decision_spec: ModelSpec, label_spec: ModelSpec
+) -> None:
+    neutral_lean: dict[Sentiment, float] = {"neutral": 0.62, "bullish": 0.33, "bearish": 0.05}
+    plain = policy_for(decision_spec)
+    assert plain == ProbabilityPolicy(0.5, None)
+    assert isinstance(plain, ProbabilityPolicy)
+    assert plain.decide(neutral_lean).sentiment == "neutral"
+    with_tau = policy_for(decision_spec.model_copy(update={"directional_tau": 0.3}))
+    assert isinstance(with_tau, ProbabilityPolicy)
+    assert with_tau.decide(neutral_lean).sentiment == "bullish"
+    label = policy_for(label_spec.model_copy(update={"directional_tau": 0.3, "min_p": 0.0}))
+    assert label == LabelLogprobPolicy(0.0, 0.3)
+    assert isinstance(label, LabelLogprobPolicy)
+    chat = _label_chat("neutral", ['"}'], [("neutral", 0.62), ("bull", 0.33), ("bear", 0.05)])
+    verdict = label.decide(LabelOut(label="neutral"), chat)
+    assert verdict is not None
+    assert (verdict.sentiment, verdict.abstained, verdict.policy) == ("bullish", False, "label-logprob")
+
+
 @pytest.mark.parametrize(
     ("probabilities", "expected"),
     [
@@ -167,16 +221,49 @@ def test_ambiguous_alternatives_with_real_mass_return_none() -> None:
     )
 
 
-def test_alternatives_ending_at_the_value_start_carry_no_class() -> None:
-    # Seen live on qwen3.5:0.8b: a bare " " held 27% of the mass next to " -" before "-2".
-    content = '{"score": -2}'
-    tokens = [
-        *plain(['{"', "score", '":']),
-        lp(" -", 0.7, [(" -", 0.7), (" ", 0.27), (" 0", 0.03)]),
-        *plain(["2}"]),
-    ]
-    probabilities = score_sign_probabilities(content, parse_logprobs(tokens))
-    assert probabilities == pytest.approx({"neutral": 0.03 / 0.73, "bullish": 0.0, "bearish": 0.7 / 0.73})
+def _score(content: str, tokens: Sequence[dict[str, object]]) -> dict[Sentiment, float] | None:
+    return score_sign_probabilities(content, parse_logprobs(list(tokens)))
+
+
+def test_fused_space_minus_with_a_heavy_bare_space_alternative_hides_the_sign() -> None:
+    # Seen live on qwen3.5:0.8b: " -" 0.70 next to a bare " " 0.28, whose continuation is never observed.
+    tokens = [*plain(['{"', "score", '":']), lp(" -", 0.7, [(" -", 0.7), (" ", 0.27), (" 0", 0.03)])]
+    assert _score('{"score": -2}', [*tokens, *plain(["2}"])]) is None
+
+
+def test_fused_space_minus_counts_as_negative() -> None:
+    first = lp(" -", 0.95, [(" -", 0.95), (" 0", 0.03), (" ", 0.02)])
+    probabilities = _score('{"score": -1}', [*plain(['{"', "score", '":']), first, *plain(["1", "}"])])
+    assert probabilities == pytest.approx({"neutral": 0.03 / 0.98, "bullish": 0.0, "bearish": 0.95 / 0.98})
+
+
+def test_a_generated_bare_space_defers_to_the_digit_and_keeps_its_signed_alternatives() -> None:
+    # The bearish mass sits on " -" one token before the digit that decides the other classes.
+    space = lp(" ", 0.9, [(" ", 0.9), (" -", 0.08), (' "', 0.02)])
+    digit = lp("1", 0.6, [("1", 0.6), ("2", 0.3), ("0", 0.1)])
+    probabilities = _score(
+        '{"score": 1}', [*plain(['{"', "score"]), lp('":', 1.0), space, digit, *plain(["}"])]
+    )
+    total = 0.08 + 0.9 * 0.9 + 0.9 * 0.1
+    assert probabilities == pytest.approx(
+        {"neutral": 0.9 * 0.1 / total, "bullish": 0.9 * 0.9 / total, "bearish": 0.08 / total}
+    )
+
+
+def test_sign_fused_into_the_colon_token() -> None:
+    colon = lp('":-', 0.9, [('":-', 0.9), ('":0', 0.06), ('": ', 0.04)])
+    probabilities = _score('{"score":-2}', [*plain(['{"', "score"]), colon, *plain(["2", "}"])])
+    assert probabilities == pytest.approx({"neutral": 0.06 / 0.96, "bullish": 0.0, "bearish": 0.9 / 0.96})
+
+
+def test_colon_step_alternatives_that_already_carry_the_sign_count() -> None:
+    colon = lp('":', 0.95, [('":', 0.95), ('":-', 0.05)])
+    first = lp("0", 0.8, [("0", 0.8), ("1", 0.2)])
+    probabilities = _score('{"score":0}', [*plain(['{"', "score"]), colon, first, *plain(["}"])])
+    total = 0.05 + 0.95
+    assert probabilities == pytest.approx(
+        {"neutral": 0.95 * 0.8 / total, "bullish": 0.95 * 0.2 / total, "bearish": 0.05 / total}
+    )
 
 
 def test_tokens_that_do_not_tile_the_content_return_none() -> None:

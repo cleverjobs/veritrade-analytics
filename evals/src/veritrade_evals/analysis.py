@@ -7,8 +7,8 @@ import math
 import re
 from collections import Counter
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, field
-from typing import Any, Literal, cast
+from dataclasses import dataclass, field, replace
+from typing import Any, Literal, TypeIs, cast
 
 import numpy as np
 
@@ -24,13 +24,19 @@ from veritrade_evals.metrics import (
     SweepPoint,
     bootstrap_cis,
     headline_cis,
-    risk_coverage_sweep,
     select_operating_point,
     signal_metrics,
 )
 from veritrade_evals.runner import Variant
 
 PolicyName = Literal["probability", "label-logprob", "ordinal"]
+# The served directional_tau rule on top of a probability policy, always with min_p 0.
+TauPolicy = Literal["probability+tau", "label-logprob+tau"]
+EvalPolicy = PolicyName | TauPolicy
+TAU_BASE: dict[TauPolicy, PolicyName] = {
+    "probability+tau": "probability",
+    "label-logprob+tau": "label-logprob",
+}
 Record = Mapping[str, Any]
 
 # Round min_p values to freeze; finer near 1 because decision models are often very peaked.
@@ -42,18 +48,24 @@ PROB_THRESHOLDS: tuple[float, ...] = (
     0.9999,
 )
 ORDINAL_THRESHOLDS: tuple[float, ...] = (1.0, 2.0)
-# A directional class can win a call with far less than 1/3 of the mass, so the grid starts near 0.
-MASS_THRESHOLDS: tuple[float, ...] = tuple(
+# tau applies while neutral leads, when the likelier directional class can hold far less than 1/3.
+TAU_THRESHOLDS: tuple[float, ...] = tuple(
     sorted({round(0.02 * i, 2) for i in range(1, 17)} | set(PROB_THRESHOLDS[1:]))
 )
 # Score-sign probabilities stay out of the knobs: the qwen tokenizer fuses " -" into one token, so the
 # first value token misses the sign decision (records keep them as raw `sign_probs`).
-POLICIES: dict[Variant, tuple[PolicyName, ...]] = {
-    "decision": ("probability",),
-    "label": ("label-logprob",),
+POLICIES: dict[Variant, tuple[EvalPolicy, ...]] = {
+    "decision": ("probability", "probability+tau"),
+    "label": ("label-logprob", "label-logprob+tau"),
     "ordinal": ("ordinal",),
     "sentiment-first": ("ordinal",),
+    "summary-first": ("ordinal",),
 }
+
+
+def is_tau(policy: EvalPolicy) -> TypeIs[TauPolicy]:
+    return policy in TAU_BASE
+
 
 # Keyword heuristics for error analysis; the first match wins and nothing but the bucket name leaves.
 BUCKETS: tuple[tuple[str, re.Pattern[str]], ...] = (
@@ -130,12 +142,31 @@ def replay(policy: PolicyName, record: Record | None, *, ordinal_t: int = 1) -> 
     return label, math.inf if confidence >= ordinal_t else -math.inf
 
 
+def replay_tau(record: Record | None, *, ordinal_t: int = 1) -> tuple[Sentiment, float]:
+    """The served directional_tau rule at min_p 0: a leading directional class is always called (inf); while
+    neutral leads, the likelier directional class carries its probability and is served neutral below tau.
+    Failed calls and ordinal-fallback abstentions (-inf) abstain."""
+    if record is None or record.get("error") is not None:
+        return "neutral", -math.inf
+    if probs := record.get("probs"):
+        p = normalise(cast(Mapping[Sentiment, float], probs))
+        top = winner(p)
+        if top != "neutral":
+            return top, math.inf
+        side: Sentiment = "bullish" if p["bullish"] >= p["bearish"] else "bearish"
+        return side, p[side]
+    if record.get("score") is None:
+        raise ValueError(f"record {record.get('id')!r} has neither probabilities nor a score")
+    label, confidence = _ordinal(int(record["score"]))
+    return label, math.inf if confidence >= ordinal_t else -math.inf
+
+
 @dataclass(frozen=True, slots=True)
 class PolicyEval:
-    policy: PolicyName | Literal["directional-mass"]
+    policy: EvalPolicy
     labels: tuple[Sentiment, ...]
     confidences: tuple[float, ...]
-    sweep: tuple[SweepPoint, ...]
+    sweep: tuple[SweepPoint, ...] = ()
 
     @property
     def default(self) -> SweepPoint:
@@ -145,24 +176,33 @@ class PolicyEval:
     def operating(self) -> SweepPoint | None:
         return select_operating_point(self.sweep)
 
-    def abstained(self, threshold: float) -> list[bool]:
-        return [not c >= threshold for c in self.confidences]
+    def served(self, threshold: float) -> tuple[list[Sentiment], list[bool]]:
+        """(class, abstained) per row; below tau a row is served neutral, below min_p or t it abstains."""
+        if not is_tau(self.policy):
+            return list(self.labels), [not c >= threshold for c in self.confidences]
+        rows = zip(self.labels, self.confidences, strict=True)
+        return [label if c >= threshold else "neutral" for label, c in rows], [
+            c == -math.inf for c in self.confidences
+        ]
 
 
 def evaluate_policy(
-    policy: PolicyName,
+    policy: EvalPolicy,
     records: Sequence[Record | None],
     gold: Sequence[Sentiment],
     weights: Sequence[float] | None,
     *,
     ordinal_t: int = 1,
 ) -> PolicyEval:
-    calls = [replay(policy, r, ordinal_t=ordinal_t) for r in records]
-    labels = tuple(label for label, _ in calls)
-    confidences = tuple(c for _, c in calls)
-    thresholds = ORDINAL_THRESHOLDS if policy == "ordinal" else PROB_THRESHOLDS
-    sweep = risk_coverage_sweep(gold, labels, confidences, thresholds, weights)
-    return PolicyEval(policy, labels, confidences, tuple(sweep))
+    if is_tau(policy):
+        calls = [replay_tau(r, ordinal_t=ordinal_t) for r in records]
+        thresholds = TAU_THRESHOLDS
+    else:
+        calls = [replay(policy, r, ordinal_t=ordinal_t) for r in records]
+        thresholds = ORDINAL_THRESHOLDS if policy == "ordinal" else PROB_THRESHOLDS
+    ev = PolicyEval(policy, tuple(label for label, _ in calls), tuple(c for _, c in calls))
+    sweep = [SweepPoint(t, signal_metrics(gold, *ev.served(t), weights)) for t in sorted(set(thresholds))]
+    return replace(ev, sweep=tuple(sweep))
 
 
 # --- cells and candidates --------------------------------------------------------------------
@@ -188,6 +228,8 @@ class CellInput:
     records: tuple[Record | None, ...]
     dims: Mapping[str, str] = field(default_factory=dict)
     ordinal_t: int = 1
+    # A follow-up cell names the grid config it is paired against and never competes for the best one.
+    against: str | None = None
     meta: Mapping[str, Any] = field(default_factory=dict)
 
 
@@ -349,12 +391,16 @@ def ci_dict(cis: Mapping[str, ConfidenceInterval]) -> dict[str, dict[str, float]
 
 
 def candidate_cis(candidate: Candidate, point: SweepPoint, dev: DevSet, n_boot: int) -> dict[str, Any]:
-    abstained = candidate.evaluation.abstained(point.threshold)
-    return ci_dict(headline_cis(dev.gold, candidate.evaluation.labels, abstained, dev.weights, n_boot=n_boot))
+    pred, abstained = candidate.evaluation.served(point.threshold)
+    return ci_dict(headline_cis(dev.gold, pred, abstained, dev.weights, n_boot=n_boot))
+
+
+def grid_only(cands: Sequence[Candidate]) -> list[Candidate]:
+    return [c for c in cands if c.cell.against is None]
 
 
 def best_report(cands: Sequence[Candidate], dev: DevSet, n_boot: int) -> dict[str, Any]:
-    best, cap_met = best_candidate(cands)
+    best, cap_met = best_candidate(grid_only(cands))
     point = chosen_point(best, cap_met)
     return {
         "config": best.cell.name,
@@ -372,8 +418,7 @@ def best_report(cands: Sequence[Candidate], dev: DevSet, n_boot: int) -> dict[st
 # --- knob comparison -------------------------------------------------------------------------
 
 
-def _knob(c: Candidate) -> str:
-    return "ordinal" if c.evaluation.policy == "ordinal" else "logprob"
+KNOB_POLICIES: dict[str, EvalPolicy] = {"logprob": "label-logprob", "ordinal": "ordinal"}
 
 
 def paired_f05(
@@ -383,8 +428,8 @@ def paired_f05(
     g = np.asarray(dev.gold, dtype=np.str_)
     w = None if dev.weights is None else np.asarray(dev.weights, dtype=np.float64)
     served = [
-        (np.asarray(c.evaluation.labels, dtype=np.str_), np.asarray(c.evaluation.abstained(p.threshold)))
-        for c, p in (a, b)
+        (np.asarray(pred, dtype=np.str_), np.asarray(abstained))
+        for pred, abstained in (c.evaluation.served(p.threshold) for c, p in (a, b))
     ]
 
     def f05(k: int, idx: IndexArray) -> float:
@@ -404,8 +449,9 @@ def _verdict(gap: ConfidenceInterval, a: str, b: str) -> str:
 
 
 def knob_comparison(cands: Sequence[Candidate], dev: DevSet, n_boot: int) -> dict[str, Any] | None:
-    """Best logprob-threshold candidate vs best ordinal candidate, with a paired bootstrap on the gap."""
-    by_knob = {k: [c for c in cands if _knob(c) == k] for k in ("logprob", "ordinal")}
+    """Best logprob-threshold candidate vs best ordinal candidate (plain rules, grid cells), with a paired
+    bootstrap on the gap."""
+    by_knob = {k: [c for c in grid_only(cands) if c.evaluation.policy == p] for k, p in KNOB_POLICIES.items()}
     if not all(by_knob.values()):
         return None
     picks = {k: best_candidate(v) for k, v in by_knob.items()}
@@ -431,55 +477,62 @@ def knob_comparison(cands: Sequence[Candidate], dev: DevSet, n_boot: int) -> dic
     }
 
 
-# --- informational: directional-mass threshold ------------------------------------------------
-
-
-def directional_mass(record: Record | None) -> tuple[Sentiment, float]:
-    """The likelier directional class and its probability, even when neutral is the argmax; rows without
-    probabilities keep their ordinal outcome (directional calls never abstain at t=1)."""
-    if record is None or record.get("error") is not None:
-        return "neutral", -math.inf
-    probs = record.get("probs")
-    if not probs:
-        return _ordinal(int(record["score"]))
-    side: Sentiment = "bullish" if probs["bullish"] >= probs["bearish"] else "bearish"
-    return side, float(normalise(cast(Mapping[Sentiment, float], probs))[side])
-
-
-def evaluate_mass(records: Sequence[Record | None], dev: DevSet) -> PolicyEval:
-    calls = [directional_mass(r) for r in records]
-    labels = tuple(label for label, _ in calls)
-    confidences = tuple(c for _, c in calls)
-    sweep = risk_coverage_sweep(dev.gold, labels, confidences, MASS_THRESHOLDS, dev.weights)
-    return PolicyEval("directional-mass", labels, confidences, tuple(sweep))
-
-
-def directional_mass_report(
-    cells: Sequence[CellInput], cands: Sequence[Candidate], dev: DevSet, n_boot: int
-) -> dict[str, Any] | None:
-    """Not a serving policy: shows how much F0.5 the argmax rule leaves behind on neutral-leaning models.
-    Below tau the row is served neutral (counted as an abstention)."""
-    prob_cells = [c for c in cells if c.variant in ("decision", "label")]
-    if not prob_cells:
-        return None
-    mass = [Candidate(cell, evaluate_mass(cell.records, dev), i) for i, cell in enumerate(prob_cells)]
-    best, ok = best_candidate(mass)
-    serving, serving_ok = best_candidate(cands)
-    point, serving_point = chosen_point(best, ok), chosen_point(serving, serving_ok)
-    paired = paired_f05((best, point), (serving, serving_point), dev, n_boot)
+def _pick_row(candidate: Candidate, cap_met: bool) -> dict[str, Any]:
     return {
-        "config": best.cell.name,
-        "inversion_cap_met": ok,
-        **point_row(point),
-        "per_config_f05": {
-            c.cell.name: chosen_point(c, c.evaluation.operating is not None).f05_macro for c in mass
-        },
-        "serving_best": {"config": serving.cell.name, "policy": serving.evaluation.policy},
-        "paired_bootstrap": ci_dict(
-            {"directional_mass": paired["a"], "serving": paired["b"], "gap": paired["gap"]}
-        ),
-        "verdict": _verdict(paired["gap"], "directional-mass", "serving"),
+        "config": candidate.cell.name,
+        "policy": candidate.evaluation.policy,
+        "inversion_cap_met": cap_met,
+        **point_row(chosen_point(candidate, cap_met)),
     }
+
+
+def tau_report(cands: Sequence[Candidate], dev: DevSet, n_boot: int) -> dict[str, Any] | None:
+    """Best directional_tau candidate vs best plain-rule candidate over the grid cells, paired bootstrap."""
+    pool = grid_only(cands)
+    tau = [c for c in pool if is_tau(c.evaluation.policy)]
+    plain = [c for c in pool if not is_tau(c.evaluation.policy)]
+    if not tau or not plain:
+        return None
+    picks = {"tau": best_candidate(tau), "plain": best_candidate(plain)}
+    (a, a_ok), (b, b_ok) = picks["tau"], picks["plain"]
+    paired = paired_f05((a, chosen_point(a, a_ok)), (b, chosen_point(b, b_ok)), dev, n_boot)
+    return {
+        **{name: _pick_row(c, ok) for name, (c, ok) in picks.items()},
+        "paired_bootstrap": ci_dict({"tau": paired["a"], "plain": paired["b"], "gap": paired["gap"]}),
+        "verdict": _verdict(paired["gap"], "tau", "plain"),
+    }
+
+
+def follow_up_report(cands: Sequence[Candidate], dev: DevSet, n_boot: int) -> list[dict[str, Any]]:
+    """Each follow-up cell at its own operating point vs the grid config it names, at that config's."""
+    pool = grid_only(cands)
+    rows = []
+    for c in cands:
+        if c.cell.against is None:
+            continue
+        base = [
+            b for b in pool if b.cell.name == c.cell.against and b.evaluation.policy == c.evaluation.policy
+        ]
+        if not base:
+            continue
+        own_ok, base_ok = c.evaluation.operating is not None, base[0].evaluation.operating is not None
+        paired = paired_f05(
+            (c, chosen_point(c, own_ok)), (base[0], chosen_point(base[0], base_ok)), dev, n_boot
+        )
+        rows.append(
+            {
+                **_pick_row(c, own_ok),
+                "variant": c.cell.variant,
+                "prompt_version": c.cell.prompt_version,
+                "against": _pick_row(base[0], base_ok),
+                "paired_bootstrap": ci_dict(
+                    {"follow_up": paired["a"], "against": paired["b"], "gap": paired["gap"]}
+                ),
+                "verdict": _verdict(paired["gap"], "follow-up", "against"),
+                "latency": latency(c.cell.records),
+            }
+        )
+    return rows
 
 
 # --- error patterns --------------------------------------------------------------------------
@@ -494,10 +547,9 @@ class Served:
 
 
 def served_calls(best: Candidate, cap_met: bool) -> Served:
-    point = chosen_point(best, cap_met)
-    abstained = best.evaluation.abstained(point.threshold)
+    pred, abstained = best.evaluation.served(chosen_point(best, cap_met).threshold)
     failed = tuple(r is None or r.get("error") is not None for r in best.cell.records)
-    return Served(best.cell.model, best.evaluation.labels, tuple(abstained), failed)
+    return Served(best.cell.model, tuple(pred), tuple(abstained), failed)
 
 
 def _directional_call(s: Served, i: int) -> Sentiment | None:
@@ -518,7 +570,9 @@ ERROR_KEYS = (
 )
 
 
-def error_patterns(served: Sequence[Served], dev: DevSet) -> dict[str, Any]:
+def error_patterns(
+    served: Sequence[Served], dev: DevSet, bucket_names: Sequence[str] = BUCKET_NAMES
+) -> dict[str, Any]:
     """Raw counts (unweighted) of how each model's served calls go wrong, overall and per keyword bucket."""
     per_model: dict[str, Any] = {}
     for s in served:
@@ -537,7 +591,7 @@ def error_patterns(served: Sequence[Served], dev: DevSet) -> dict[str, Any]:
         per_model[s.model] = {k: tally.get(k, 0) for k in ERROR_KEYS}
     buckets: dict[str, Any] = {}
     if dev.buckets:
-        for name in BUCKET_NAMES:
+        for name in bucket_names:
             idx = [i for i, b in enumerate(dev.buckets) if b == name]
             gold_counts = Counter(dev.gold[i] for i in idx)
             row: dict[str, Any] = {
@@ -608,6 +662,8 @@ def _ms(x: float | None) -> str:
 def threshold_text(policy: str, threshold: float) -> str:
     if policy == "ordinal":
         return f"\\|s\\| >= {threshold:.0f}"
+    if policy.endswith("+tau"):
+        return f"tau {threshold:g}"
     return "none" if threshold == 0 else f"p >= {threshold:g}"
 
 
@@ -666,7 +722,7 @@ def config_table(report: Mapping[str, Any]) -> list[str]:
                     cfg["name"],
                     dims,
                     policy,
-                    _num(pol["default"]["metrics"]["f05_macro"]),
+                    "-" if policy.endswith("+tau") else _num(pol["default"]["metrics"]["f05_macro"]),
                     _num(m["f05_macro"]) if m else "cap missed",
                     threshold_text(policy, op["threshold"]) if op else "-",
                     _num(m["per_class"]["bullish"]["precision"]) if m else "-",
@@ -769,37 +825,64 @@ def error_lines(patterns: Mapping[str, Any]) -> list[str]:
     return lines
 
 
-def mass_lines(masses: Sequence[tuple[str, Mapping[str, Any]]]) -> list[str]:
+def _gap_text(boot: Mapping[str, Mapping[str, float]]) -> str:
+    gap = boot["gap"]
+    return f"{gap['point']:+.3f} [{gap['low']:+.3f}, {gap['high']:+.3f}]"
+
+
+def _pick_cells(pick: Mapping[str, Any], boot: Mapping[str, Mapping[str, float]], key: str) -> list[str]:
+    return [
+        pick["config"],
+        threshold_text(pick["policy"], pick["threshold"]),
+        _ci_text(boot, key),
+        _num(pick["precision_bullish"]),
+        _num(pick["precision_bearish"]),
+        _pct(pick["inversion_rate"]) + ("" if pick["inversion_cap_met"] else " (cap missed)"),
+        _pct(pick["coverage"]),
+        _pct(pick["signal_rate"]),
+    ]
+
+
+def tau_lines(taus: Sequence[tuple[str, Mapping[str, Any]]]) -> list[str]:
     rows = []
-    for model, m in masses:
-        boot = m["paired_bootstrap"]
-        gap = boot["gap"]
-        rows.append(
-            [
-                f"`{model}`",
-                m["config"],
-                f"p(class) >= {m['threshold']:g}",
-                _ci_text(boot, "directional_mass"),
-                _num(m["precision_bullish"]),
-                _num(m["precision_bearish"]),
-                _pct(m["inversion_rate"]) + ("" if m["inversion_cap_met"] else " (cap missed)"),
-                _pct(m["signal_rate"]),
-                f"{m['serving_best']['config']}: {_ci_text(boot, 'serving')}",
-                f"{gap['point']:+.3f} [{gap['low']:+.3f}, {gap['high']:+.3f}]",
-            ]
-        )
+    for model, t in taus:
+        boot = t["paired_bootstrap"]
+        for key in ("tau", "plain"):
+            gap = _gap_text(boot) if key == "tau" else ""
+            rows.append([f"`{model}`" if key == "tau" else "", key, *_pick_cells(t[key], boot, key), gap])
     header = [
-        "model", "config", "threshold", "F0.5 [95% CI]", "P bull", "P bear", "inversion", "signal rate",
-        "serving best F0.5", "gap",
+        "model", "rule", "config", "threshold", "F0.5 [95% CI]", "P bull", "P bear", "inversion", "coverage",
+        "signal rate", "tau - plain",
     ]  # fmt: skip
     return [
-        "## Not served yet: directional-mass threshold",
+        "## directional_tau vs the plain rule",
         "",
-        "The serving policies abstain only when the winning class is unsure, so a model that keeps most "
-        "of its mass on neutral is never pushed into a call. This informational policy calls bullish or "
-        "bearish whenever that class's probability clears tau, even when neutral is the argmax. It is "
-        "tuned on the same 300 tweets as everything else here (gap: paired bootstrap against the serving "
-        "best config).",
+        "The plain rule calls the argmax class and abstains below min_p, so a model that keeps most of its "
+        "mass on neutral is never pushed into a call. The served `directional_tau` rule (min_p 0) calls the "
+        "likelier directional class when neutral leads and that class holds p >= tau; a leading directional "
+        "class is always called, and below tau the row is a served neutral, not an abstention. Both rules "
+        "are tuned on these 300 tweets; the gap is a paired bootstrap.",
+        "",
+        *_table(header, rows),
+    ]
+
+
+def follow_up_lines(follow_ups: Sequence[tuple[str, Mapping[str, Any]]]) -> list[str]:
+    rows = []
+    for model, f in follow_ups:
+        boot = f["paired_bootstrap"]
+        rows.append([f"`{model}`", *_pick_cells(f, boot, "follow_up"), _gap_text(boot)])
+        rows.append(["", *_pick_cells(f["against"], boot, "against"), ""])
+    header = [
+        "model", "config", "threshold", "F0.5 [95% CI]", "P bull", "P bear", "inversion", "coverage",
+        "signal rate", "gap",
+    ]  # fmt: skip
+    return [
+        "## Follow-ups after the grid (paired against a grid config, never selected as best)",
+        "",
+        "v5 = v1 with the tightened summary rule (2 to 3 sentences, at most 50 words, entity first); "
+        "`v1-summary-first` = v1 with the summary before the score (the field-order check). Each row pair is "
+        "the follow-up at its own operating point, then the grid config it is compared against.",
         "",
         *_table(header, rows),
     ]
@@ -828,7 +911,8 @@ def render_summary(
         "to neutral.",
         "- Policies: decision models threshold native class probabilities (min_p); generative /signal "
         "thresholds first-token label probabilities (label schema) or the |score| of an ordinal -2..2 schema "
-        "(t in {1, 2}); /analyze is streamed sentiment-first and always uses |score|.",
+        "(t in {1, 2}); both probability policies are also swept with the served `directional_tau` rule "
+        "(min_p 0, see below); /analyze is streamed sentiment-first and always uses |score|.",
         f"- Decoding: Ollama options {header['decoding']} on every generative call (greedy; overrides the "
         "penalties some Modelfiles ship).",
         f"- CIs: 95% stratified bootstrap (B={header['n_boot']}) at the chosen threshold; the threshold "
@@ -853,9 +937,12 @@ def render_summary(
         lines += ["", "## Knob comparison: logprob threshold vs ordinal threshold"]
         for model, knob in knobs:
             lines += ["", *knob_lines(model, knob)]
-    masses = [(r["model"], r["directional_mass"]) for r in reports if r.get("directional_mass")]
-    if masses:
-        lines += ["", *mass_lines(masses)]
+    taus = [(r["model"], r["directional_tau"]) for r in reports if r.get("directional_tau")]
+    if taus:
+        lines += ["", *tau_lines(taus)]
+    follow_ups = [(r["model"], f) for r in reports for f in r.get("follow_ups", ())]
+    if follow_ups:
+        lines += ["", *follow_up_lines(follow_ups)]
     lines += [
         "",
         "## Error patterns (best config per model, at its operating point, raw counts)",

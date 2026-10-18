@@ -1,14 +1,14 @@
 {
  "per_model": {
   "qwen3.5:0.8b-q8_0": {
-   "directional_calls": 39,
-   "wrong_calls": 1,
-   "neutral_called_bullish": 0,
+   "directional_calls": 84,
+   "wrong_calls": 2,
+   "neutral_called_bullish": 1,
    "neutral_called_bearish": 1,
    "bullish_called_bearish": 0,
    "bearish_called_bullish": 0,
-   "bullish_missed": 84,
-   "bearish_missed": 78,
+   "bullish_missed": 66,
+   "bearish_missed": 52,
    "failed": 0
   },
   "clef-flash:9b-q8_0": {
@@ -77,9 +77,9 @@
    },
    "models": {
     "qwen3.5:0.8b-q8_0": {
-     "directional_calls": 7,
+     "directional_calls": 14,
      "wrong_calls": 0,
-     "missed_directional": 15
+     "missed_directional": 8
     },
     "clef-flash:9b-q8_0": {
      "directional_calls": 19,
@@ -117,9 +117,9 @@
    },
    "models": {
     "qwen3.5:0.8b-q8_0": {
-     "directional_calls": 10,
+     "directional_calls": 19,
      "wrong_calls": 1,
-     "missed_directional": 25
+     "missed_directional": 16
     },
     "clef-flash:9b-q8_0": {
      "directional_calls": 31,
@@ -157,9 +157,9 @@
    },
    "models": {
     "qwen3.5:0.8b-q8_0": {
-     "directional_calls": 13,
+     "directional_calls": 22,
      "wrong_calls": 0,
-     "missed_directional": 44
+     "missed_directional": 35
     },
     "clef-flash:9b-q8_0": {
      "directional_calls": 47,
@@ -197,9 +197,9 @@
    },
    "models": {
     "qwen3.5:0.8b-q8_0": {
-     "directional_calls": 1,
-     "wrong_calls": 0,
-     "missed_directional": 23
+     "directional_calls": 7,
+     "wrong_calls": 1,
+     "missed_directional": 18
     },
     "clef-flash:9b-q8_0": {
      "directional_calls": 23,
@@ -237,9 +237,9 @@
    },
    "models": {
     "qwen3.5:0.8b-q8_0": {
-     "directional_calls": 8,
+     "directional_calls": 22,
      "wrong_calls": 0,
-     "missed_directional": 55
+     "missed_directional": 41
     },
     "clef-flash:9b-q8_0": {
      "directional_calls": 52,

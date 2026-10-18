@@ -154,7 +154,8 @@ class PromptRegistry:
         source = self._source(endpoint, model, kind)
         label = f"{endpoint}/{source.name}"
         doc = self._doc(source, label)
-        version_id = version or doc.get("active")
+        frozen = allowlist().get(model)
+        version_id = version or (frozen.prompt.get(endpoint) if frozen else None) or doc.get("active")
         if not isinstance(version_id, str):
             raise ValueError(f"{label}: missing `active` version")
         body = _resolve_version(doc, version_id, label)

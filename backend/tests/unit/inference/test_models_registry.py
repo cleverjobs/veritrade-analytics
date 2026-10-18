@@ -135,8 +135,55 @@ def test_specs_are_frozen() -> None:
             },
             "needs min_p",
         ),
+        (
+            {
+                "kind": "generative",
+                "endpoints": ["analyze"],
+                "policy": "ordinal",
+                "num_ctx": 8192,
+                "num_predict": {"analyze": 200},
+                "directional_tau": 0.3,
+            },
+            "directional_tau needs class probabilities",
+        ),
+        (
+            {
+                "kind": "decision",
+                "endpoints": ["signal"],
+                "policy": "probability",
+                "min_p": 0.5,
+                "prompt": {"summary": "v1"},
+            },
+            "endpoints it does not serve",
+        ),
+        (
+            {
+                "kind": "decision",
+                "endpoints": ["signal"],
+                "policy": "probability",
+                "min_p": 0.5,
+                "directional_tau": 1,
+            },
+            "less than 1",
+        ),
     ],
 )
 def test_inconsistent_specs_are_rejected(body: dict[str, object], message: str) -> None:
     with pytest.raises(ValidationError, match=message):
         ModelSpec.model_validate({"name": "m", "max_input_tokens": 100} | body)
+
+
+def test_frozen_fields_parse() -> None:
+    spec = ModelSpec.model_validate(
+        {
+            "name": "m",
+            "max_input_tokens": 100,
+            "kind": "decision",
+            "endpoints": ["signal"],
+            "policy": "probability",
+            "min_p": 0.0,
+            "directional_tau": 0.28,
+            "prompt": {"signal": "v4"},
+        }
+    )
+    assert (spec.min_p, spec.directional_tau, spec.prompt) == (0.0, 0.28, {"signal": "v4"})

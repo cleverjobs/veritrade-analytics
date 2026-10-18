@@ -1,12 +1,18 @@
 # Serving config: allowlist, per-endpoint defaults, decoding options and frozen thresholds.
-# Provisional values until `veritrade_evals freeze` / `select --write` rewrite them from eval results.
+# `veritrade_evals freeze` writes the per-model thresholds and prompt versions from the eval results
+# (evals/results/frozen.json); `select --write` owns [defaults]. Models it has not frozen keep provisional values.
 #
 # kind        generative (/api/chat) | decision (/v1/systemone)
 # endpoints   endpoints the model may serve
 # signal_schema   generative signal output: "label" (one of 3 labels) | "ordinal" (score -2..2)
 # policy      probability | label-logprob | ordinal  (streaming and /analyze always use ordinal)
-# min_p       decision/label-logprob threshold on the winning class probability
+# min_p       decision/label-logprob threshold on the winning class probability; 0 never abstains
+# directional_tau   optional, probability policies only: when neutral wins the argmax and the likelier
+#             directional class has p >= tau, call that class; otherwise argmax + min_p applies
 # ordinal_t   directional call only when |score| >= ordinal_t (always set: streaming fallback)
+# field_order /analyze JSON order: sentiment-first (streams the score early) | summary-first
+# prompt      frozen prompt version per endpoint, e.g. { signal = "v4" }; an endpoint left out serves
+#             the prompt file's `active` version
 
 [defaults]
 signal = "qwen3.5:0.8b-q8_0"
@@ -18,16 +24,18 @@ kind = "decision"
 endpoints = ["signal"]
 max_input_tokens = 2000
 policy = "probability"
-min_p = 0.5
+min_p = 0.8
 ordinal_t = 1
+prompt = { signal = "v4" }
 
 [models."nimble:9b-q4_K_M"]
 kind = "decision"
 endpoints = ["signal"]
 max_input_tokens = 6000
 policy = "probability"
-min_p = 0.5
+min_p = 0.97
 ordinal_t = 1
+prompt = { signal = "v1" }
 
 [models."tev1:0.8b-q8_0"]
 kind = "decision"
@@ -46,8 +54,10 @@ max_input_tokens = 3000
 num_predict = { signal = 16, summary = 160, analyze = 200 }
 signal_schema = "label"
 policy = "label-logprob"
-min_p = 0.5
+min_p = 0.0
 ordinal_t = 1
+directional_tau = 0.28
+prompt = { signal = "v2" }
 
 [models."qwen3.5:2b-q4_K_M"]
 kind = "generative"
@@ -57,6 +67,7 @@ max_input_tokens = 3000
 num_predict = { summary = 160 }
 policy = "ordinal"
 ordinal_t = 1
+prompt = { summary = "v2" }
 
 [models."qwen3.5:4b-q4_K_M"]
 kind = "generative"
@@ -67,6 +78,7 @@ num_predict = { summary = 160, analyze = 200 }
 policy = "ordinal"
 ordinal_t = 1
 field_order = "sentiment-first"
+prompt = { analyze = "v1", summary = "v2" }
 
 [models."qwen3:4b-instruct-2507-q4_K_M"]
 kind = "generative"
@@ -77,6 +89,7 @@ num_predict = { analyze = 200 }
 policy = "ordinal"
 ordinal_t = 1
 field_order = "sentiment-first"
+prompt = { analyze = "v5" }
 
 [models."ministral-3:3b"]
 kind = "generative"
@@ -87,6 +100,7 @@ num_predict = { analyze = 200 }
 policy = "ordinal"
 ordinal_t = 1
 field_order = "sentiment-first"
+prompt = { analyze = "v5" }
 
 [models."qwen3.5:9b-q4_K_M"]
 kind = "generative"

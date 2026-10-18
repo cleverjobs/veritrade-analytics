@@ -7,7 +7,7 @@ import asyncio
 import itertools
 import json
 import sys
-from collections.abc import Collection, Sequence
+from collections.abc import Collection, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -26,20 +26,23 @@ from veritrade_evals.analysis import (
     candidates,
     counts,
     diagnostics,
-    directional_mass_report,
     error_patterns,
+    follow_up_report,
+    grid_only,
     knob_comparison,
     latency,
     policy_report,
     render_summary,
     rounded,
     served_calls,
+    tau_report,
 )
 from veritrade_evals.datasets import Example
 from veritrade_evals.metrics import INVERSION_CAP
 from veritrade_evals.paths import PREDS_DIR, RESULTS_DIR
 from veritrade_evals.predcache import canonical_json, model_slug
 from veritrade_evals.runner import (
+    ANALYZE_VARIANTS,
     DEFAULT_CONCURRENCY,
     RunSpec,
     Variant,
@@ -96,15 +99,46 @@ DIMS: dict[str, dict[str, dict[str, str]]] = {
 }
 
 
+@dataclass(frozen=True, slots=True)
+class FollowUp:
+    """A cell added after the grid: scored against one grid config, it never competes for the best one."""
+
+    model: str
+    version: str
+    variant: Variant
+    against: str
+    dims: Mapping[str, str]
+
+
+ANALYZE_GRID_MODELS = ("ministral-3:3b", "qwen3:4b-instruct-2507-q4_K_M", "qwen3.5:4b-q4_K_M")
+FIELD_ORDER_MODELS = ("ministral-3:3b", "qwen3.5:4b-q4_K_M")
+FOLLOW_UPS: tuple[FollowUp, ...] = (
+    *(
+        FollowUp(m, "v5", "sentiment-first", "v1", {"rubric": "A", "shots": "0", "summary": "tight"})
+        for m in ANALYZE_GRID_MODELS
+    ),
+    *(
+        FollowUp(m, "v1", "summary-first", "v1", {"rubric": "A", "shots": "0", "order": "summary-first"})
+        for m in FIELD_ORDER_MODELS
+    ),
+)
+
+
 def cell_name(version: str, variant: Variant) -> str:
-    return f"{version}-{variant}" if variant in ("label", "ordinal") else version
+    return f"{version}-{variant}" if variant in ("label", "ordinal", "summary-first") else version
+
+
+def follow_up_of(model: str, name: str) -> FollowUp | None:
+    return next((f for f in FOLLOW_UPS if f.model == model and cell_name(f.version, f.variant) == name), None)
 
 
 def cell_key(cell: RunSpec) -> str:
     return f"{cell.endpoint}/{cell.model}/{cell.name}"
 
 
-def grid_cells(models: Collection[str] = (), registry: PromptRegistry | None = None) -> list[RunSpec]:
+def grid_cells(
+    models: Collection[str] = (), registry: PromptRegistry | None = None, *, follow_ups: bool = True
+) -> list[RunSpec]:
     registry = registry or PromptRegistry()
     roster = allowlist()
     unknown = set(models) - {p.model for p in PLAN}
@@ -115,22 +149,21 @@ def grid_cells(models: Collection[str] = (), registry: PromptRegistry | None = N
         if models and plan.model not in models:
             continue
         base = roster[plan.model]
-        for variant in plan.variants:
-            spec = serving_spec(base, variant)
-            for version in VERSIONS:
-                cell = RunSpec(
-                    cell_name(version, variant),
-                    spec,
-                    registry.get(
-                        "analyze" if variant == "sentiment-first" else "signal",
-                        plan.model,
-                        kind=base.kind,
-                        version=version,
-                    ),
-                    variant,
-                    DIMS[base.kind][version],
-                )
-                cells.append(cell)
+        planned: list[tuple[Variant, str, Mapping[str, str]]] = [
+            (v, version, DIMS[base.kind][version]) for v in plan.variants for version in VERSIONS
+        ]
+        if follow_ups:
+            planned += [(f.variant, f.version, f.dims) for f in FOLLOW_UPS if f.model == plan.model]
+        for variant, version, dims in planned:
+            prompt = registry.get(
+                "analyze" if variant in ANALYZE_VARIANTS else "signal",
+                plan.model,
+                kind=base.kind,
+                version=version,
+            )
+            cells.append(
+                RunSpec(cell_name(version, variant), serving_spec(base, variant), prompt, variant, dims)
+            )
     return cells
 
 
@@ -167,9 +200,11 @@ async def run_grid(
     concurrency: int,
     preds_root: Path = PREDS_DIR,
     manifest_path: Path = MANIFEST,
+    shared: bool = False,
     log: TextIO = sys.stderr,
 ) -> dict[str, Any]:
-    """Model by model with only that model resident; the manifest is rewritten after every cell."""
+    """Model by model with only that model resident (unless the Ollama is shared); the manifest is
+    rewritten after every cell."""
     manifest = read_manifest(manifest_path)
     manifest["split"] = GRID_SPLIT
     manifest["ollama_version"] = await client.version()
@@ -179,8 +214,8 @@ async def run_grid(
         model_cells = list(group)
         digest = await model_digest(client, model)
         if any(not ids <= c.cache(GRID_SPLIT, digest, preds_root).done_ids() for c in model_cells):
-            print(f"== {model}: unloading others and warming up", file=log, flush=True)
-            await make_resident(client, model_cells[0], log=log)
+            print(f"== {model}: {'' if shared else 'unloading others and '}warming up", file=log, flush=True)
+            await make_resident(client, model_cells[0], shared=shared, log=log)
         for cell in model_cells:
             stats = await run_cell(
                 client,
@@ -207,6 +242,7 @@ async def run_grid(
                 "done": len(records),
                 "errors": sum(1 for r in records.values() if r.get("error") is not None),
                 "concurrency": concurrency,
+                "shared_ollama": shared,
                 "updated_at": _now(),
             }
             write_manifest(manifest, manifest_path)
@@ -255,6 +291,7 @@ def cell_inputs(
                 records=aligned,
                 dims=dict(cell.dims),
                 ordinal_t=cell.spec.ordinal_t,
+                against=None if (f := follow_up_of(cell.model, cell.name)) is None else f.against,
                 meta={"cache_key": entry["cache_key"], "model_digest": entry["model_digest"]},
             )
         )
@@ -295,9 +332,12 @@ def model_report(inputs: Sequence[CellInput], dev: DevSet, class_weights: Any, n
     knob = knob_comparison(cands, dev, n_boot) if first.variant in ("label", "ordinal") else None
     if knob is not None:
         report["knob_comparison"] = knob
-    mass = directional_mass_report(inputs, cands, dev, n_boot)
-    if mass is not None:
-        report["directional_mass"] = mass
+    tau = tau_report(cands, dev, n_boot)
+    if tau is not None:
+        report["directional_tau"] = tau
+    follow_ups = follow_up_report(cands, dev, n_boot)
+    if follow_ups:
+        report["follow_ups"] = follow_ups
     return report
 
 
@@ -322,7 +362,7 @@ def analyze_grid(
     for group in groups:
         report = rounded(model_report(group, dev, payload["class_weights"], n_boot))
         reports.append(report)
-        served.append(served_calls(*best_candidate(candidates(group, dev))))
+        served.append(served_calls(*best_candidate(grid_only(candidates(group, dev)))))
         path = out_dir / f"{report['endpoint']}__{model_slug(report['model'])}.json"
         path.write_text(json.dumps(report, indent=1) + "\n", encoding="utf-8")
         written.append(path)
@@ -381,6 +421,7 @@ async def _run(args: argparse.Namespace) -> int:
             concurrency=args.concurrency,
             preds_root=args.preds_root,
             manifest_path=args.manifest,
+            shared=args.shared,
         )
     done = sum(e["done"] for e in manifest["cells"].values())
     errors = sum(e["errors"] for e in manifest["cells"].values())
@@ -416,6 +457,9 @@ def add_parser(subparsers: Any) -> argparse.ArgumentParser:
     running = actions.add_parser("run", help="run (or resume) the grid against Ollama")
     running.add_argument("--model", action="append", help="restrict to this model (repeatable)")
     running.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY)
+    running.add_argument(
+        "--shared", action="store_true", help="Ollama serves other runs: never unload models"
+    )
     running.add_argument("--limit", type=int, default=0, help="first N dev300 examples only (smoke runs)")
     running.add_argument("--base-url", default=None, help="Ollama URL (default from settings)")
     running.add_argument("--preds-root", type=Path, default=PREDS_DIR)

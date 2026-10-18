@@ -35,7 +35,46 @@
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:00:33+00:00"
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:38:23+00:00"
+    },
+    "analyze/ministral-3:3b/v1-summary-first": {
+      "endpoint": "analyze",
+      "model": "ministral-3:3b",
+      "config": "v1-summary-first",
+      "variant": "summary-first",
+      "dims": {
+        "rubric": "A",
+        "shots": "0",
+        "order": "summary-first"
+      },
+      "prompt_version": "analyze/ministral-3:3b/v1@7daf4f28",
+      "prompt_sha": "ee41a66e10cea95b50154808369568b64a69be81801f3f3c4ac1ff1dbc461005",
+      "run_config": {
+        "endpoint": "analyze",
+        "max_input_tokens": 3000,
+        "options": {
+          "frequency_penalty": 0,
+          "num_ctx": 8192,
+          "num_predict": 200,
+          "presence_penalty": 0,
+          "repeat_penalty": 1,
+          "seed": 0,
+          "temperature": 0
+        },
+        "prompt_version": "analyze/ministral-3:3b/v1@7daf4f28",
+        "runner": "1",
+        "split": "dev300",
+        "stop_after_score": true,
+        "variant": "summary-first"
+      },
+      "model_digest": "f04aa1c738f64e13c625b82ae92504fc0260fa6723b509ed1ece0fa188179b1d",
+      "cache_key": "1703467888828fe3",
+      "done": 300,
+      "errors": 0,
+      "concurrency": 1,
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:44:44+00:00"
     },
     "analyze/ministral-3:3b/v2": {
       "endpoint": "analyze",
@@ -71,7 +110,8 @@
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:01:31+00:00"
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:38:23+00:00"
     },
     "analyze/ministral-3:3b/v3": {
       "endpoint": "analyze",
@@ -107,7 +147,8 @@
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:02:35+00:00"
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:38:23+00:00"
     },
     "analyze/ministral-3:3b/v4": {
       "endpoint": "analyze",
@@ -143,7 +184,46 @@
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:03:38+00:00"
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:38:23+00:00"
+    },
+    "analyze/ministral-3:3b/v5": {
+      "endpoint": "analyze",
+      "model": "ministral-3:3b",
+      "config": "v5",
+      "variant": "sentiment-first",
+      "dims": {
+        "rubric": "A",
+        "shots": "0",
+        "summary": "tight"
+      },
+      "prompt_version": "analyze/ministral-3:3b/v5@e2b57fc6",
+      "prompt_sha": "ee2ede0c3a2ce5624c92a99ea8e9244803e17a89c1a4f7848c6a7cc497b567ff",
+      "run_config": {
+        "endpoint": "analyze",
+        "max_input_tokens": 3000,
+        "options": {
+          "frequency_penalty": 0,
+          "num_ctx": 8192,
+          "num_predict": 200,
+          "presence_penalty": 0,
+          "repeat_penalty": 1,
+          "seed": 0,
+          "temperature": 0
+        },
+        "prompt_version": "analyze/ministral-3:3b/v5@e2b57fc6",
+        "runner": "1",
+        "split": "dev300",
+        "stop_after_score": true,
+        "variant": "sentiment-first"
+      },
+      "model_digest": "f04aa1c738f64e13c625b82ae92504fc0260fa6723b509ed1ece0fa188179b1d",
+      "cache_key": "530499b68306f335",
+      "done": 300,
+      "errors": 0,
+      "concurrency": 1,
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:39:10+00:00"
     },
     "analyze/qwen3.5:4b-q4_K_M/v1": {
       "endpoint": "analyze",
@@ -179,7 +259,46 @@
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:13:22+00:00"
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:46:40+00:00"
+    },
+    "analyze/qwen3.5:4b-q4_K_M/v1-summary-first": {
+      "endpoint": "analyze",
+      "model": "qwen3.5:4b-q4_K_M",
+      "config": "v1-summary-first",
+      "variant": "summary-first",
+      "dims": {
+        "rubric": "A",
+        "shots": "0",
+        "order": "summary-first"
+      },
+      "prompt_version": "analyze/qwen3.5:4b-q4_K_M/v1@7daf4f28",
+      "prompt_sha": "ee41a66e10cea95b50154808369568b64a69be81801f3f3c4ac1ff1dbc461005",
+      "run_config": {
+        "endpoint": "analyze",
+        "max_input_tokens": 3000,
+        "options": {
+          "frequency_penalty": 0,
+          "num_ctx": 8192,
+          "num_predict": 200,
+          "presence_penalty": 0,
+          "repeat_penalty": 1,
+          "seed": 0,
+          "temperature": 0
+        },
+        "prompt_version": "analyze/qwen3.5:4b-q4_K_M/v1@7daf4f28",
+        "runner": "1",
+        "split": "dev300",
+        "stop_after_score": true,
+        "variant": "summary-first"
+      },
+      "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+      "cache_key": "c38aae1dd2e994be",
+      "done": 300,
+      "errors": 0,
+      "concurrency": 1,
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:57:07+00:00"
     },
     "analyze/qwen3.5:4b-q4_K_M/v2": {
       "endpoint": "analyze",
@@ -215,7 +334,8 @@
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:18:46+00:00"
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:46:40+00:00"
     },
     "analyze/qwen3.5:4b-q4_K_M/v3": {
       "endpoint": "analyze",
@@ -251,7 +371,8 @@
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:21:58+00:00"
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:46:40+00:00"
     },
     "analyze/qwen3.5:4b-q4_K_M/v4": {
       "endpoint": "analyze",
@@ -287,7 +408,46 @@
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:27:13+00:00"
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:46:40+00:00"
+    },
+    "analyze/qwen3.5:4b-q4_K_M/v5": {
+      "endpoint": "analyze",
+      "model": "qwen3.5:4b-q4_K_M",
+      "config": "v5",
+      "variant": "sentiment-first",
+      "dims": {
+        "rubric": "A",
+        "shots": "0",
+        "summary": "tight"
+      },
+      "prompt_version": "analyze/qwen3.5:4b-q4_K_M/v5@e2b57fc6",
+      "prompt_sha": "ee2ede0c3a2ce5624c92a99ea8e9244803e17a89c1a4f7848c6a7cc497b567ff",
+      "run_config": {
+        "endpoint": "analyze",
+        "max_input_tokens": 3000,
+        "options": {
+          "frequency_penalty": 0,
+          "num_ctx": 8192,
+          "num_predict": 200,
+          "presence_penalty": 0,
+          "repeat_penalty": 1,
+          "seed": 0,
+          "temperature": 0
+        },
+        "prompt_version": "analyze/qwen3.5:4b-q4_K_M/v5@e2b57fc6",
+        "runner": "1",
+        "split": "dev300",
+        "stop_after_score": true,
+        "variant": "sentiment-first"
+      },
+      "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+      "cache_key": "1f6e3deae4a0f080",
+      "done": 300,
+      "errors": 0,
+      "concurrency": 1,
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:49:41+00:00"
     },
     "analyze/qwen3:4b-instruct-2507-q4_K_M/v1": {
       "endpoint": "analyze",
@@ -323,7 +483,8 @@
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:05:29+00:00"
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:44:48+00:00"
     },
     "analyze/qwen3:4b-instruct-2507-q4_K_M/v2": {
       "endpoint": "analyze",
@@ -359,7 +520,8 @@
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:07:13+00:00"
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:44:48+00:00"
     },
     "analyze/qwen3:4b-instruct-2507-q4_K_M/v3": {
       "endpoint": "analyze",
@@ -395,7 +557,8 @@
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:08:49+00:00"
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:44:48+00:00"
     },
     "analyze/qwen3:4b-instruct-2507-q4_K_M/v4": {
       "endpoint": "analyze",
@@ -431,7 +594,46 @@
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:10:32+00:00"
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:44:48+00:00"
+    },
+    "analyze/qwen3:4b-instruct-2507-q4_K_M/v5": {
+      "endpoint": "analyze",
+      "model": "qwen3:4b-instruct-2507-q4_K_M",
+      "config": "v5",
+      "variant": "sentiment-first",
+      "dims": {
+        "rubric": "A",
+        "shots": "0",
+        "summary": "tight"
+      },
+      "prompt_version": "analyze/qwen3:4b-instruct-2507-q4_K_M/v5@e2b57fc6",
+      "prompt_sha": "ee2ede0c3a2ce5624c92a99ea8e9244803e17a89c1a4f7848c6a7cc497b567ff",
+      "run_config": {
+        "endpoint": "analyze",
+        "max_input_tokens": 3000,
+        "options": {
+          "frequency_penalty": 0,
+          "num_ctx": 8192,
+          "num_predict": 200,
+          "presence_penalty": 0,
+          "repeat_penalty": 1,
+          "seed": 0,
+          "temperature": 0
+        },
+        "prompt_version": "analyze/qwen3:4b-instruct-2507-q4_K_M/v5@e2b57fc6",
+        "runner": "1",
+        "split": "dev300",
+        "stop_after_score": true,
+        "variant": "sentiment-first"
+      },
+      "model_digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+      "cache_key": "1e22d90d27c5e9f8",
+      "done": 300,
+      "errors": 0,
+      "concurrency": 1,
+      "shared_ollama": true,
+      "updated_at": "2026-10-18T17:46:35+00:00"
     },
     "signal/clef-flash:9b-q8_0/v1": {
       "endpoint": "signal",
@@ -666,16 +868,17 @@
         },
         "prompt_version": "signal/qwen3.5:0.8b-q8_0/v1@4abef6e2",
         "runner": "1",
+        "score_sign": 2,
         "split": "dev300",
         "top_logprobs": 20,
         "variant": "label"
       },
       "model_digest": "7c00f78aed0fd757e9ba2f2720896768fd22da24b7fb6fe17096bb1e85bb2d25",
-      "cache_key": "1430528bb0234d85",
+      "cache_key": "a1bb779b4d46e15e",
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:28:06+00:00"
+      "updated_at": "2026-10-18T17:13:39+00:00"
     },
     "signal/qwen3.5:0.8b-q8_0/v1-ordinal": {
       "endpoint": "signal",
@@ -702,16 +905,17 @@
         },
         "prompt_version": "signal/qwen3.5:0.8b-q8_0/v1@4abef6e2",
         "runner": "1",
+        "score_sign": 2,
         "split": "dev300",
         "top_logprobs": 20,
         "variant": "ordinal"
       },
       "model_digest": "7c00f78aed0fd757e9ba2f2720896768fd22da24b7fb6fe17096bb1e85bb2d25",
-      "cache_key": "f25b0cd0193f7e66",
+      "cache_key": "8f8e1e749efaffff",
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:32:07+00:00"
+      "updated_at": "2026-10-18T17:19:42+00:00"
     },
     "signal/qwen3.5:0.8b-q8_0/v2-label": {
       "endpoint": "signal",
@@ -738,16 +942,17 @@
         },
         "prompt_version": "signal/qwen3.5:0.8b-q8_0/v2@ff82e957",
         "runner": "1",
+        "score_sign": 2,
         "split": "dev300",
         "top_logprobs": 20,
         "variant": "label"
       },
       "model_digest": "7c00f78aed0fd757e9ba2f2720896768fd22da24b7fb6fe17096bb1e85bb2d25",
-      "cache_key": "e7ef0c82e7a7bde7",
+      "cache_key": "316ac439a203a764",
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:29:09+00:00"
+      "updated_at": "2026-10-18T17:14:46+00:00"
     },
     "signal/qwen3.5:0.8b-q8_0/v2-ordinal": {
       "endpoint": "signal",
@@ -774,16 +979,17 @@
         },
         "prompt_version": "signal/qwen3.5:0.8b-q8_0/v2@ff82e957",
         "runner": "1",
+        "score_sign": 2,
         "split": "dev300",
         "top_logprobs": 20,
         "variant": "ordinal"
       },
       "model_digest": "7c00f78aed0fd757e9ba2f2720896768fd22da24b7fb6fe17096bb1e85bb2d25",
-      "cache_key": "10e69074a2f019e6",
+      "cache_key": "5b571bffeab4ddef",
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:32:07+00:00"
+      "updated_at": "2026-10-18T17:21:17+00:00"
     },
     "signal/qwen3.5:0.8b-q8_0/v3-label": {
       "endpoint": "signal",
@@ -810,16 +1016,17 @@
         },
         "prompt_version": "signal/qwen3.5:0.8b-q8_0/v3@0d85d0ae",
         "runner": "1",
+        "score_sign": 2,
         "split": "dev300",
         "top_logprobs": 20,
         "variant": "label"
       },
       "model_digest": "7c00f78aed0fd757e9ba2f2720896768fd22da24b7fb6fe17096bb1e85bb2d25",
-      "cache_key": "d1f5695ce6e2b617",
+      "cache_key": "ffac530b629671dd",
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:29:55+00:00"
+      "updated_at": "2026-10-18T17:16:33+00:00"
     },
     "signal/qwen3.5:0.8b-q8_0/v3-ordinal": {
       "endpoint": "signal",
@@ -846,16 +1053,17 @@
         },
         "prompt_version": "signal/qwen3.5:0.8b-q8_0/v3@0d85d0ae",
         "runner": "1",
+        "score_sign": 2,
         "split": "dev300",
         "top_logprobs": 20,
         "variant": "ordinal"
       },
       "model_digest": "7c00f78aed0fd757e9ba2f2720896768fd22da24b7fb6fe17096bb1e85bb2d25",
-      "cache_key": "849ad8bfb9dd33c9",
+      "cache_key": "bbebbbb5c2d41a29",
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:32:07+00:00"
+      "updated_at": "2026-10-18T17:22:30+00:00"
     },
     "signal/qwen3.5:0.8b-q8_0/v4-label": {
       "endpoint": "signal",
@@ -882,16 +1090,17 @@
         },
         "prompt_version": "signal/qwen3.5:0.8b-q8_0/v4@8f1e0d7b",
         "runner": "1",
+        "score_sign": 2,
         "split": "dev300",
         "top_logprobs": 20,
         "variant": "label"
       },
       "model_digest": "7c00f78aed0fd757e9ba2f2720896768fd22da24b7fb6fe17096bb1e85bb2d25",
-      "cache_key": "ccc318076045acf5",
+      "cache_key": "e9a3dff42b25c569",
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:31:10+00:00"
+      "updated_at": "2026-10-18T17:18:04+00:00"
     },
     "signal/qwen3.5:0.8b-q8_0/v4-ordinal": {
       "endpoint": "signal",
@@ -918,16 +1127,17 @@
         },
         "prompt_version": "signal/qwen3.5:0.8b-q8_0/v4@8f1e0d7b",
         "runner": "1",
+        "score_sign": 2,
         "split": "dev300",
         "top_logprobs": 20,
         "variant": "ordinal"
       },
       "model_digest": "7c00f78aed0fd757e9ba2f2720896768fd22da24b7fb6fe17096bb1e85bb2d25",
-      "cache_key": "b4011c0b8f2a1e9f",
+      "cache_key": "02ffcb4d279e6178",
       "done": 300,
       "errors": 0,
       "concurrency": 1,
-      "updated_at": "2026-10-18T16:32:07+00:00"
+      "updated_at": "2026-10-18T17:23:45+00:00"
     }
   },
   "ollama_version": "0.40.6",

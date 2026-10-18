@@ -11,12 +11,18 @@ from collections.abc import Callable, Coroutine, Mapping, Sequence
 from contextlib import aclosing
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Literal, TextIO, get_args
+from typing import Any, Literal, Protocol, TextIO, get_args
 
 from pydantic import BaseModel, ValidationError
 
 from veritrade.errors import LlmUnreachable, ModelUnavailable, SchemaViolation, VtError
-from veritrade.inference.adapters import TOP_LOGPROBS, analyze_stream, chat_options, classify_signal
+from veritrade.inference.adapters import (
+    TOP_LOGPROBS,
+    AnalyzeResult,
+    analyze_stream,
+    chat_options,
+    classify_signal,
+)
 from veritrade.inference.confidence import score_sign_probabilities
 from veritrade.inference.incremental import ScoreClosed
 from veritrade.inference.ollama import FIXED_OPTIONS, OllamaClient
@@ -24,26 +30,29 @@ from veritrade.inference.schemas import ANALYZE_MODELS, LabelOut, OrdinalOut, ol
 from veritrade.inference.types import ChatResult, DecisionResult, Endpoint, Verdict
 from veritrade.models_registry import ModelSpec
 from veritrade.prompts.registry import PromptSpec
-from veritrade_evals.datasets import Example
 from veritrade_evals.paths import PREDS_DIR
 from veritrade_evals.predcache import PredCache, PredError, canonical_json
 
 # Part of every cache key: bump when the runner changes what it records for an unchanged config.
 RUNNER_VERSION = "1"
+# Signal cells record score_sign_probabilities output (fallback and sign_probs): bump when it changes.
+SCORE_SIGN_VERSION = 2
 DEFAULT_CONCURRENCY = 4
 # Rendering the prompt with its own placeholder hashes everything the model sees except the input.
 TEXT_SENTINEL = "{text}"
 # Synthetic input that loads the model and warms the prompt cache before any timed call.
 WARMUP_TEXT = "Ostrava Logistics appoints a new chief financial officer effective January 1."
 
-Variant = Literal["decision", "label", "ordinal", "sentiment-first"]
+Variant = Literal["decision", "label", "ordinal", "sentiment-first", "summary-first"]
 VARIANTS: tuple[Variant, ...] = get_args(Variant)
 VARIANT_ENDPOINT: dict[Variant, Endpoint] = {
     "decision": "signal",
     "label": "signal",
     "ordinal": "signal",
     "sentiment-first": "analyze",
+    "summary-first": "analyze",
 }
+ANALYZE_VARIANTS: tuple[Variant, ...] = ("sentiment-first", "summary-first")
 Pred = dict[str, Any]
 Timing = dict[str, float]
 
@@ -52,17 +61,32 @@ class RunAborted(RuntimeError):
     pass
 
 
+class Item(Protocol):
+    """One scored input: a dataset example or an extracted article."""
+
+    @property
+    def id(self) -> str: ...
+    @property
+    def text(self) -> str: ...
+    @property
+    def label(self) -> str: ...
+
+
 def serving_spec(base: ModelSpec, variant: Variant) -> ModelSpec:
     """The allowlisted spec switched to the variant under test; thresholds are applied offline."""
     if (variant == "decision") != (base.kind == "decision"):
         raise ValueError(f"{base.name} is a {base.kind} model and cannot run the {variant} variant")
     update: dict[str, Any] = {}
     if variant == "label":
-        update = {"signal_schema": "label", "policy": "label-logprob", "min_p": base.min_p or 0.5}
+        update = {
+            "signal_schema": "label",
+            "policy": "label-logprob",
+            "min_p": 0.5 if base.min_p is None else base.min_p,
+        }
     elif variant == "ordinal":
-        update = {"signal_schema": "ordinal", "policy": "ordinal"}
-    elif variant == "sentiment-first":
-        update = {"field_order": "sentiment-first"}
+        update = {"signal_schema": "ordinal", "policy": "ordinal", "directional_tau": None}
+    elif variant in ANALYZE_VARIANTS:
+        update = {"field_order": variant}
     return ModelSpec.model_validate({**base.model_dump(), **update})
 
 
@@ -84,7 +108,8 @@ class RunSpec:
     def endpoint(self) -> Endpoint:
         return VARIANT_ENDPOINT[self.variant]
 
-    def run_config(self, split: str) -> dict[str, Any]:
+    def run_config(self, split: str, inputs: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        """`inputs` identifies derived inputs (scope, extractor, content hash) so they re-key the cache."""
         config: dict[str, Any] = {
             "runner": RUNNER_VERSION,
             "split": split,
@@ -98,8 +123,11 @@ class RunSpec:
             config["options"] = {**chat_options(self.spec, self.endpoint), **FIXED_OPTIONS}
         if self.variant in ("label", "ordinal"):
             config["top_logprobs"] = TOP_LOGPROBS
-        if self.variant == "sentiment-first":
+            config["score_sign"] = SCORE_SIGN_VERSION
+        if self.variant in ANALYZE_VARIANTS:
             config["stop_after_score"] = True
+        if inputs:
+            config["inputs"] = dict(inputs)
         return config
 
     def prompt_sha(self) -> str:
@@ -122,10 +150,12 @@ class RunSpec:
                 }
         return hashlib.sha256(canonical_json(payload).encode("utf-8")).hexdigest()
 
-    def cache(self, split: str, model_digest: str, root: Path = PREDS_DIR) -> PredCache:
+    def cache(
+        self, split: str, model_digest: str, root: Path = PREDS_DIR, inputs: Mapping[str, Any] | None = None
+    ) -> PredCache:
         return PredCache(
             self.model,
-            self.run_config(split),
+            self.run_config(split, inputs),
             model_digest=model_digest,
             prompt_sha=self.prompt_sha(),
             root=root,
@@ -137,7 +167,9 @@ def _out_type(variant: Variant) -> type[BaseModel]:
         return LabelOut
     if variant == "ordinal":
         return OrdinalOut
-    return ANALYZE_MODELS["sentiment-first"]
+    if variant in ("sentiment-first", "summary-first"):
+        return ANALYZE_MODELS[variant]
+    raise ValueError(f"{variant} has no chat output type")
 
 
 # --- one call --------------------------------------------------------------------------------
@@ -183,12 +215,19 @@ async def _score_first(client: OllamaClient, run: RunSpec, text: str) -> tuple[P
                 return {"kind": "analyze", "score": item.score}, {
                     "wall_ms": (time.perf_counter() - t0) * 1000
                 }
+            if isinstance(item, AnalyzeResult):
+                # A generation cut at its token limit is salvaged without a ScoreClosed event.
+                return {
+                    "kind": "analyze",
+                    "score": item.output.score,
+                    "truncated": item.truncated,
+                }, _chat_timing(item.chat)
     raise SchemaViolation(f"{run.model} finished the stream without a score")
 
 
 async def call_once(client: OllamaClient, run: RunSpec, text: str) -> tuple[Pred, Timing]:
     """One example through the serving adapters; returns raw outputs, never the input."""
-    if run.variant == "sentiment-first":
+    if run.variant in ANALYZE_VARIANTS:
         return await _score_first(client, run, text)
     verdict, raw = await classify_signal(client, run.spec, run.prompt, text)
     if isinstance(raw, DecisionResult):
@@ -222,9 +261,12 @@ async def model_digest(client: OllamaClient, model: str) -> str:
     raise ModelUnavailable(f"{model} is not installed in Ollama", hint=f"Pull it with `ollama pull {model}`.")
 
 
-async def make_resident(client: OllamaClient, run: RunSpec, *, log: TextIO = sys.stderr) -> None:
-    """Unload every other model, then warm this one so the first timed call is not a cold load."""
-    for entry in await client.ps():
+async def make_resident(
+    client: OllamaClient, run: RunSpec, *, shared: bool = False, log: TextIO = sys.stderr
+) -> None:
+    """Unload every other model, then warm this one so the first timed call is not a cold load. On an
+    Ollama shared with other runs, only warm up: their models stay loaded."""
+    for entry in [] if shared else await client.ps():
         name = str(entry.get("name") or entry.get("model") or "")
         if name and name != run.model:
             try:
@@ -294,19 +336,20 @@ async def _pool(workers: int, job: Callable[[], Coroutine[Any, Any, None]]) -> N
 async def run_cell(
     client: OllamaClient,
     run: RunSpec,
-    examples: Sequence[Example],
+    examples: Sequence[Item],
     *,
     split: str,
     model_digest: str,
     concurrency: int = DEFAULT_CONCURRENCY,
     root: Path = PREDS_DIR,
+    inputs: Mapping[str, Any] | None = None,
     progress_every_s: float = 30.0,
     log: TextIO = sys.stderr,
 ) -> RunStats:
     """Run every example not yet in the cache; an unreachable Ollama aborts, other failures are recorded."""
     if concurrency < 1:
         raise ValueError("concurrency must be >= 1")
-    with run.cache(split, model_digest, root) as cache:
+    with run.cache(split, model_digest, root, inputs) as cache:
         done = cache.done_ids()
         todo = deque(e for e in examples if e.id not in done)
         cached = len(examples) - len(todo)

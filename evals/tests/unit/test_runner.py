@@ -19,6 +19,7 @@ from veritrade.models_registry import allowlist
 from veritrade.prompts.registry import PromptRegistry
 from veritrade_evals.datasets import Example
 from veritrade_evals.runner import (
+    ANALYZE_VARIANTS,
     RunAborted,
     RunSpec,
     Variant,
@@ -56,7 +57,7 @@ async def client() -> AsyncIterator[OllamaClient]:
 
 def cell(model: str, variant: Variant, version: str = "v1") -> RunSpec:
     base = allowlist()[model]
-    endpoint: Endpoint = "analyze" if variant == "sentiment-first" else "signal"
+    endpoint: Endpoint = "analyze" if variant in ANALYZE_VARIANTS else "signal"
     prompt = PromptRegistry().get(endpoint, model, kind=base.kind, version=version)
     return RunSpec(f"{version}-{variant}", serving_spec(base, variant), prompt, variant)
 
@@ -207,6 +208,26 @@ async def test_sentiment_first_stops_reading_once_the_score_closes(
     assert list(sent["format"]["properties"]) == ["score", "entity", "summary"]
 
 
+async def test_summary_first_reads_to_the_score_at_the_end(
+    client: OllamaClient, mock_ollama: respx.MockRouter
+) -> None:
+    pieces = [
+        '{"summary": "Orvane Bank posted a loss.", ',
+        '"entity": "Orvane Bank", ',
+        '"score": ',
+        "-2",
+        "}",
+    ]
+    route = mock_ollama.post("/api/chat").mock(side_effect=lambda request: ndjson(pieces))
+    pred, _ = await call_once(client, cell(COMBINED, "summary-first"), "Orvane Bank posts a loss")
+    assert pred == {"kind": "analyze", "score": -2}
+    assert list(json.loads(route.calls[0].request.content)["format"]["properties"]) == [
+        "summary",
+        "entity",
+        "score",
+    ]
+
+
 # --- cell runs -------------------------------------------------------------------------------
 
 
@@ -352,9 +373,23 @@ def test_prompt_sha_and_run_config_separate_every_cell() -> None:
         "max_input_tokens": 3000,
         "options": {"num_ctx": 8192, "num_predict": 16, **FIXED_OPTIONS},
         "top_logprobs": 20,
+        "score_sign": 2,
     }
     assert cell(COMBINED, "sentiment-first").run_config("dev300")["stop_after_score"] is True
     assert "options" not in cell(DECISION, "decision").run_config("dev300")
+    first, last = cell(COMBINED, "sentiment-first"), cell(COMBINED, "summary-first")
+    assert first.prompt_sha() != last.prompt_sha()
+    assert last.spec.field_order == "summary-first"
+
+
+def test_derived_inputs_re_key_the_cache(tmp_path: Path) -> None:
+    run = cell(SMALL, "label")
+    plain_key = run.cache("articles_dev", DIGEST, tmp_path).key
+    lede = run.cache("articles_dev", DIGEST, tmp_path, {"scope": "lede", "sha": "a"}).key
+    full = run.cache("articles_dev", DIGEST, tmp_path, {"scope": "full", "sha": "a"}).key
+    edited = run.cache("articles_dev", DIGEST, tmp_path, {"scope": "full", "sha": "b"}).key
+    assert len({plain_key, lede, full, edited}) == 4
+    assert "inputs" not in run.run_config("dev300")
 
 
 def test_serving_spec_rejects_a_kind_mismatch() -> None:
@@ -363,3 +398,9 @@ def test_serving_spec_rejects_a_kind_mismatch() -> None:
     with pytest.raises(ValueError, match="cannot run"):
         serving_spec(allowlist()[SMALL], "decision")
     assert serving_spec(allowlist()[SMALL], "ordinal").policy == "ordinal"
+
+
+def test_serving_spec_survives_a_frozen_tau_spec() -> None:
+    frozen = allowlist()[SMALL].model_copy(update={"min_p": 0.0, "directional_tau": 0.28})
+    assert serving_spec(frozen, "ordinal").directional_tau is None
+    assert serving_spec(frozen, "label").min_p == 0.0

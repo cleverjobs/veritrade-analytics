@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from veritrade.inference.types import Endpoint
-from veritrade.models_registry import allowlist
+from veritrade.models_registry import ModelSpec, allowlist
 from veritrade.prompts import registry as prompts
 from veritrade.prompts.registry import OUTPUT_FIELDS, REQUIRED_VARIANTS, PromptRegistry, model_slug
 
@@ -49,14 +49,14 @@ def test_every_prompt_fences_untrusted_text_and_states_the_rubric(endpoint: Endp
 
 
 def test_version_is_stable_across_registries_and_tracks_content() -> None:
-    first = PromptRegistry().get("signal", "qwen3.5:0.8b-q8_0")
-    again = PromptRegistry().get("signal", "qwen3.5:0.8b-q8_0")
+    first = PromptRegistry().get("signal", "qwen3.5:0.8b-q8_0", version="v1")
+    again = PromptRegistry().get("signal", "qwen3.5:0.8b-q8_0", version="v1")
     assert first.version == again.version
     with_shots = PromptRegistry().get("signal", "qwen3.5:0.8b-q8_0", version="v2")
     assert with_shots.version.split("@")[1] != first.version.split("@")[1]
     # Two models sharing default.toml share the content hash but not the version string.
-    other = PromptRegistry().get("analyze", "ministral-3:3b")
-    same_file = PromptRegistry().get("analyze", "qwen3.5:4b-q4_K_M")
+    other = PromptRegistry().get("analyze", "ministral-3:3b", version="v1")
+    same_file = PromptRegistry().get("analyze", "qwen3.5:4b-q4_K_M", version="v1")
     assert other.version.split("@")[1] == same_file.version.split("@")[1]
     assert other.version != same_file.version
 
@@ -122,6 +122,38 @@ def test_model_file_overrides_default_and_content_changes_the_hash(tmp_path: Pat
     assert default.source == "signal/default.toml"
     assert custom.source == "signal/m_1b.toml"
     assert default.version.split("@")[1] != custom.version.split("@")[1]
+
+
+def test_a_models_frozen_version_beats_active_and_an_explicit_version_beats_both(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    two_versions = (
+        GENERATIVE_SIGNAL.format(active="v1") + '\n[v2]\nextends = "v1"\nsystem = "Rate v2. {output}"\n'
+    )
+    root = _root(tmp_path, {"signal/default.toml": two_versions})
+    frozen = ModelSpec(
+        name="m:1b",
+        kind="generative",
+        endpoints=("signal",),
+        num_ctx=1024,
+        max_input_tokens=100,
+        num_predict={"signal": 8},
+        signal_schema="label",
+        policy="label-logprob",
+        min_p=0.0,
+        prompt={"signal": "v2"},
+    )
+    monkeypatch.setattr(prompts, "allowlist", lambda: {"m:1b": frozen})
+    registry = PromptRegistry(root)
+    assert registry.get("signal", "m:1b").version_id == "v2"
+    assert registry.get("signal", "other:1b", kind="generative").version_id == "v1"
+    assert registry.get("signal", "m:1b", version="v1").version_id == "v1"
+
+
+def test_shipped_frozen_versions_exist() -> None:
+    for spec in allowlist().values():
+        for endpoint, version in spec.prompt.items():
+            assert prompts.get(endpoint, spec.name).version_id == version
 
 
 @pytest.mark.parametrize(

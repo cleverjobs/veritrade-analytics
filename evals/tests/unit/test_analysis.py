@@ -1,33 +1,39 @@
 from __future__ import annotations
 
+import itertools
 import math
 from collections.abc import Sequence
 from typing import Any
 
 import pytest
 
+from veritrade.inference.confidence import LabelLogprobPolicy, ProbabilityPolicy
 from veritrade.inference.types import Sentiment
 from veritrade_evals.analysis import (
     PROB_THRESHOLDS,
+    TAU_THRESHOLDS,
     CellInput,
     DevSet,
     Record,
     Served,
+    TauPolicy,
     best_candidate,
+    best_report,
     bucket_of,
     candidates,
     chosen_point,
     counts,
     diagnostics,
-    directional_mass,
-    directional_mass_report,
     error_patterns,
     evaluate_policy,
+    follow_up_report,
     knob_comparison,
     latency,
     replay,
+    replay_tau,
     rounded,
     served_calls,
+    tau_report,
     thin_sweep,
 )
 from veritrade_evals.runner import Variant
@@ -109,7 +115,7 @@ def test_probability_sweep_hand_computed() -> None:
     assert op is not None
     assert op.threshold == 0.69
     assert ev.default.threshold == 0.0
-    assert ev.abstained(0.69) == [False, True, False, True, True, False]
+    assert ev.served(0.69)[1] == [False, True, False, True, True, False]
 
 
 def test_weights_flow_into_precision() -> None:
@@ -159,9 +165,26 @@ def test_each_variant_is_scored_by_its_serving_policy() -> None:
         make_cell("ordinal", [ordinal(1, sign)] * 6),
         make_cell("sentiment-first", [analyze(1)] * 6),
     ]
+    cells.append(make_cell("summary-first", [analyze(1)] * 6))
     cands = candidates(cells, DEV)
-    assert [c.evaluation.policy for c in cands] == ["probability", "label-logprob", "ordinal", "ordinal"]
-    assert [c.reads for c in cands] == ["class probabilities", "label tokens", "score value", "score value"]
+    assert [c.evaluation.policy for c in cands] == [
+        "probability",
+        "probability+tau",
+        "label-logprob",
+        "label-logprob+tau",
+        "ordinal",
+        "ordinal",
+        "ordinal",
+    ]
+    assert [c.reads for c in cands] == [
+        "class probabilities",
+        "class probabilities",
+        "label tokens",
+        "label tokens",
+        "score value",
+        "score value",
+        "score value",
+    ]
 
 
 def test_knob_comparison_prefers_the_cleaner_knob() -> None:
@@ -186,31 +209,84 @@ def test_knob_comparison_prefers_the_cleaner_knob() -> None:
     assert knob_comparison(candidates(cells[:1], dev), dev, n_boot=10) is None
 
 
-def test_directional_mass_recovers_calls_the_argmax_rule_never_makes() -> None:
-    def lab(bull: float, bear: float) -> dict[str, Any]:
-        probs = {"bullish": bull, "bearish": bear, "neutral": 1 - bull - bear}
-        return {"kind": "label", "fallback": "none", "label": "neutral", "probs": probs}
+def _label(bull: float, bear: float) -> dict[str, Any]:
+    probs = {"bullish": bull, "bearish": bear, "neutral": 1 - bull - bear}
+    return {"kind": "label", "fallback": "none", "label": "neutral", "probs": probs}
 
-    # Neutral is the argmax everywhere, so every serving threshold makes zero calls.
-    cell = make_cell(
-        "label", [lab(0.4, 0), lab(0.2, 0), lab(0, 0.45), lab(0.1, 0.3), lab(0.05, 0.05), lab(0.3, 0)]
-    )
-    side, p = directional_mass(cell.records[3])
+
+@pytest.mark.parametrize(
+    ("kind", "policy"), [("decision", "probability+tau"), ("label", "label-logprob+tau")]
+)
+def test_tau_replay_matches_the_serving_policy(kind: str, policy: TauPolicy) -> None:
+    grid = [0.0, 0.05, 0.125, 0.25, 1 / 3, 0.4, 0.5, 0.75]
+    rows = [(b, r) for b, r in itertools.product(grid, grid) if b + r <= 1]
+    for (bull, bear), tau in itertools.product(rows, (0.02, 0.1, 0.3, 0.45, 0.7)):
+        probs: dict[Sentiment, float] = {"bullish": bull, "bearish": bear, "neutral": 1 - bull - bear}
+        record = _label(bull, bear) if kind == "label" else decision(bull, bear, 1 - bull - bear)
+        ev = evaluate_policy(policy, [record], ["neutral"], None)
+        pred, abstained = ev.served(tau)
+        verdict = (
+            LabelLogprobPolicy(0.0, tau).threshold(probs)
+            if kind == "label"
+            else ProbabilityPolicy(0.0, tau).decide(probs)
+        )
+        assert (pred[0], abstained[0]) == (verdict.sentiment, verdict.abstained), (bull, bear, tau)
+
+
+def test_tau_replay_keeps_fallbacks_and_failures() -> None:
+    assert replay_tau(failed()) == ("neutral", -math.inf)
+    assert replay_tau(None) == ("neutral", -math.inf)
+    # Without probabilities serving ends at the ordinal policy, so tau never applies.
+    assert replay_tau({"kind": "label", "probs": None, "score": -1}) == ("bearish", math.inf)
+    assert replay_tau({"kind": "label", "probs": None, "score": 1}, ordinal_t=2) == ("bullish", -math.inf)
+    assert replay_tau({"kind": "label", "probs": None, "score": 0}) == ("neutral", math.inf)
+    side, p = replay_tau(_label(0.1, 0.3))
     assert side == "bearish"
     assert p == pytest.approx(0.3)
-    assert directional_mass(cell.records[4])[0] == "bullish"
-    assert directional_mass(failed()) == ("neutral", -math.inf)
-    assert directional_mass({"kind": "label", "probs": None, "score": -1}) == ("bearish", 1.0)
+    assert replay_tau(_label(0.5, 0.1)) == ("bullish", math.inf)
 
-    report = directional_mass_report([cell], candidates([cell], DEV), DEV, n_boot=50)
+
+def test_tau_recovers_calls_the_plain_rule_never_makes() -> None:
+    # Neutral leads everywhere, so every plain threshold makes zero calls.
+    cell = make_cell(
+        "label",
+        [
+            _label(0.4, 0),
+            _label(0.2, 0),
+            _label(0, 0.45),
+            _label(0.1, 0.3),
+            _label(0.05, 0.05),
+            _label(0.3, 0),
+        ],
+    )
+    cands = candidates([cell], DEV)
+    report = tau_report(cands, DEV, n_boot=50)
     assert report is not None
     # From tau 0.06 to 0.2: bull calls e0 e1 e5 (P 2/3, R 1 -> 5/7), bear calls e2 e3 (F0.5 1).
-    assert report["threshold"] == 0.06
-    assert report["f05_macro"] == pytest.approx((5 / 7 + 1) / 2)
-    assert report["inversion_rate"] == 0.0
-    assert report["paired_bootstrap"]["serving"]["point"] == 0.0
-    assert report["verdict"] == "directional-mass"
-    assert directional_mass_report([make_cell("sentiment-first", [analyze(1)] * 6)], [], DEV, 10) is None
+    assert (report["tau"]["policy"], report["tau"]["threshold"]) == ("label-logprob+tau", 0.06)
+    assert report["tau"]["f05_macro"] == pytest.approx((5 / 7 + 1) / 2)
+    # Below tau the row is a served neutral, not an abstention.
+    assert report["tau"]["coverage"] == 1.0
+    assert report["paired_bootstrap"]["plain"]["point"] == 0.0
+    assert report["verdict"] == "tau"
+    best = best_report(cands, DEV, n_boot=20)
+    assert (best["policy"], best["threshold"]) == ("label-logprob+tau", 0.06)
+    assert tau_report(candidates([make_cell("sentiment-first", [analyze(1)] * 6)], DEV), DEV, 10) is None
+    assert min(TAU_THRESHOLDS) > 0
+    assert max(TAU_THRESHOLDS) < 1
+
+
+def test_follow_ups_are_compared_but_never_selected() -> None:
+    v1 = make_cell("sentiment-first", [analyze(s) for s in (2, 0, -2, 0, 0, 0)], "v1")
+    better = make_cell("sentiment-first", [analyze(s) for s in (2, 1, -2, -1, 0, 0)], "v5", against="v1")
+    cands = candidates([v1, better], DEV)
+    assert best_report(cands, DEV, n_boot=20)["config"] == "v1"
+    (row,) = follow_up_report(cands, DEV, n_boot=50)
+    assert (row["config"], row["against"]["config"]) == ("v5", "v1")
+    assert row["f05_macro"] == 1.0
+    assert row["paired_bootstrap"]["gap"]["point"] == pytest.approx(1.0 - row["against"]["f05_macro"])
+    orphan = make_cell("sentiment-first", [analyze(0)] * 6, "v6", against="v9")
+    assert follow_up_report(candidates([v1, orphan], DEV), DEV, n_boot=10) == []
 
 
 def test_error_patterns_count_by_kind_bucket_and_model() -> None:

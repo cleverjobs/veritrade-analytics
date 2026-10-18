@@ -22,6 +22,7 @@ _VALUE_START = {
     "score": re.compile(r'"score"\s*:\s*'),
 }
 _SCORE_HEAD = re.compile(r"^(?:-|-[12](?:[\s,}][\s\S]*)?|[012](?:[\s,}][\s\S]*)?)$")
+_SCORE_KEY = re.compile(r'"score"\s*:')
 
 
 def winner(probabilities: Mapping[Sentiment, float]) -> Sentiment:
@@ -40,9 +41,24 @@ def normalise(probabilities: Mapping[Sentiment, float]) -> dict[Sentiment, float
 
 
 def _threshold(
-    name: PolicyName, probabilities: dict[Sentiment, float], min_p: float, score: int | None = None
+    name: PolicyName,
+    probabilities: dict[Sentiment, float],
+    min_p: float,
+    score: int | None = None,
+    tau: float | None = None,
 ) -> Verdict:
     top = winner(probabilities)
+    if tau is not None and top == "neutral":
+        side: Sentiment = "bullish" if probabilities["bullish"] >= probabilities["bearish"] else "bearish"
+        if probabilities[side] >= tau:
+            return Verdict(
+                sentiment=side,
+                abstained=False,
+                policy=name,
+                confidence=probabilities[side],
+                score=score,
+                probabilities=probabilities,
+            )
     confidence = probabilities[top]
     abstained = confidence < min_p
     return Verdict(
@@ -134,36 +150,83 @@ def label_probabilities(
 def score_sign_probabilities(
     content: str, logprobs: Sequence[TokenLogprob] | None
 ) -> dict[Sentiment, float] | None:
-    """Class probabilities from the first score token: "-" bearish, "0" neutral, "1"/"2" bullish."""
-    return _first_token_distribution(content, logprobs, "score", sign_classes)
+    """Class probabilities of the score's sign ("-" bearish, "0" neutral, "1"/"2" bullish) from the tokens
+    after the colon, whitespace-insensitive because tokenizers fuse " -". A generated bare space defers to
+    the next token; a bare space that was not generated hides its sign and counts as ambiguous."""
+    match = _SCORE_KEY.search(content)
+    if match is None or not logprobs:
+        return None
+    offset, pos = match.end(), 0
+    mass = dict.fromkeys(TIE_ORDER, 0.0)
+    hidden = 0.0
+    path = 1.0
+    for tok in logprobs:
+        end = pos + len(tok.token)
+        if content[pos:end] != tok.token:
+            return None
+        if end >= offset:
+            prefix = content[pos:offset] if pos < offset else ""
+            candidates: dict[str, float] = {}
+            for text, logprob in ((tok.token, tok.logprob), *tok.top):
+                if text.startswith(prefix):
+                    candidates.setdefault(text[len(prefix) :], math.exp(logprob))
+            chosen = tok.token[len(prefix) :]
+            for rest, p in candidates.items():
+                if rest == chosen:
+                    continue
+                if not rest.strip():
+                    hidden += path * p
+                elif hit := sign_classes(rest.lstrip()):
+                    mass[next(iter(hit))] += path * p
+            if chosen.strip():
+                hit = sign_classes(chosen.lstrip())
+                if len(hit) != 1:
+                    return None
+                mass[next(iter(hit))] += path * candidates[chosen]
+                total = sum(mass.values())
+                if total <= 0 or hidden > AMBIGUOUS_MASS_MAX * (total + hidden):
+                    return None
+                return {s: mass[s] / total for s in TIE_ORDER}
+            path *= candidates[chosen]
+        pos = end
+    return None
 
 
 @dataclass(frozen=True, slots=True)
 class ProbabilityPolicy:
+    """Argmax unless its probability is below min_p (then neutral, abstained). With directional_tau, a
+    neutral argmax still yields the likelier directional class when that class reaches tau: models that
+    park most of their mass on neutral are otherwise never pushed into a call."""
+
     min_p: float
+    directional_tau: float | None = None
     name: ClassVar[PolicyName] = "probability"
 
     def decide(self, probabilities: Mapping[Sentiment, float]) -> Verdict:
-        return _threshold(self.name, normalise(probabilities), self.min_p)
+        return _threshold(self.name, normalise(probabilities), self.min_p, tau=self.directional_tau)
 
 
 @dataclass(frozen=True, slots=True)
 class LabelLogprobPolicy:
-    """Threshold on first-token label probabilities. When label tokens collide `decide` returns None and
-    the adapter re-asks with the ordinal schema: its first score token ("-", "0", "1", "2") always
-    names exactly one class, so the score sign is the collision-free fallback."""
+    """The probability rule (min_p, directional_tau) on first-token label probabilities. On a label
+    collision `decide` returns None and the adapter re-asks with the ordinal schema; when its sign is
+    unreadable too, the chain ends at the ordinal policy."""
 
     min_p: float
+    directional_tau: float | None = None
     name: ClassVar[PolicyName] = "label-logprob"
 
     def decide(self, out: LabelOut | OrdinalOut, chat: ChatResult) -> Verdict | None:
         if isinstance(out, LabelOut):
             probabilities = label_probabilities(chat.content, chat.logprobs)
-            return None if probabilities is None else _threshold(self.name, probabilities, self.min_p)
+            return None if probabilities is None else self.threshold(probabilities)
         probabilities = score_sign_probabilities(chat.content, chat.logprobs)
-        if probabilities is None:
-            return None
-        return _threshold(self.name, probabilities, self.min_p, score=out.score)
+        return None if probabilities is None else self.threshold(probabilities, score=out.score)
+
+    def threshold(self, probabilities: Mapping[Sentiment, float], score: int | None = None) -> Verdict:
+        return _threshold(
+            self.name, normalise(probabilities), self.min_p, score=score, tau=self.directional_tau
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -194,7 +257,7 @@ def policy_for(spec: ModelSpec, streaming: bool = False, *, endpoint: Endpoint =
     """Streams and /analyze always threshold the ordinal score: it is read mid-JSON as soon as it
     closes, with no dependency on logprobs or on where the score sits in the output."""
     if spec.kind == "decision":
-        return ProbabilityPolicy(_min_p(spec))
+        return ProbabilityPolicy(_min_p(spec), spec.directional_tau)
     if streaming or endpoint == "analyze" or spec.policy == "ordinal":
         return OrdinalPolicy(spec.ordinal_t)
-    return LabelLogprobPolicy(_min_p(spec))
+    return LabelLogprobPolicy(_min_p(spec), spec.directional_tau)

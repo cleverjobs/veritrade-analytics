@@ -34,7 +34,7 @@ WEIGHTS: dict[Sentiment, float] = {"bullish": 0.6, "bearish": 0.45, "neutral": 1
 
 
 def test_grid_enumerates_the_lean_plan() -> None:
-    cells = grid.grid_cells()
+    cells = grid.grid_cells(follow_ups=False)
     per_model = Counter(c.model for c in cells)
     assert per_model == {
         "qwen3.5:0.8b-q8_0": 8,
@@ -55,8 +55,34 @@ def test_grid_enumerates_the_lean_plan() -> None:
     assert order == sorted(order, key=list(dict.fromkeys(order)).index)
 
 
-def test_dims_describe_the_prompt_files() -> None:
+def test_follow_ups_follow_their_grid_config() -> None:
     cells = grid.grid_cells()
+    follow_ups = [c for c in cells if grid.follow_up_of(c.model, c.name) is not None]
+    assert len({grid.cell_key(c) for c in cells}) == len(cells) == 28 + len(grid.FOLLOW_UPS)
+    assert {(c.model, c.name) for c in follow_ups} == {
+        (m, n) for m in grid.ANALYZE_GRID_MODELS for n in ("v5", "v1-summary-first")
+    } - {("qwen3:4b-instruct-2507-q4_K_M", "v1-summary-first")}
+    by_key = {(c.model, c.name): c for c in cells}
+    for cell in follow_ups:
+        f = grid.follow_up_of(cell.model, cell.name)
+        assert f is not None
+        base = by_key[(cell.model, f.against)]
+        assert cell.endpoint == base.endpoint == "analyze"
+        assert cell.dims["shots"] == str(len(cell.prompt.few_shot)) == "0"
+        # Same rubric as the grid config: only the summary instruction or the field order changes.
+        assert cell.prompt.system.split("summary:")[0] == base.prompt.system.split("summary:")[0]
+    order = [c.model for c in cells]
+    assert order == sorted(order, key=list(dict.fromkeys(order)).index)
+    first = by_key[("ministral-3:3b", "v1-summary-first")]
+    assert (first.variant, first.spec.field_order, first.prompt.version_id) == (
+        "summary-first",
+        "summary-first",
+        "v1",
+    )
+
+
+def test_dims_describe_the_prompt_files() -> None:
+    cells = grid.grid_cells(follow_ups=False)
     for model in {c.model for c in cells}:
         own = {c.prompt.version_id: c for c in cells if c.model == model}
         v1 = own["v1"].prompt
@@ -161,7 +187,7 @@ async def test_run_then_analyze_end_to_end(
     manifest = await grid.run_grid(
         client, cells, EXAMPLES, concurrency=2, preds_root=preds, manifest_path=manifest_path, log=log
     )
-    assert len(manifest["cells"]) == 8
+    assert len(manifest["cells"]) == 10
     assert {e["done"] for e in manifest["cells"].values()} == {6}
     assert manifest["ollama_version"] == "0.40.6"
     decide = mock_ollama.routes["decide"]
@@ -207,8 +233,14 @@ async def test_run_then_analyze_end_to_end(
         "1": 0,
         "2": 2,
     }
+    assert [f["config"] for f in combined["follow_ups"]] == ["v5", "v1-summary-first"]
+    assert {f["against"]["config"] for f in combined["follow_ups"]} == {"v1"}
+    assert combined["best"]["config"] == "v1"
+    assert "directional_tau" in report
     summary = (out / "summary.md").read_text(encoding="utf-8")
     assert "## Best config per model" in summary
+    assert "## Follow-ups after the grid" in summary
+    assert "## directional_tau vs the plain rule" in summary
     assert "`nimble:9b-q4_K_M`" in summary
     for path in [*paths, manifest_path]:
         written = path.read_text(encoding="utf-8")

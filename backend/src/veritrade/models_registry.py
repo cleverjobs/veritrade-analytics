@@ -29,9 +29,13 @@ class ModelSpec(BaseModel):
     num_predict: dict[Endpoint, int] = Field(default_factory=dict)
     signal_schema: SignalSchema | None = None
     policy: PolicyName
-    min_p: float | None = Field(None, gt=0, le=1)
+    # 0 never abstains on the winning class.
+    min_p: float | None = Field(None, ge=0, le=1)
     ordinal_t: int = Field(1, ge=1, le=2)
+    directional_tau: float | None = Field(None, gt=0, lt=1)
     field_order: FieldOrder | None = None
+    # Frozen prompt version per endpoint; an endpoint left out serves the prompt file's `active`.
+    prompt: dict[Endpoint, str] = Field(default_factory=dict)
     evaluated: bool = True
 
     @model_validator(mode="before")
@@ -62,6 +66,12 @@ class ModelSpec(BaseModel):
                 raise ValueError(f"{self.name}: the ordinal policy needs signal_schema = 'ordinal'")
         if self.policy in ("probability", "label-logprob") and self.min_p is None:
             raise ValueError(f"{self.name}: policy {self.policy} needs min_p")
+        if self.directional_tau is not None and self.policy == "ordinal":
+            raise ValueError(
+                f"{self.name}: directional_tau needs class probabilities, not the ordinal policy"
+            )
+        if stray := sorted(set(self.prompt) - set(self.endpoints)):
+            raise ValueError(f"{self.name}: prompt versions for endpoints it does not serve: {stray}")
         return self
 
     def serves(self, endpoint: Endpoint) -> bool:

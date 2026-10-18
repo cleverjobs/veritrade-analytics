@@ -1,0 +1,410 @@
+{
+ "generated_by": "uv run python -m veritrade_evals freeze",
+ "sources": {
+  "dev300": "evals/results/grid",
+  "articles_dev": "evals/results/articles_dev/summary.json"
+ },
+ "rules": {
+  "signal": "dev300 best rule (max F0.5 with inversions <= 2%); re-picked on the articles only when the whole inversion CI is over the cap or coverage collapses",
+  "analyze": "v5 unless clearly less accurate than v1 (paired 95% CI of the F0.5 gap below 0) on dev300 or the articles, else v1 stays; t from the chosen config's dev300 operating point; summary-first only if it wins on dev300 and does not lose on the articles",
+  "summary": "v2 for qwen3.5:2b-q4_K_M, qwen3.5:4b-q4_K_M"
+ },
+ "defaults_untouched": {
+  "signal": "qwen3.5:0.8b-q8_0",
+  "summary": "qwen3.5:2b-q4_K_M",
+  "analyze": "ministral-3:3b"
+ },
+ "models": {
+  "qwen3.5:0.8b-q8_0": {
+   "signal": {
+    "prompt": "v2",
+    "prompt_version": "signal/qwen3.5:0.8b-q8_0/v2@ff82e957",
+    "signal_schema": "label",
+    "policy": "label-logprob",
+    "min_p": 0.0,
+    "directional_tau": 0.28,
+    "ordinal_t": 1,
+    "evidence": {
+     "dev300": {
+      "config": "v2-label",
+      "policy": "label-logprob+tau",
+      "threshold": 0.28,
+      "f05_macro": {
+       "point": 0.7297,
+       "low": 0.6507,
+       "high": 0.7954
+      },
+      "inversion_rate": {
+       "point": 0.0,
+       "low": 0.0,
+       "high": 0.0
+      },
+      "coverage": {
+       "point": 1.0,
+       "low": 1.0,
+       "high": 1.0
+      },
+      "signal_rate": {
+       "point": 0.154,
+       "low": 0.1248,
+       "high": 0.185
+      },
+      "accuracy": {
+       "point": 0.7755,
+       "low": 0.7439,
+       "high": 0.8047
+      }
+     },
+     "articles_dev": [
+      {
+       "scope": "lede",
+       "policy": "label-logprob+tau",
+       "threshold": 0.28,
+       "f05_macro": {
+        "point": 0.6846,
+        "low": 0.4727,
+        "high": 0.8333
+       },
+       "inversions": "1/14",
+       "coverage": 1.0,
+       "clear_failure": []
+      },
+      {
+       "scope": "full",
+       "policy": "label-logprob+tau",
+       "threshold": 0.28,
+       "f05_macro": {
+        "point": 0.6349,
+        "low": 0.3289,
+        "high": 0.8167
+       },
+       "inversions": "0/10",
+       "coverage": 1.0,
+       "clear_failure": []
+      }
+     ]
+    }
+   }
+  },
+  "clef-flash:9b-q8_0": {
+   "signal": {
+    "prompt": "v4",
+    "prompt_version": "signal/clef-flash:9b-q8_0/v4@fcc93f1b",
+    "signal_schema": null,
+    "policy": "probability",
+    "min_p": 0.8,
+    "directional_tau": null,
+    "ordinal_t": 1,
+    "evidence": {
+     "dev300": {
+      "config": "v4",
+      "policy": "probability",
+      "threshold": 0.8,
+      "f05_macro": {
+       "point": 0.8743,
+       "low": 0.8111,
+       "high": 0.9366
+      },
+      "inversion_rate": {
+       "point": 0.0,
+       "low": 0.0,
+       "high": 0.0
+      },
+      "coverage": {
+       "point": 0.7285,
+       "low": 0.6615,
+       "high": 0.786
+      },
+      "signal_rate": {
+       "point": 0.332,
+       "low": 0.2985,
+       "high": 0.3719
+      },
+      "accuracy": {
+       "point": 0.9017,
+       "low": 0.8648,
+       "high": 0.9343
+      }
+     },
+     "articles_dev": [
+      {
+       "scope": "lede",
+       "policy": "probability",
+       "threshold": 0.8,
+       "f05_macro": {
+        "point": 0.8477,
+        "low": 0.7077,
+        "high": 0.963
+       },
+       "inversions": "1/20",
+       "coverage": 0.7667,
+       "clear_failure": []
+      },
+      {
+       "scope": "full",
+       "policy": "probability",
+       "threshold": 0.8,
+       "f05_macro": {
+        "point": 0.9072,
+        "low": 0.82,
+        "high": 0.9891
+       },
+       "inversions": "0/20",
+       "coverage": 0.7667,
+       "clear_failure": []
+      }
+     ]
+    }
+   }
+  },
+  "nimble:9b-q4_K_M": {
+   "signal": {
+    "prompt": "v1",
+    "prompt_version": "signal/nimble:9b-q4_K_M/v1@a1e34f63",
+    "signal_schema": null,
+    "policy": "probability",
+    "min_p": 0.97,
+    "directional_tau": null,
+    "ordinal_t": 1,
+    "evidence": {
+     "dev300": {
+      "config": "v1",
+      "policy": "probability",
+      "threshold": 0.97,
+      "f05_macro": {
+       "point": 0.8429,
+       "low": 0.7733,
+       "high": 0.9008
+      },
+      "inversion_rate": {
+       "point": 0.0,
+       "low": 0.0,
+       "high": 0.0
+      },
+      "coverage": {
+       "point": 0.263,
+       "low": 0.2249,
+       "high": 0.3025
+      },
+      "signal_rate": {
+       "point": 0.2421,
+       "low": 0.2104,
+       "high": 0.2766
+      },
+      "accuracy": {
+       "point": 0.8506,
+       "low": 0.8155,
+       "high": 0.8807
+      }
+     },
+     "articles_dev": [
+      {
+       "scope": "lede",
+       "policy": "probability",
+       "threshold": 0.97,
+       "f05_macro": {
+        "point": 0.8947,
+        "low": 0.7715,
+        "high": 0.9762
+       },
+       "inversions": "0/17",
+       "coverage": 0.6,
+       "clear_failure": []
+      },
+      {
+       "scope": "full",
+       "policy": "probability",
+       "threshold": 0.97,
+       "f05_macro": {
+        "point": 0.8796,
+        "low": 0.7606,
+        "high": 0.9762
+       },
+       "inversions": "0/19",
+       "coverage": 0.6667,
+       "clear_failure": []
+      }
+     ]
+    }
+   }
+  },
+  "ministral-3:3b": {
+   "analyze": {
+    "prompt": "v5",
+    "prompt_version": "analyze/ministral-3:3b/v5@e2b57fc6",
+    "field_order": "sentiment-first",
+    "ordinal_t": 1,
+    "evidence": {
+     "dev300": {
+      "config": "v5",
+      "threshold": 1.0,
+      "revision_f05": {
+       "point": 0.6851,
+       "low": 0.5889,
+       "high": 0.7724
+      },
+      "revision_gap_vs_v1": {
+       "point": 0.0253,
+       "low": 0.0018,
+       "high": 0.0518
+      }
+     },
+     "articles_dev": [
+      {
+       "scope": "full",
+       "policy": "ordinal",
+       "threshold": 1.0,
+       "f05_macro": {
+        "point": 0.7407,
+        "low": 0.611,
+        "high": 0.8578
+       },
+       "inversions": "0/19",
+       "coverage": 1.0,
+       "clear_failure": []
+      }
+     ],
+     "articles_revision_gap_vs_v1": {
+      "point": 0.0,
+      "low": 0.0,
+      "high": 0.0
+     },
+     "revision_rejected": null,
+     "field_order": {
+      "dev300_gap_summary_first": {
+       "point": -0.0173,
+       "low": -0.0876,
+       "high": 0.0594
+      },
+      "articles_gap_summary_first": {
+       "point": 0.0576,
+       "low": -0.0635,
+       "high": 0.1747
+      },
+      "chosen": "sentiment-first"
+     }
+    }
+   }
+  },
+  "qwen3:4b-instruct-2507-q4_K_M": {
+   "analyze": {
+    "prompt": "v5",
+    "prompt_version": "analyze/qwen3:4b-instruct-2507-q4_K_M/v5@e2b57fc6",
+    "field_order": "sentiment-first",
+    "ordinal_t": 1,
+    "evidence": {
+     "dev300": {
+      "config": "v5",
+      "threshold": 1.0,
+      "revision_f05": {
+       "point": 0.6468,
+       "low": 0.5529,
+       "high": 0.7405
+      },
+      "revision_gap_vs_v1": {
+       "point": -0.0114,
+       "low": -0.0466,
+       "high": 0.0226
+      }
+     },
+     "articles_dev": [
+      {
+       "scope": "full",
+       "policy": "ordinal",
+       "threshold": 1.0,
+       "f05_macro": {
+        "point": 0.779,
+        "low": 0.6458,
+        "high": 0.8794
+       },
+       "inversions": "1/22",
+       "coverage": 1.0,
+       "clear_failure": []
+      }
+     ],
+     "articles_revision_gap_vs_v1": {
+      "point": -0.0193,
+      "low": -0.0654,
+      "high": 0.0
+     },
+     "revision_rejected": null,
+     "field_order": {
+      "dev300_gap_summary_first": null,
+      "articles_gap_summary_first": null,
+      "chosen": "sentiment-first"
+     }
+    }
+   }
+  },
+  "qwen3.5:4b-q4_K_M": {
+   "summary": {
+    "prompt": "v2",
+    "prompt_version": "summary/qwen3.5:4b-q4_K_M/v2@84ce3858",
+    "evidence": "tightened summary rule; quality is scored by the summary eval"
+   },
+   "analyze": {
+    "prompt": "v1",
+    "prompt_version": "analyze/qwen3.5:4b-q4_K_M/v1@7daf4f28",
+    "field_order": "sentiment-first",
+    "ordinal_t": 1,
+    "evidence": {
+     "dev300": {
+      "config": "v1",
+      "threshold": 1.0,
+      "revision_f05": {
+       "point": 0.7313,
+       "low": 0.6409,
+       "high": 0.8141
+      },
+      "revision_gap_vs_v1": {
+       "point": -0.0207,
+       "low": -0.0537,
+       "high": 0.0071
+      }
+     },
+     "articles_dev": [
+      {
+       "scope": "full",
+       "policy": "ordinal",
+       "threshold": 1.0,
+       "f05_macro": {
+        "point": 0.8796,
+        "low": 0.7911,
+        "high": 0.9891
+       },
+       "inversions": "0/22",
+       "coverage": 1.0,
+       "clear_failure": []
+      }
+     ],
+     "articles_revision_gap_vs_v1": {
+      "point": -0.0796,
+      "low": -0.1781,
+      "high": -0.0144
+     },
+     "revision_rejected": "articles F0.5 gap -0.080 [-0.178, -0.014]",
+     "field_order": {
+      "dev300_gap_summary_first": {
+       "point": -0.0607,
+       "low": -0.1224,
+       "high": 0.0028
+      },
+      "articles_gap_summary_first": {
+       "point": -0.0134,
+       "low": -0.074,
+       "high": 0.0348
+      },
+      "chosen": "sentiment-first"
+     }
+    }
+   }
+  },
+  "qwen3.5:2b-q4_K_M": {
+   "summary": {
+    "prompt": "v2",
+    "prompt_version": "summary/qwen3.5:2b-q4_K_M/v2@84ce3858",
+    "evidence": "tightened summary rule; quality is scored by the summary eval"
+   }
+  }
+ }
+}
