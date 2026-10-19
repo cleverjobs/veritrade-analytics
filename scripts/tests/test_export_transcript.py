@@ -388,3 +388,23 @@ def test_export_publishes_only_when_gate_passes(tmp_path: Path, monkeypatch: pyt
     assert meta["session_id"] == SID
     assert meta["records"]["kept"] == {"user": 1}
     assert et.scan_paths(args.out, []) == []
+    assert "NOTE.md" not in (args.out / "README.md").read_text()
+
+
+def test_reexport_keeps_the_note_and_points_to_it(tmp_path: Path) -> None:
+    write_jsonl(tmp_path / "proj" / f"{SID}.jsonl", [user("u1", None, "hello")])
+    out = tmp_path / "out"
+    out.mkdir()
+    (out / "NOTE.md").write_text("Dear reviewers\n")
+    (out / "README.md").write_text("stale\n")
+    args = argparse.Namespace(
+        out=out,
+        staging=tmp_path / "staging",
+        projects_root=tmp_path / "proj",
+        session=SID[:8],
+        denylist=tmp_path / "missing.txt",
+        no_render=True,
+    )
+    assert et.export(args) == 0
+    assert (out / "NOTE.md").read_text() == "Dear reviewers\n"
+    assert "[`NOTE.md`](NOTE.md)" in (out / "README.md").read_text()

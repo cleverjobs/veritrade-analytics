@@ -363,8 +363,8 @@ fetches the real publishers weekly and never gates, because publishers change ma
 
 ## AI tools used
 
-- **Claude Code CLI** (2.1.30x) with **Claude Opus 5.5** (`claude-opus-5-5`) as the main loop, high reasoning effort
-  and plan mode.
+- **Claude Code CLI** (2.1.301) with **Claude Opus 5.5** (`claude-opus-5-5`) as the main loop, `xhigh` reasoning
+  effort with adaptive thinking, and plan mode.
 - **`/grill-me` skill**: Claude interviewed Kris until every decision was settled, before any code (Q1-Q20, R1-R10
   and follow-ups in [`01-decisions.md`](.context/docs/design/01-decisions.md)). The approach was handpicked from
   [`.context/openai-research.md`](.context/openai-research.md), a research and architecture proposal Kris provided.

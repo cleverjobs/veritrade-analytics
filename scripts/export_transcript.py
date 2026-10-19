@@ -28,6 +28,8 @@ RENDER_FLAGS = ("--depth", "tool", "--image-export-mode", "placeholder", "--no-c
 PROJECT_NAME = "veritrade-analytics"
 STAGING_MARKER = ".transcript-staging"
 OUTPUT_NAMES = ("raw", "rendered", "meta.json", "README.md")
+# Hand-written and committed beside the outputs; publish() never touches it.
+NOTE_NAME = "NOTE.md"
 MAX_FILE_BYTES = 50 * 1024 * 1024
 
 ALLOWED_EMAILS = frozenset({"kris.dimitrov92@gmail.com", "noreply@anthropic.com"})
@@ -710,13 +712,15 @@ def build_meta(harvest: Harvest, san: Sanitizer, sid: str) -> dict[str, Any]:
     return cleaned
 
 
-def readme(meta: dict[str, Any]) -> str:
+def readme(meta: dict[str, Any], note: bool = False) -> str:
     dates = meta["date_range"]
+    pointer = f"\nStart with [`{NOTE_NAME}`]({NOTE_NAME}), a note from Kris to the reviewers.\n"
+    pointer = pointer if note else ""
     return f"""# AI conversation transcript
 
 Exported from the Claude Code session that built this repo (`{meta["session_id"]}`,
 {dates["start"]} to {dates["end"]}), including every subagent and workflow run it spawned.
-
+{pointer}
 ## Contents
 
 - `rendered/transcript.html`, `rendered/transcript.md`: readable render ({RENDERER}, depth `tool`).
@@ -873,7 +877,8 @@ def export(args: argparse.Namespace) -> int:
     else:
         (export_dir / "rendered").mkdir(parents=True)
     (export_dir / "meta.json").write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n", "utf-8")
-    (export_dir / "README.md").write_text(readme(meta), encoding="utf-8")
+    note = (args.out / NOTE_NAME).exists()
+    (export_dir / "README.md").write_text(readme(meta, note=note), encoding="utf-8")
     records = meta["records"]
     print(f"records kept {records['kept_total']}, dropped {records['dropped_total']}")
     print("redactions " + json.dumps(meta["redactions"]))
