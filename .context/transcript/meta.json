@@ -6,28 +6,28 @@
     "version": "2.1.301",
     "versions_seen": {
       "2.1.301": 27983,
-      "2.1.302": 1475
+      "2.1.302": 4252
     },
     "entrypoint": "cli"
   },
   "models": {
     "note": "responses per model, deduped by message.id",
     "main": {
-      "claude-opus-5-5": 464,
+      "claude-opus-5-5": 559,
       "<synthetic>": 1
     },
     "subagents": {
-      "claude-opus-5-5": 3761,
+      "claude-opus-5-5": 4065,
       "<synthetic>": 1
     }
   },
   "effort": {
     "note": "assistant records per value",
     "effort": {
-      "xhigh": 10621
+      "xhigh": 11582
     },
     "perTurnEffort": {
-      "xhigh": 10621
+      "xhigh": 11582
     }
   },
   "thinking": {
@@ -35,20 +35,20 @@
       {
         "type": "adaptive",
         "display": "updates",
-        "requests": 4297
+        "requests": 4705
       }
     ],
     "display_on_records": {
-      "updates": 3265
+      "updates": 3566
     }
   },
   "modes": {
     "permission_modes": {
       "plan": 28,
-      "auto": 487
+      "auto": 594
     },
     "modes": {
-      "normal": 515
+      "normal": 622
     },
     "plan_mode": true,
     "ultracode": true,
@@ -64,28 +64,35 @@
     },
     "skill_tool": {
       "grill-me": 1,
-      "workflow-authoring": 1
+      "workflow-authoring": 2
     }
   },
   "tools_used": {
-    "Bash": 2551,
-    "Read": 1348,
-    "Write": 1176,
-    "Edit": 998,
+    "Bash": 2861,
+    "Read": 1411,
+    "Write": 1188,
+    "Edit": 1146,
     "WebFetch": 247,
     "WebSearch": 74,
     "SendMessage": 46,
-    "ToolSearch": 27,
-    "StructuredOutput": 14,
+    "ToolSearch": 28,
+    "StructuredOutput": 21,
     "Agent": 13,
     "Monitor": 13,
+    "Workflow": 12,
     "TaskStop": 12,
-    "Workflow": 11,
+    "mcp__claude-in-chrome__computer": 12,
+    "Skill": 3,
+    "AskUserQuestion": 3,
     "ListAgents": 3,
-    "Skill": 2,
-    "AskUserQuestion": 2,
+    "mcp__claude-in-chrome__form_input": 3,
     "SubagentHandback": 2,
-    "ExitPlanMode": 1
+    "ExitPlanMode": 1,
+    "mcp__claude-in-chrome__tabs_context_mcp": 1,
+    "mcp__claude-in-chrome__navigate": 1,
+    "mcp__claude-in-chrome__read_page": 1,
+    "mcp__claude-in-chrome__find": 1,
+    "mcp__claude-in-chrome__tabs_close_mcp": 1
   },
   "workflows": [
     {
@@ -300,6 +307,73 @@
           "phase": "Probe",
           "state": "done",
           "tokens": 387329
+        }
+      ]
+    },
+    {
+      "run_id": "wf_c29df6a3-ae0",
+      "workflowName": "thresholds-and-cold-start",
+      "status": "completed",
+      "agentCount": 7,
+      "totalTokens": 1181787,
+      "durationMs": 2662998,
+      "script": "thresholds-and-cold-start-wf_c29df6a3-ae0.js",
+      "agents": [
+        {
+          "agentType": "workflow-subagent",
+          "model": "claude-opus-5-5",
+          "label": "frontend",
+          "phase": "Frontend",
+          "state": "done",
+          "tokens": 219355
+        },
+        {
+          "agentType": "workflow-subagent",
+          "model": "claude-opus-5-5",
+          "label": "fix",
+          "phase": "Fix",
+          "state": "done",
+          "tokens": 147058
+        },
+        {
+          "agentType": "workflow-subagent",
+          "model": "claude-opus-5-5",
+          "label": "review:contract-docs",
+          "phase": "Review",
+          "state": "done",
+          "tokens": 147954
+        },
+        {
+          "agentType": "workflow-subagent",
+          "model": "claude-opus-5-5",
+          "label": "review:frontend-ux",
+          "phase": "Review",
+          "state": "done",
+          "tokens": 179102
+        },
+        {
+          "agentType": "workflow-subagent",
+          "model": "claude-opus-5-5",
+          "label": "review:backend-correctness",
+          "phase": "Review",
+          "state": "done",
+          "tokens": 151226
+        },
+        {
+          "agentType": "workflow-subagent",
+          "model": "claude-opus-5-5",
+          "label": "backend",
+          "phase": "Backend",
+          "state": "done",
+          "tokens": 186977
+        },
+        {
+          "agentType": "workflow-subagent",
+          "model": "claude-opus-5-5",
+          "label": "docs",
+          "phase": "Docs",
+          "state": "done",
+          "tokens": 150115
         }
       ]
     },
@@ -603,7 +677,7 @@
     }
   ],
   "subagents": {
-    "total": 63,
+    "total": 70,
     "by_type": {
       "Explore": 2,
       "adjudicator": 1,
@@ -618,11 +692,11 @@
       "p4-truncation": 1,
       "refill-label-a": 1,
       "refill-label-b": 1,
-      "workflow-subagent": 44,
+      "workflow-subagent": 51,
       "Plan": 4
     },
     "by_model": {
-      "opus": 52,
+      "opus": 59,
       "claude-opus-5-5": 10,
       "inherit": 1
     }
@@ -630,20 +704,20 @@
   "usage_tokens": {
     "note": "summed once per (file, message.id); thinking is a subset of output",
     "total": {
-      "input": 8629,
-      "cache_creation": 27476358,
-      "cache_read": 931220815,
-      "output": 1520596,
-      "thinking": 648582
+      "input": 9428,
+      "cache_creation": 29166682,
+      "cache_read": 990346696,
+      "output": 1635881,
+      "thinking": 697857
     },
     "by_scope_and_model": {
       "main": {
         "claude-opus-5-5": {
-          "input": 1079,
-          "cache_creation": 2275541,
-          "cache_read": 130356521,
-          "output": 483023,
-          "thinking": 228428
+          "input": 1270,
+          "cache_creation": 2726848,
+          "cache_read": 150907407,
+          "output": 562071,
+          "thinking": 267152
         },
         "<synthetic>": {
           "input": 0,
@@ -655,11 +729,11 @@
       },
       "subagents": {
         "claude-opus-5-5": {
-          "input": 7550,
-          "cache_creation": 25200817,
-          "cache_read": 800864294,
-          "output": 1037573,
-          "thinking": 420154
+          "input": 8158,
+          "cache_creation": 26439834,
+          "cache_read": 839439289,
+          "output": 1073810,
+          "thinking": 430705
         },
         "<synthetic>": {
           "input": 0,
@@ -673,87 +747,87 @@
   },
   "date_range": {
     "start": "2026-10-16T10:22:16.947Z",
-    "end": "2026-10-19T13:16:18.035Z"
+    "end": "2026-10-19T17:02:53.275Z"
   },
   "records": {
-    "kept_total": 20323,
-    "dropped_total": 19977,
+    "kept_total": 22456,
+    "dropped_total": 22186,
     "kept": {
-      "agent-name": 510,
-      "ai-title": 513,
-      "assistant": 10623,
-      "attachment:date": 70,
-      "attachment:model": 68,
+      "agent-name": 617,
+      "ai-title": 620,
+      "assistant": 11584,
+      "attachment:date": 78,
+      "attachment:model": 76,
       "attachment:plan_mode": 14,
-      "attachment:queued_command": 61,
+      "attachment:queued_command": 63,
       "attachment:skill_mention": 1,
-      "attachment:ultra_effort_enter": 4,
-      "custom-title": 510,
-      "journal:launched": 11,
-      "journal:result": 49,
-      "journal:started": 49,
-      "mode": 515,
-      "permission-mode": 515,
-      "system:away_summary": 13,
-      "system:informational": 5,
-      "system:turn_duration": 17,
-      "user": 6775
+      "attachment:ultra_effort_enter": 5,
+      "custom-title": 617,
+      "journal:launched": 12,
+      "journal:result": 56,
+      "journal:started": 56,
+      "mode": 622,
+      "permission-mode": 622,
+      "system:away_summary": 16,
+      "system:informational": 6,
+      "system:turn_duration": 24,
+      "user": 7367
     },
     "dropped": {
-      "api-request": 4297,
-      "api request blob": 6875,
-      "api-request-shape": 91,
-      "atis-latch": 514,
-      "attachment:agent_listing_delta": 17,
-      "attachment:auto_mode": 56,
-      "attachment:command_permissions": 2,
-      "attachment:compact_file_reference": 3,
-      "attachment:credential_org": 69,
-      "attachment:deferred_tools_delta": 138,
-      "attachment:deferred_tools_record": 2102,
-      "attachment:diagnostics": 4,
-      "attachment:edited_text_file": 214,
-      "attachment:environment": 103,
-      "attachment:file": 22,
-      "attachment:hook_additional_context": 11,
-      "attachment:hook_success": 8,
-      "attachment:instructions": 63,
-      "attachment:mcp_instructions_delta": 69,
+      "api-request": 4705,
+      "api request blob": 7657,
+      "api-request-shape": 100,
+      "atis-latch": 621,
+      "attachment:agent_listing_delta": 18,
+      "attachment:auto_mode": 64,
+      "attachment:command_permissions": 3,
+      "attachment:compact_file_reference": 5,
+      "attachment:credential_org": 77,
+      "attachment:deferred_tools_delta": 154,
+      "attachment:deferred_tools_record": 2343,
+      "attachment:diagnostics": 5,
+      "attachment:edited_text_file": 223,
+      "attachment:environment": 115,
+      "attachment:file": 25,
+      "attachment:hook_additional_context": 16,
+      "attachment:hook_success": 9,
+      "attachment:instructions": 71,
+      "attachment:mcp_instructions_delta": 77,
       "attachment:opened_file_in_ide": 1,
-      "attachment:plan_file_reference": 2,
+      "attachment:plan_file_reference": 3,
       "attachment:plan_mode_exit": 2,
-      "attachment:prompt_snapshot": 137,
+      "attachment:prompt_snapshot": 153,
       "attachment:read_truncation_notice": 3,
-      "attachment:remote_session_change": 68,
-      "attachment:session context": 68,
-      "attachment:silent_turn_reminder": 13,
-      "attachment:skill_listing": 68,
-      "attachment:structured_output": 14,
+      "attachment:remote_session_change": 76,
+      "attachment:session context": 76,
+      "attachment:silent_turn_reminder": 19,
+      "attachment:skill_listing": 75,
+      "attachment:structured_output": 21,
       "attachment:task_status": 2,
-      "attachment:thinking_drop": 4,
-      "attachment:total_tokens_reminder": 4068,
+      "attachment:thinking_drop": 5,
+      "attachment:total_tokens_reminder": 4459,
       "cost-state": 3,
-      "file-history-delta": 26,
-      "file-history-snapshot": 9,
+      "file-history-delta": 32,
+      "file-history-snapshot": 14,
       "fork-context-ref": 1,
-      "last-prompt": 516,
-      "queue-operation": 226,
-      "system:compact_boundary": 5,
+      "last-prompt": 623,
+      "queue-operation": 234,
+      "system:compact_boundary": 6,
       "system:local_command": 2,
-      "system:stop_hook_summary": 81
+      "system:stop_hook_summary": 88
     },
     "unparseable_lines": 0
   },
   "redactions": {
-    "denylist": 690,
-    "email": 69,
-    "home_path": 24587,
-    "marker_neutralized": 194,
+    "denylist": 830,
+    "email": 77,
+    "home_path": 27082,
+    "marker_neutralized": 195,
     "omitted:html": 14,
-    "omitted:private_config": 151,
+    "omitted:private_config": 162,
     "omitted:private_data": 2717,
-    "omitted:skill_body": 15,
-    "omitted:web_fetch": 6,
+    "omitted:skill_body": 16,
+    "omitted:web_fetch": 8,
     "secret:jwt": 1,
     "secret:sk_key": 4,
     "system_reminder": 45

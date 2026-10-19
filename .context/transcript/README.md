@@ -1,13 +1,13 @@
 # AI conversation transcript
 
 Exported from the Claude Code session that built this repo (`0024648c-2a0d-4dde-9495-8d22e0c9ccaa`,
-2026-10-16T10:22:16.947Z to 2026-10-19T13:16:18.035Z), including every subagent and workflow run it spawned.
+2026-10-16T10:22:16.947Z to 2026-10-19T17:02:53.275Z), including every subagent and workflow run it spawned.
 
 Start with [`NOTE.md`](NOTE.md), a note from Kris to the reviewers.
 
 ## Contents
 
-- `rendered/transcript.html`, `rendered/transcript.md`: readable render (claude-code-log@1.7.0, depth `tool`).
+- `rendered/transcript-1.html`, `rendered/transcript-2.html`, `rendered/transcript.md`: readable render (claude-code-log@1.7.0, depth `tool`) (HTML in time-ordered parts, each under GitHub's 50 MB file limit).
 - `raw/`: the filtered, redacted JSONL in the original session layout (main thread, `subagents/**`,
   `workflows/**`); re-renderable with claude-code-log.
 - `meta.json`: harness version, models, effort and thinking settings, modes, skills, workflows,

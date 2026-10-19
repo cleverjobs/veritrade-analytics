@@ -712,10 +712,16 @@ def build_meta(harvest: Harvest, san: Sanitizer, sid: str) -> dict[str, Any]:
     return cleaned
 
 
-def readme(meta: dict[str, Any], note: bool = False) -> str:
+def html_names(parts: int) -> list[str]:
+    return ["transcript.html"] if parts <= 1 else [f"transcript-{i}.html" for i in range(1, parts + 1)]
+
+
+def readme(meta: dict[str, Any], note: bool = False, html_parts: int = 1) -> str:
     dates = meta["date_range"]
     pointer = f"\nStart with [`{NOTE_NAME}`]({NOTE_NAME}), a note from Kris to the reviewers.\n"
     pointer = pointer if note else ""
+    html = ", ".join(f"`rendered/{name}`" for name in html_names(html_parts))
+    split = " (HTML in time-ordered parts, each under GitHub's 50 MB file limit)" if html_parts > 1 else ""
     return f"""# AI conversation transcript
 
 Exported from the Claude Code session that built this repo (`{meta["session_id"]}`,
@@ -723,7 +729,7 @@ Exported from the Claude Code session that built this repo (`{meta["session_id"]
 {pointer}
 ## Contents
 
-- `rendered/transcript.html`, `rendered/transcript.md`: readable render ({RENDERER}, depth `tool`).
+- {html}, `rendered/transcript.md`: readable render ({RENDERER}, depth `tool`){split}.
 - `raw/`: the filtered, redacted JSONL in the original session layout (main thread, `subagents/**`,
   `workflows/**`); re-renderable with claude-code-log.
 - `meta.json`: harness version, models, effort and thinking settings, modes, skills, workflows,
@@ -753,11 +759,31 @@ and pushed it are not included.
 """
 
 
-def render(session_file: Path, out_dir: Path, cache: Path) -> None:
+def render_jobs(splits: list[str]) -> list[tuple[str, str, list[str]]]:
+    """(format, file name, date filters) per output; HTML parts cover the gaps between split times."""
+    bounds: list[str | None] = [None, *splits, None]
+    jobs = []
+    for name, start, end in zip(html_names(len(splits) + 1), bounds[:-1], bounds[1:], strict=True):
+        dates = (["--from-date", start] if start else []) + (["--to-date", end] if end else [])
+        jobs.append(("html", name, dates))
+    return [*jobs, ("md", "transcript.md", [])]
+
+
+def render(session_file: Path, out_dir: Path, cache: Path, splits: list[str]) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     env = {**os.environ, "CLAUDE_CODE_LOG_CACHE_PATH": str(cache)}
-    for fmt, name in (("html", "transcript.html"), ("md", "transcript.md")):
-        cmd = ["uvx", RENDERER, str(session_file), "-o", str(out_dir / name), "-f", fmt, *RENDER_FLAGS]
+    for fmt, name, dates in render_jobs(splits):
+        cmd = [
+            "uvx",
+            RENDERER,
+            str(session_file),
+            "-o",
+            str(out_dir / name),
+            "-f",
+            fmt,
+            *RENDER_FLAGS,
+            *dates,
+        ]
         try:
             subprocess.run(cmd, check=True, env=env, stdout=subprocess.DEVNULL)
         except (OSError, subprocess.CalledProcessError) as exc:
@@ -872,13 +898,16 @@ def export(args: argparse.Namespace) -> int:
     meta = build_meta(harvest, san, sid)
     shutil.copytree(session_root, export_dir / "raw")
     if not args.no_render:
-        render(session_root / f"{sid}.jsonl", export_dir / "rendered", staging / "ccl-cache.db")
+        render(
+            session_root / f"{sid}.jsonl", export_dir / "rendered", staging / "ccl-cache.db", args.html_split
+        )
         scrub_rendered(export_dir / "rendered", Sanitizer(denylist=denylist))
     else:
         (export_dir / "rendered").mkdir(parents=True)
     (export_dir / "meta.json").write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n", "utf-8")
     note = (args.out / NOTE_NAME).exists()
-    (export_dir / "README.md").write_text(readme(meta, note=note), encoding="utf-8")
+    readme_text = readme(meta, note=note, html_parts=len(args.html_split) + 1)
+    (export_dir / "README.md").write_text(readme_text, encoding="utf-8")
     records = meta["records"]
     print(f"records kept {records['kept_total']}, dropped {records['dropped_total']}")
     print("redactions " + json.dumps(meta["redactions"]))
@@ -902,6 +931,14 @@ def main() -> None:
     parser.add_argument("--session", help="session id or prefix (default: most recently written)")
     parser.add_argument("--denylist", type=Path, default=DEFAULT_DENYLIST)
     parser.add_argument("--no-render", action="store_true", help="skip claude-code-log (raw + meta only)")
+    parser.add_argument(
+        "--html-split",
+        action="append",
+        default=[],
+        metavar="TIME",
+        help="split the HTML render at this time (repeatable, claude-code-log date syntax); pick times "
+        "inside idle gaps so no message sits on a boundary",
+    )
     args = parser.parse_args()
     if args.scan_only:
         if not args.scan_only.exists():
