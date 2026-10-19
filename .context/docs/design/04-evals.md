@@ -252,7 +252,8 @@ Bundled models (R8): `qwen3.5:0.8b-q8_0` + `qwen3.5:4b-q4_K_M`, 4.34 GB against 
 (p50 659 ms), and its 10.58 GB file alone exceeds the 10 GB bundle cap. `nimble:9b-q4_K_M` (0.843, 1,061 ms) misses
 the budget too. The selected `qwen3.5:0.8b-q8_0` scores 0.730 at 178 ms: high dev300 precision (0.91 / 0.92), low
 recall (it misses about half the directional articles on dev). The budget was not moved to fit the 9B models; both
-stay on the allowlist and can be chosen per request with the `model` parameter on native Ollama.
+stay on the allowlist and can be chosen per request with the `model` parameter on native Ollama. The holdout keeps
+this picture: the 9B models still lead on the test articles and tweets ([section 8](#holdout-results)).
 
 ## 8. Holdout
 
@@ -265,50 +266,135 @@ Protocol of `uv run python -m veritrade_evals holdout {plan,run,analyze}` ([`hol
   finalists on the test articles (full) and `tfns_val`; the two winners also on `fpb_allagree` and
   `finentity_single`; the `qwen3.5:9b` ceiling on the test articles and both cross-domain sets. Then summaries from
   the `/summary` and `/analyze` winners on the 60 test articles go to the blind Opus judges.
-- **Run once**: `evals/results/holdout_runs.json` is a guard keyed by the sha256 of
+- **Run once**: [`holdout_runs.json`](../../../evals/results/holdout_runs.json) is a guard keyed by the sha256 of
   `frozen.json`, recording the selection sha256, git sha, and start and completion times. An interrupted run resumes
   from its caches; a completed config refuses a second run unless `--force --reason` is passed, which is logged in
   the guard and must be disclosed. It also refuses a provisional selection (one made before the latency suite)
   without `--allow-provisional`; this selection was not provisional.
 - `holdout analyze` only re-scores the cached predictions and never calls a model; the tables below come from the
-  `evals/results/holdout/holdout.md` it writes.
+  [`holdout.md`](../../../evals/results/holdout/holdout.md) it writes, and the summary rows from the test split of
+  [`summary/summary.md`](../../../evals/results/summary/summary.md).
+
+**The run.** It ran once, on 2026-10-19 from 05:57 to 10:03 UTC, over all 22 cells
+([`manifest.json`](../../../evals/results/holdout/manifest.json)). Mid-run the native Ollama server hung: every
+`/api/chat` call timed out after 90 s, which hit 21 rows of one cell (`/analyze` `qwen3.5:4b` on `fpb_allagree`).
+The run was stopped, Ollama restarted with the same service environment, and the run resumed from its caches; the
+timeouts are retryable errors, so the resume re-ran those 21 rows and their answers replaced the errors. Every cell
+finished with 0 errors, and the guard records the one resume and no `--force`. Six blind Opus judges then scored
+the 60 test summaries per endpoint (10 articles each, labels anonymised); their output was validated, de-blinded and
+ingested. Nothing was re-tuned on these numbers, and the selected defaults stay as frozen.
 
 ### Holdout results
 
-The one-time run is in progress; its tables are added here from `evals/results/holdout/holdout.md` when it completes.
-<!-- PENDING:holdout replace the in-progress line above with a two-to-four-sentence verdict: do the frozen rules hold on test (F0.5 gap vs dev, inversion cap, coverage), and any clear failure -->
+The frozen rules mostly hold. On the test articles no rule loses more than 0.043 F0.5 against its articles dev
+figure (gaps -0.043 to +0.129), and no coverage CI falls below half its dev300 coverage. The 2% inversion cap holds
+on every tweet and cross-domain set (0.0-1.7%) but not on the articles as a point estimate: the `/signal` default
+inverts 1 of 30 calls (3.3%), `clef-flash` lede 1 of 44 (2.3%) and `ministral` 2 of 45 (4.4%). Each of those CIs
+reaches 0%, so none clearly fails by the freeze rule, but the `/signal` default's doubt from dev (1 of 14) is not
+cleared. On 2,388 tweets every model lands 0.03-0.09 F0.5 below dev300.
 
 #### `/signal` on the test articles (n = 60, lede and full)
-<!-- PENDING:holdout table: qwen3.5:0.8b winner + clef-flash + nimble finalists, lede and full; F0.5 [95% CI], bull P/R, bear P/R, inversion, coverage, dev F0.5, gap -->
+
+| model | rule | scope | F0.5 [95% CI] | bull P / R | bear P / R | inversion | coverage | articles dev F0.5 | gap |
+|---|---|---|---|---|---|--:|--:|--:|--:|
+| `qwen3.5:0.8b-q8_0` (served) | v2-label, label-logprob+tau 0.28 | lede | 0.801 [0.668, 0.886] | 0.82 / 0.90 | 1.00 / 0.40 | 3.3% (1/30) | 100% | 0.685 | +0.117 |
+| `qwen3.5:0.8b-q8_0` | v2-label, label-logprob+tau 0.28 | full | 0.764 [0.615, 0.865] | 0.93 / 0.65 | 0.88 / 0.35 | 0.0% (0/22) | 100% | 0.635 | +0.129 |
+| `clef-flash:9b-q8_0` | v4, probability 0.8 | lede | 0.859 [0.784, 0.938] | 0.80 / 1.00 | 0.89 / 0.85 | 2.3% (1/44) | 85% | 0.848 | +0.012 |
+| `clef-flash:9b-q8_0` | v4, probability 0.8 | full | 0.864 [0.795, 0.931] | 0.78 / 0.90 | 0.94 / 0.85 | 0.0% (0/41) | 73% | 0.907 | -0.043 |
+| `nimble:9b-q4_K_M` | v1, probability 0.97 | lede | 0.859 [0.755, 0.938] | 0.89 / 0.85 | 0.92 / 0.60 | 0.0% (0/32) | 57% | 0.895 | -0.035 |
+| `nimble:9b-q4_K_M` | v1, probability 0.97 | full | 0.896 [0.819, 0.950] | 0.94 / 0.80 | 1.00 / 0.60 | 0.0% (0/29) | 52% | 0.880 | +0.016 |
+
+The served 0.8B scores higher than on dev (inside the dev CI [0.473, 0.833], so not evidence of a gain), but its one
+inversion in 30 directional calls is 3.3%, above the 2% cap as a point estimate (95% CI 0% to 10.3%). Selection let it through because the articles-dev CI at n=30 reached 0%;
+the test CI reaches 0% too, so the test result does not clear that doubt. It stays cautious on bearish news: of the
+20 bearish articles it calls 8 bearish (recall 0.40, as on dev), 11 neutral and 1 bullish. The 9B decision models
+keep their lead (0.859 lede for both, 0.896 full for `nimble`) at lower coverage.
 
 #### `/signal` on Twitter FNS validation (n = 2,388)
-<!-- PENDING:holdout table: three /signal finalists on tfns_val; F0.5 [95% CI], P/R per class, inversion, coverage, dev300 F0.5, gap -->
+
+| model | F0.5 [95% CI] | bull P / R | bear P / R | inversion | coverage | dev300 F0.5 | gap |
+|---|---|---|---|--:|--:|--:|--:|
+| `qwen3.5:0.8b-q8_0` (served) | 0.648 [0.612, 0.679] | 0.79 / 0.39 | 0.80 / 0.35 | 0.5% (2/386) | 100% | 0.730 | -0.082 |
+| `clef-flash:9b-q8_0` | 0.783 [0.761, 0.805] | 0.77 / 0.81 | 0.78 / 0.80 | 0.5% (4/859) | 75% | 0.874 | -0.091 |
+| `nimble:9b-q4_K_M` | 0.755 [0.730, 0.782] | 0.82 / 0.57 | 0.78 / 0.66 | 0.3% (2/620) | 27% | 0.843 | -0.087 |
+
+Every model loses 0.08-0.09 against dev300: the expected optimism of picking prompts and thresholds on the same 300
+dev tweets (winner's curse). The ranking holds, coverage matches dev300 (72.9% and 26.3%), and the 0.8B's precision
+falls to 0.79 / 0.80 from 0.914 / 0.918 on dev300.
 
 #### `/signal` winner, cross-domain (FPB AllAgree n = 2,259, FinEntity single-label n = 851)
-<!-- PENDING:holdout table: qwen3.5:0.8b-q8_0 on fpb_allagree and finentity_single; F0.5 [95% CI], P/R per class, inversion, coverage, dev300 F0.5, gap -->
+
+| set | F0.5 [95% CI] | bull P / R | bear P / R | inversion | coverage | dev300 F0.5 | gap |
+|---|---|---|---|--:|--:|--:|--:|
+| `fpb_allagree` | 0.700 [0.669, 0.728] | 0.93 / 0.20 | 0.98 / 0.59 | 1.0% (3/305) | 100% | 0.730 | -0.030 |
+| `finentity_single` | 0.711 [0.672, 0.749] | 0.79 / 0.49 | 0.75 / 0.64 | 0.0% (0/266) | 100% | 0.730 | -0.019 |
+
+Precise but cautious again: on FPB it catches 114 of 570 bullish sentences (recall 0.20).
 
 #### `/analyze` on the test articles (n = 60, full)
-<!-- PENDING:holdout table: qwen3.5:4b winner + ministral-3:3b + qwen3:4b-instruct-2507 finalists on articles_test full; F0.5 [95% CI], P/R per class, inversion, coverage, dev F0.5, gap -->
+
+| model | rule | F0.5 [95% CI] | bull P / R | bear P / R | inversion | coverage | articles dev F0.5 | gap |
+|---|---|---|---|---|--:|--:|--:|--:|
+| `qwen3.5:4b-q4_K_M` (served) | v1, ordinal \|s\| >= 1 | 0.871 [0.804, 0.940] | 0.78 / 0.90 | 0.95 / 0.90 | 0.0% (0/42) | 100% | 0.880 | -0.009 |
+| `ministral-3:3b` | v5, ordinal \|s\| >= 1 | 0.795 [0.715, 0.876] | 0.64 / 0.90 | 0.94 / 0.80 | 4.4% (2/45) | 100% | 0.741 | +0.055 |
+| `qwen3:4b-instruct-2507-q4_K_M` | v5, ordinal \|s\| >= 1 | 0.799 [0.740, 0.856] | 0.61 / 0.95 | 0.95 / 0.90 | 2.0% (1/50) | 100% | 0.779 | +0.020 |
+
+The combined endpoint generalises best of the served defaults: 0.871 against 0.880 on dev, with no inversion in 42
+directional calls.
 
 #### `/analyze` on Twitter FNS validation (n = 2,388)
-<!-- PENDING:holdout table: three /analyze finalists on tfns_val; F0.5 [95% CI], P/R per class, inversion, coverage, dev300 F0.5, gap -->
+
+| model | F0.5 [95% CI] | bull P / R | bear P / R | inversion | coverage | dev300 F0.5 | gap |
+|---|---|---|---|--:|--:|--:|--:|
+| `qwen3.5:4b-q4_K_M` (served) | 0.662 [0.631, 0.690] | 0.70 / 0.45 | 0.77 / 0.50 | 0.8% (4/527) | 100% | 0.752 | -0.090 |
+| `ministral-3:3b` | 0.603 [0.572, 0.633] | 0.64 / 0.37 | 0.67 / 0.56 | 1.1% (6/565) | 100% | 0.685 | -0.082 |
+| `qwen3:4b-instruct-2507-q4_K_M` | 0.619 [0.586, 0.649] | 0.61 / 0.54 | 0.80 / 0.37 | 1.2% (7/585) | 100% | 0.647 | -0.028 |
+
+The served model still leads; the two runners-up swap places (0.619 against 0.603, overlapping CIs).
 
 #### `/analyze` winner, cross-domain (FPB AllAgree n = 2,259, FinEntity single-label n = 851)
-<!-- PENDING:holdout table: qwen3.5:4b-q4_K_M /analyze on fpb_allagree and finentity_single; F0.5 [95% CI], P/R per class, inversion, coverage, dev300 F0.5, gap -->
+
+| set | F0.5 [95% CI] | bull P / R | bear P / R | inversion | coverage | dev300 F0.5 | gap |
+|---|---|---|---|--:|--:|--:|--:|
+| `fpb_allagree` | 0.940 [0.928, 0.952] | 0.95 / 0.81 | 0.98 / 0.91 | 0.1% (1/771) | 100% | 0.752 | +0.188 |
+| `finentity_single` | 0.760 [0.727, 0.794] | 0.76 / 0.76 | 0.76 / 0.75 | 1.7% (6/357) | 100% | 0.752 | +0.008 |
+
+AllAgree keeps only sentences every annotator labelled the same way, so they are unambiguous by construction. The
+gap compares a different domain against dev300 tweets; do not read +0.188 as an improvement.
 
 #### Quality ceiling: `qwen3.5:9b` vs the `/analyze` winner
-<!-- PENDING:holdout table: qwen3.5:9b-q4_K_M (untuned ceiling) next to qwen3.5:4b-q4_K_M on articles_test full, fpb_allagree, finentity_single; F0.5 [95% CI], inversion, coverage, and one sentence on the headroom -->
+
+Both run the served 4B's v1 prompt at \|s\| >= 1; the 9B was never tuned.
+
+| set | `qwen3.5:9b-q4_K_M` F0.5 [95% CI] | inversion | coverage | `qwen3.5:4b-q4_K_M` F0.5 [95% CI] | inversion | coverage |
+|---|---|--:|--:|---|--:|--:|
+| articles test, full | 0.814 [0.759, 0.880] | 2.0% (1/51) | 100% | 0.871 [0.804, 0.940] | 0.0% (0/42) | 100% |
+| `fpb_allagree` | 0.932 [0.919, 0.945] | 0.2% (2/812) | 100% | 0.940 [0.928, 0.952] | 0.1% (1/771) | 100% |
+| `finentity_single` | 0.692 [0.661, 0.723] | 1.2% (5/425) | 100% | 0.760 [0.727, 0.794] | 1.7% (6/357) | 100% |
+
+The 9B makes more directional calls at lower precision and beats the 4B nowhere (a tie on FPB), so there is no
+evidence the 4B leaves quality on the table at this prompt; untuned, this is a floor for the 9B, not its best.
 
 #### Summaries on the test articles (n = 60)
-<!-- PENDING:holdout table: summary/qwen3.5:4b and analyze/qwen3.5:4b on test articles; pass, numbers, entity, key facts 0.60 / 0.75, Opus judge faithfulness [CI], coverage, halluc. flag, material error rate [CI], leads -->
+
+| endpoint | model | pass | numbers | entity | key facts 0.60 / 0.75 | faithful [95% CI] | cover | halluc. flag | material [95% CI] | leads |
+|---|---|--:|--:|--:|---|---|--:|--:|---|--:|
+| summary | `qwen3.5:4b-q4_K_M` | 93% | 97% | 97% | 58% / 33% | 4.37 [4.17, 4.57] | 4.50 | 42% | 17% [7%, 27%] | 93% |
+| analyze | `qwen3.5:4b-q4_K_M` | 92% | 95% | 97% | 63% / 38% | 4.17 [3.97, 4.37] | 4.63 | 52% | 25% [15%, 35%] | 95% |
+
+`/summary` holds: faithfulness 4.37 against 4.40 on dev, though material errors rise from 10% (3 of 30) to 17% (10
+of 60), with overlapping CIs. `/analyze` summaries degrade on unseen articles: faithfulness 4.17 against 4.47 and
+material errors 25% (15 of 60) against 10%. The served 3-sentence / 60-word cap shortened 25% of the `/analyze`
+summaries (33% on dev) and none of the `/summary` ones. Both still pass the deterministic gate; of the unsupported
+numbers (3 for `/summary`, 5 for `/analyze`), 3 each were in the extracted input but not in the gold article.
 
 ## 9. Threats to validity
 
 - **One labeller family**: article labels, gold bodies, key facts and summary judges are all Claude Opus. Labellers
   were independent and judges blind, but a shared bias would not show, and no human checked any label.
-- **Small n**: with 30 dev articles, the served rules' CIs span about 0.2-0.5 F0.5 (60 test articles in the
-  holdout); article results check that rules transfer,
-  they do not rank models.
+- **Small n**: with 30 dev articles, the served rules' CIs span about 0.2-0.5 F0.5, and about 0.14-0.25 on the 60
+  test articles; article results check that rules transfer, they do not rank models. One inversion moves the rate by
+  2-7 points, so the 2% cap cannot be confirmed on articles at this n.
 - **Tuned on tweets**: thresholds and prompts were tuned on 300 tweets and only checked on articles; CIs at a tuned
   threshold exclude the threshold choice, and `directional_tau` is one more tuned parameter.
 - **Class mix**: the article sets are balanced while real traffic is likely neutral-heavy (64.7% in Twitter FNS
@@ -317,7 +403,7 @@ The one-time run is in progress; its tables are added here from `evals/results/h
   the extraction profiles were tuned with this set in view (caveats in `03-extraction.md`).
 - **Contamination**: the public datasets may be in the models' pretraining data; the articles are recent, which
   limits but does not rule out overlap.
-- **Precision first, by design**: the selected `/signal` model misses about half the directional articles; a miss is
-  cheap under Q2, but users will see many neutrals.
+- **Precision first, by design**: the selected `/signal` model misses about half the directional dev articles and 14
+  of 40 test ones (bearish recall 0.40 on both); a miss is cheap under Q2, but users will see many neutrals.
 - **Indicative parts**: grid and articles timings ran on a shared machine (selection uses the dedicated native-metal
   suite; Docker CPU is in `05-latency.md`), and the error-analysis keyword buckets are a first-match heuristic.

@@ -141,8 +141,9 @@ its budget, so no Pareto knee was needed.
   9B decision models stay on the allowlist and can be chosen per request with the `model` parameter on native
   Ollama.
 - **The winner's articles-dev inversion**: that one inversion is 1 of 14 directional calls (7.1%). The rule passes
-  it because at n=30 the 95% CI reaches down to 0%; the point estimate alone would fail the 2% cap, so the holdout
-  is the real check.
+  it because at n=30 the 95% CI reaches down to 0%; the point estimate alone would fail the 2% cap. On the 60 test
+  articles it is 1 of 30 (3.3%, CI 0% to 10.3%), again above the cap with a CI that reaches 0%, so the holdout does
+  not clear the doubt (below).
 - **Provisional defaults replaced**: the budget-feasible defaults set after the P2 probe (`/summary`
   `qwen3.5:2b-q4_K_M`, `/analyze` `ministral-3:3b`, see `defaults_untouched` in
   [`frozen.json`](../../../evals/results/frozen.json)) gave way to `qwen3.5:4b-q4_K_M` on both. The probe's
@@ -151,11 +152,40 @@ its budget, so no Pareto knee was needed.
   about 718 tokens of `full` article text, [03](03-extraction.md)), and there it meets both budgets.
 - **Split vs combined**: split mode delivers the signal at 178 ms; the combined `/analyze` stream delivers it at
   1,098 ms, about six times later, but scores higher on the article dev set (0.880 [0.791, 0.989] vs
-  0.685 [0.473, 0.833], overlapping CIs at n=30) and is close on dev300 (0.752 vs 0.730).
+  0.685 [0.473, 0.833], overlapping CIs at n=30) and on the test articles (0.871 vs 0.801), and is close on dev300
+  (0.752 vs 0.730).
 
-**Holdout check.** The frozen configs run once on the test splits (`articles_test`, `tfns_val`, `fpb_allagree`,
-`finentity_single`), with `qwen3.5:9b-q4_K_M` as a holdout-only quality ceiling, and Opus judges the winners'
-summaries on the test articles. Nothing is re-tuned on these numbers; results go to `evals/results/holdout/` and
-[04-evals.md](04-evals.md#8-holdout).
-<!-- PENDING:holdout per-endpoint winner F0.5 [95% CI] and inversion rate on articles_test and tfns_val, the cross-domain fpb_allagree / finentity_single scores, and the qwen3.5:9b ceiling, each against its dev number -->
-<!-- PENDING:holdout Opus judge faithfulness and coverage of the /summary and /analyze winners on the 60 test articles, against the dev 4.40 / 4.47 -->
+**Holdout check.** The frozen configs ran once, on 2026-10-19, on the test splits (`articles_test`, `tfns_val`,
+`fpb_allagree`, `finentity_single`), with `qwen3.5:9b-q4_K_M` as a holdout-only quality ceiling, and six blind Opus
+judges scored the winners' summaries on the 60 test articles. Mid-run the native Ollama server hung (21 timed-out
+rows in one cell); it was restarted with the same service environment and the run resumed from its caches, which
+[`holdout_runs.json`](../../../evals/results/holdout_runs.json) records, and every cell finished with 0 errors.
+Nothing was re-tuned on these numbers and the defaults stay as frozen. Full tables:
+[04-evals.md](04-evals.md#holdout-results), [`holdout.md`](../../../evals/results/holdout/holdout.md).
+
+| Default | Test articles F0.5 [95% CI], inversions | Articles dev | `tfns_val` F0.5 [95% CI], inversions | dev300 | `fpb_allagree` / `finentity_single` |
+|---|---|---|---|---|---|
+| `/signal` `qwen3.5:0.8b-q8_0`, lede | 0.801 [0.668, 0.886], 1/30 (3.3%) | 0.685, 1/14 | 0.648 [0.612, 0.679], 2/386 (0.5%) | 0.730, 0.0% | 0.700 / 0.711 |
+| `/analyze` `qwen3.5:4b-q4_K_M`, full | 0.871 [0.804, 0.940], 0/42 | 0.880, 0/22 | 0.662 [0.631, 0.690], 4/527 (0.8%) | 0.752, 0.0% | 0.940 / 0.760 |
+| `qwen3.5:9b-q4_K_M`, untuned ceiling | 0.814 [0.759, 0.880], 1/51 (2.0%) | - | - | - | 0.932 / 0.692 |
+
+| Summaries, test (dev) | Opus faithfulness [95% CI] | Coverage | Material errors [95% CI] |
+|---|---|---|---|
+| `/summary` `qwen3.5:4b-q4_K_M` | 4.37 [4.17, 4.57] (4.40) | 4.50 (4.57) | 17% [7%, 27%] (10%) |
+| `/analyze` `qwen3.5:4b-q4_K_M` | 4.17 [3.97, 4.37] (4.47) | 4.63 (4.63) | 25% [15%, 35%] (10%) |
+
+- **`/signal`**: F0.5 is higher than on dev (0.801 vs 0.685, inside the wide dev CI, so not evidence of a gain), but
+  the inversion point estimate is above the 2% cap again and bearish recall is 0.40 on both sets. Selection let it through because the articles-dev CI at n=30 reached 0%; the test
+  result does not clear that doubt. On tweets and the cross-domain sets it stays under the cap (0.0-1.0%).
+- **`/analyze`** generalises best of the served defaults: 0.871 against 0.880, no inversions. Its FPB 0.940 is far
+  above dev300 because AllAgree sentences are unambiguous by construction; that gap compares domains and is not an
+  improvement. On FinEntity it scores 0.760 against the 0.8B's 0.711.
+- **Tweets**: every model, finalists included, lands 0.03-0.09 F0.5 below dev300, the expected optimism of picking
+  prompts and thresholds on 300 dev tweets; each endpoint's dev300 leader still leads. The 9B decision models keep
+  their accuracy lead (test articles 0.859 lede for both, 0.896 full for `nimble`; tweets 0.783 / 0.755 against
+  0.648) and still miss the latency budget, so the `/signal` trade-off above stands.
+- **The 9B ceiling** beats the 4B nowhere (0.814 vs 0.871 on articles, 0.692 vs 0.760 on FinEntity, a tie on FPB):
+  no evidence the 4B leaves quality on the table at this prompt. It is untuned, so this is a floor for the 9B.
+- **Summaries**: `/summary` holds on unseen articles; `/analyze` summaries degrade (faithfulness 4.17, 15 of 60 with
+  a material error), and the served length cap shortened 25% of them (33% on dev)
+  ([summary eval](../../../evals/results/summary/summary.md)).

@@ -39,7 +39,13 @@ bundled profile pulls just those two models, 4.34 GB. The 9B decision models sco
 against 0.914 / 0.918 for the 0.8B) but miss the 500 ms `/signal` budget (p50 659 ms), so the default trades recall
 for speed, and the 9B models stay selectable per request on native Ollama. Details:
 [01 selection outcome](01-decisions.md#selection-outcome), [04-evals.md](04-evals.md), [05-latency.md](05-latency.md).
-<!-- PENDING:holdout one sentence: whether the one-shot holdout on the test splits confirms the three defaults, with the headline F0.5 per endpoint and a link to evals/results/holdout/ -->
+
+The one-time holdout on unseen test splits ([`holdout.md`](../../../evals/results/holdout/holdout.md)) leaves the
+three defaults as frozen, with nothing re-tuned: test-article F0.5 0.801 for `/signal` (dev 0.685) and 0.871 for
+`/analyze` (dev 0.880), and `/summary` judge faithfulness 4.37 (dev 4.40). Two weak spots remain: the
+`/signal` default inverts 1 of 30 directional calls (3.3%, above the 2% cap as a point estimate, as on the dev
+articles, 1 of 14), and `/analyze` summaries degrade on unseen articles (faithfulness 4.17, material errors 25%
+against 10% on dev).
 
 ## Reading order
 

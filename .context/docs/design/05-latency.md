@@ -173,7 +173,8 @@ alone at concurrency 1.
   resident models and two prefills of the same article.
 - **Combined** yields the signal at about 0.8 to 1.1 s and the summary by about 2.2 to 2.6 s, from one model
   and one prompt. Its signal is not worse: `qwen3.5:4b` scores dev300 F0.5 0.752 against 0.730 for the 0.8B,
-  and 0.880 against 0.685 on the 30 dev articles (wide CIs, [selection.md](../../../evals/results/selection/selection.md)).
+  0.880 against 0.685 on the 30 dev articles (wide CIs, [selection.md](../../../evals/results/selection/selection.md)),
+  and 0.871 against 0.801 on the 60 test articles ([holdout](04-evals.md#holdout-results)).
 - **Not measured**: split mode's two requests running at once on one GPU; the split row joins two isolated
   measurements, so its summary times are a lower bound for real use.
 
@@ -188,9 +189,18 @@ alone at concurrency 1.
 The 9B decision models are 0.11 to 0.14 F0.5 better on dev300 and neither fits the budget, so the 0.8B wins as
 the only candidate inside it. The budget was reported, not moved to admit them. Both stay on the allowlist: on
 native Ollama a request picks one with the `model` parameter and trades about 0.5 to 0.9 s for a higher F0.5,
-mostly recall. Whether the gap holds on unseen data is a holdout question ([04-evals.md](04-evals.md)).
+mostly recall. The lead holds on unseen tweets and narrows on the test articles, in the one-time holdout
+([04-evals.md](04-evals.md#holdout-results), [`holdout.md`](../../../evals/results/holdout/holdout.md)):
 
-<!-- PENDING:holdout articles_test and tfns_val F0.5 of the three /signal candidates at lede scope, to show whether the 9B accuracy lead holds on unseen data -->
+| model | test articles lede F0.5 [95% CI] | inversion | coverage | `tfns_val` F0.5 [95% CI] | lede p50 ms |
+|---|---|--:|--:|---|--:|
+| `qwen3.5:0.8b-q8_0` | 0.801 [0.668, 0.886] | 1/30 | 100% | 0.648 [0.612, 0.679] | 178 |
+| `clef-flash:9b-q8_0` | 0.859 [0.784, 0.938] | 1/44 | 85% | 0.783 [0.761, 0.805] | 659 |
+| `nimble:9b-q4_K_M` | 0.859 [0.755, 0.938] | 0/32 | 57% | 0.755 [0.730, 0.782] | 1,061 |
+
+The 9B lead is about 0.06 F0.5 on the 60 test articles (overlapping CIs) and 0.11 to 0.14 on 2,388 tweets, where
+the CIs separate. The trade-off stands: the 0.8B is the only candidate inside the budget, and the 9B models buy
+their accuracy with 0.5 to 0.9 s more per signal.
 
 ## docker-cpu
 

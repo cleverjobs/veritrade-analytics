@@ -38,9 +38,18 @@ native Metal on an Apple M4 Pro, warm, concurrency 1, excluding fetch ([`latency
 - Live fetch, outside the budgets: median of the per-source medians 148 ms, slowest source 552 ms.
 - The higher-scoring 9B decision models miss the 500 ms `/signal` budget ([the trade-off](#the-signal-trade-off)).
 
-These are dev numbers. The frozen configs then run once on unseen test splits
-([`04-evals.md`](.context/docs/design/04-evals.md#8-holdout)).
-<!-- PENDING:holdout one sentence per endpoint: the winner's F0.5 [95% CI] and inversion rate on articles_test and tfns_val against its dev figure, and the /summary winner's Opus faithfulness on the 60 test articles, linking evals/results/holdout/holdout.md -->
+These are dev numbers. The frozen defaults then ran once on unseen test splits, nothing re-tuned
+([`holdout.md`](evals/results/holdout/holdout.md), [full tables](.context/docs/design/04-evals.md#holdout-results)):
+
+| Endpoint (default) | Test articles F0.5 [95% CI] | Inversions | Tweets F0.5 | Summaries: Opus faithfulness [95% CI]; material errors [95% CI] |
+|---|---|---|---|---|
+| `/api/signal` (lede) | 0.801 [0.668, 0.886], dev 0.685 | 1 of 30 calls, 3.3% (dev 1 of 14) | 0.648, dev300 0.730 | - |
+| `/api/summary` | - | - | - | 4.37 [4.17, 4.57], dev 4.40; 17% [7%, 27%], dev 10% |
+| `/api/analyze` | 0.871 [0.804, 0.940], dev 0.880 | 0 of 42 (dev 0 of 22) | 0.662, dev300 0.752 | 4.17 [3.97, 4.37], dev 4.47; 25% [15%, 35%], dev 10% |
+
+Weak spots: on the dev and test articles the `/signal` default inverts 1 of 14 and 1 of 30 calls, above the 2% cap as a
+point estimate (both CIs reach 0%), and `/analyze` summaries degrade on unseen articles while `/summary` holds
+([limits](#limitations-and-next-steps)).
 
 ## Quickstart
 
@@ -203,7 +212,7 @@ answers, is in [`01-decisions.md`](.context/docs/design/01-decisions.md).
   errors; four CDN-blocked publishers were replaced, not evaded ([02](.context/docs/design/02-source-probe.md)).
 - **Budgets before measurements** (R7): set first (see [the table](#latency-trade-offs)); a miss is reported, never moved.
 - **Select by rules in code, test once** (Q6, Q7, R5-R8): lean grid, one error pass, freeze; `select` writes the
-  defaults; the holdout runs once behind a guard keyed by the frozen config's hash ([04](.context/docs/design/04-evals.md)).
+  defaults; the holdout ran once, guarded by the frozen config's hash ([04](.context/docs/design/04-evals.md#8-holdout)).
 - **Publisher rights in a public repo** (Q11): skeleton test fixtures (real DOM, synthetic text); no article or
   dataset text is committed, only ids, URLs, hashes, labels and numbers.
 
@@ -224,8 +233,8 @@ whose article input is capped at 2,000 tokens) against 825-1,074 at p50.
 
 - **Split or combined.** Split delivers the signal at 178 ms while the summary streams (first text 1,128 ms);
   combined delivers it at 1,098 ms, six times later, but from one model and one prompt instead of two resident models
-  (1.02 + 3.32 GB) and two prefills, and it scores higher on the article dev set (0.880 vs 0.685, overlapping CIs at
-  n=30; dev300 0.752 vs 0.730). Split's two concurrent requests on one GPU were not measured, so its times are a lower bound.
+  (1.02 + 3.32 GB) and two prefills, and it scores higher on the dev and test articles (0.880 vs 0.685 and 0.871 vs
+  0.801, overlapping CIs; dev300 0.752 vs 0.730). Split's two concurrent requests on one GPU were not measured, so its times are a lower bound.
 - **Streaming.** SSE does not change the total (-2.9% to +1.1% against JSON at p50) but shows text at 38-54% of it.
   Sentiment-first, the streamed score lands 194-249 ms before the first summary text and 1.4-1.5 s before a JSON
   client would see it.
@@ -244,16 +253,16 @@ whose article input is capped at 2,000 tokens) against 825-1,074 at p50.
 
 ### The `/signal` trade-off
 
-| Model | dev300 F0.5 [95% CI] | Articles dev F0.5 | Lede p50 / p95 | File | Outcome |
-|---|---|---|---|---|---|
-| `qwen3.5:0.8b-q8_0` | 0.730 [0.651, 0.795] | 0.685 | 178 / 195 ms | 1.02 GB | served default |
-| `clef-flash:9b-q8_0` | 0.874 [0.811, 0.937] | 0.848 | 659 / 807 ms | 10.58 GB | misses 500 ms; alone over the 10 GB bundle cap |
-| `nimble:9b-q4_K_M` | 0.843 [0.773, 0.901] | 0.895 | 1,061 / 1,182 ms | 5.63 GB | misses 500 ms |
+| Model | dev300 F0.5 [95% CI] | Articles dev F0.5 | Test articles / tweets F0.5 | Lede p50 / p95 | File | Outcome |
+|---|---|---|---|---|---|---|
+| `qwen3.5:0.8b-q8_0` | 0.730 [0.651, 0.795] | 0.685 | 0.801 / 0.648 | 178 / 195 ms | 1.02 GB | served default |
+| `clef-flash:9b-q8_0` | 0.874 [0.811, 0.937] | 0.848 | 0.859 / 0.783 | 659 / 807 ms | 10.58 GB | misses 500 ms; alone over the 10 GB bundle cap |
+| `nimble:9b-q4_K_M` | 0.843 [0.773, 0.901] | 0.895 | 0.859 / 0.755 | 1,061 / 1,182 ms | 5.63 GB | misses 500 ms |
 
-The 9B models score 0.11-0.14 higher on dev300, mostly through recall, but neither fits the budget and clef-flash
-alone exceeds the bundle cap. The 0.8B is precise when it calls (dev300 precision 0.91 / 0.92) but cautious: on the
-article dev set it catches 10 of 20 directional articles against 17 for clef-flash, one inversion each. The budget
-was reported, never moved; both 9B models stay selectable per request (`model`, native Ollama) for 0.5-0.9 s more.
+The 9B models score 0.11-0.14 higher on dev300, mostly through recall, and keep the lead on the holdout, but neither
+fits the budget and clef-flash alone exceeds the bundle cap. The 0.8B is precise but cautious: it catches 10 of 20
+directional dev articles and 26 of 40 test ones, against 17 and 37 for clef-flash, one inversion each on both sets.
+The budget was reported, never moved; both 9B models stay selectable per request (`model`, native Ollama).
 
 ### Native vs docker-cpu
 
@@ -302,30 +311,44 @@ what is measured is what is served.
   (`ministral-3:3b`) and 0.647 (`qwen3:4b-instruct-2507`).
 - **Summaries**: deterministic checks (length, every number grounded in the source, entity named), key-fact
   coverage with `qwen3-embedding:0.6b` at cosine 0.60, and blind Opus judges (faithfulness, coverage,
-  hallucinations, lead) on the 30 dev articles ([`summary.md`](evals/results/summary/summary.md)). Extraction is
-  scored separately against Opus gold bodies ([`summary.md`](evals/results/extraction/summary.md)).
+  hallucinations, lead) on the 30 dev and 60 test articles ([`summary.md`](evals/results/summary/summary.md)).
+  Extraction is scored separately against Opus gold bodies ([`summary.md`](evals/results/extraction/summary.md)).
 - **Reproducing**: `uv run python -m veritrade_evals --help` lists every step; `datasets fetch` re-downloads the
   pinned public datasets behind the tweet, sentence and paragraph splits, but the article-level runs (signal on
   articles, extraction, summaries, latency) need the stored HTML and Opus gold bodies in the gitignored
   `evals/data/private/`, which publisher rights keep out of the repo, so for those a clone can only read the
   committed results.
 
-Summary quality of the served pair on the dev articles (n = 30):
+Summary quality of the served pair on the dev (n = 30) and test (n = 60) articles:
 
-| Endpoint, model | Checks pass | Numbers grounded | Key facts (0.60) | Opus faithfulness [95% CI] | Coverage | Hallucination flag | Material errors [95% CI] |
-|---|--:|--:|--:|---|--:|--:|---|
-| `/summary`, `qwen3.5:4b-q4_K_M` | 90% | 93% | 47% | 4.40 [4.17, 4.60] | 4.57 | 50% | 10% [0%, 20%] |
-| `/analyze`, `qwen3.5:4b-q4_K_M` | 93% | 97% | 57% | 4.47 [4.20, 4.70] | 4.63 | 40% | 10% [0%, 20%] |
+| Articles | Endpoint, model | Checks pass | Numbers grounded | Key facts (0.60) | Opus faithfulness [95% CI] | Coverage | Hallucination flag | Material errors [95% CI] |
+|---|---|--:|--:|--:|---|--:|--:|---|
+| dev | `/summary`, `qwen3.5:4b-q4_K_M` | 90% | 93% | 47% | 4.40 [4.17, 4.60] | 4.57 | 50% | 10% [0%, 20%] |
+| dev | `/analyze`, `qwen3.5:4b-q4_K_M` | 93% | 97% | 57% | 4.47 [4.20, 4.70] | 4.63 | 40% | 10% [0%, 20%] |
+| test | `/summary`, `qwen3.5:4b-q4_K_M` | 93% | 97% | 58% | 4.37 [4.17, 4.57] | 4.50 | 42% | 17% [7%, 27%] |
+| test | `/analyze`, `qwen3.5:4b-q4_K_M` | 92% | 95% | 63% | 4.17 [3.97, 4.37] | 4.63 | 52% | 25% [15%, 35%] |
 
 The hallucination flag counts any unsupported detail, minor slips included; a material error is faithfulness <= 3
 (a wrong key number, an unsupported claim that matters). The `/summary` runner-up, `qwen3.5:2b-q4_K_M`, is faster
-(TTFT 484 ms) but scores 3.97 with 30% material errors, so the 4B serves both summary endpoints.
+(TTFT 484 ms) but scores 3.97 on dev with 30% material errors, so the 4B serves both summary endpoints. On test,
+`/analyze` summaries degrade (15 of 60 materially wrong); the served 3-sentence / 60-word cap shortened 25% (dev 33%).
 
-**Holdout.** The frozen configs run once on the test splits (`articles_test`, `tfns_val`, `fpb_allagree`,
-`finentity_single`), with `qwen3.5:9b-q4_K_M` as an untuned quality ceiling, and Opus judges the winners' summaries
-on the 60 test articles. Nothing is re-tuned on these numbers ([protocol](.context/docs/design/04-evals.md#8-holdout)).
-The one-time run is in progress; its results are added here when it completes.
-<!-- PENDING:holdout replace the in-progress sentence above with a short table: per endpoint winner, F0.5 [95% CI], inversion rate and coverage on articles_test, tfns_val, fpb_allagree and finentity_single with the dev F0.5 and gap; the qwen3.5:9b ceiling; Opus faithfulness and material error rate of the two summary winners on the test articles; link evals/results/holdout/holdout.md -->
+**Holdout.** The frozen configs ran once, on 2026-10-19, with `qwen3.5:9b-q4_K_M` as an untuned ceiling and six blind
+Opus judges for the test summaries (above). Ollama hung mid-run, was restarted and the run resumed from its caches,
+as the guard records; every cell finished with 0 errors and nothing was re-tuned
+([`holdout.md`](evals/results/holdout/holdout.md), [protocol](.context/docs/design/04-evals.md#8-holdout)). Cells
+give F0.5 [95% CI], inversion and gap to dev (articles dev, else dev300); coverage is 100% everywhere:
+
+| Test set (n) | `/signal` `qwen3.5:0.8b-q8_0` (lede) | `/analyze` `qwen3.5:4b-q4_K_M` | `qwen3.5:9b-q4_K_M` ceiling |
+|---|---|---|---|
+| Articles (60) | 0.801 [0.668, 0.886], 3.3%, +0.117 | 0.871 [0.804, 0.940], 0.0%, -0.009 | 0.814 [0.759, 0.880], 2.0% |
+| `tfns_val` tweets (2,388) | 0.648 [0.612, 0.679], 0.5%, -0.082 | 0.662 [0.631, 0.690], 0.8%, -0.090 | - |
+| `fpb_allagree` sentences (2,259) | 0.700 [0.669, 0.728], 1.0%, -0.030 | 0.940 [0.928, 0.952], 0.1%, +0.188 | 0.932 [0.919, 0.945], 0.2% |
+| `finentity_single` paragraphs (851) | 0.711 [0.672, 0.749], 0.0%, -0.019 | 0.760 [0.727, 0.794], 1.7%, +0.008 | 0.692 [0.661, 0.723], 1.2% |
+
+`/analyze` generalises best; its FPB jump reflects AllAgree sentences being unambiguous by construction, not a gain.
+The untuned 9B beats the 4B nowhere (a floor for the 9B, not its best). Tweets run 0.03-0.09 below dev300 for every
+model: the winner's curse of tuning on 300 dev tweets.
 
 ## Testing
 
@@ -382,16 +405,18 @@ harness, model, effort, subagents and token usage.
 ## Limitations and next steps
 
 - **One model family labels and judges.** Article labels, gold bodies, key facts and summary judgements all come
-  from Claude Opus with no human check, and with 30 dev articles the served rules' CIs span about 0.2-0.5 F0.5.
-- **Precision costs recall.** The `/signal` default caught 10 of 20 directional dev articles, so users will see many
-  neutrals; the 9B decision models catch more but miss the latency budget.
-- **The inversion cap is unproven on articles.** On the 30 dev articles the `/signal` default inverts 1 of its 14
-  directional calls (7.1% against the 2% cap); selection passes it only because the 95% CI at n=30 reaches 0%, so
-  the holdout is the real check ([`selection.md`](evals/results/selection/selection.md)).
-- **Tuned on tweets.** Prompts and thresholds were tuned on 300 tweets and checked on balanced article sets; real
-  traffic is likely neutral-heavy, so served precision is likely lower ([threats](.context/docs/design/04-evals.md#9-threats-to-validity)).
-- **Summaries still slip.** The `/summary` default has an unsupported detail (minor slips included) in 50% of dev
-  summaries and a material error in 10% [0%, 20%]; numbers are not re-checked against the source at serve time.
+  from Claude Opus with no human check; served-rule CIs span 0.2-0.5 F0.5 on 30 dev and 0.14-0.25 on 60 test articles.
+- **Precision costs recall.** The `/signal` default caught 10 of 20 directional dev articles and 26 of 40 test ones
+  (bearish recall 0.40 on both), so users will see many neutrals; the 9B models catch more but miss the budget.
+- **The inversion cap is unproven on articles.** The `/signal` default inverts 1 of 14 directional calls on dev
+  articles (7.1% against the 2% cap) and 1 of 30 on test (3.3%, 95% CI 0% to 10.3%); selection let it through as the
+  dev CI at n=30 reaches 0%, and the holdout does not clear that doubt ([`holdout.md`](evals/results/holdout/holdout.md)).
+- **Tuned on tweets.** Prompts and thresholds were tuned on 300 tweets, and every model scores 0.03-0.09 F0.5 lower on
+  the 2,388 held-out ones; real traffic is likely neutral-heavy, so served precision is likely below the balanced
+  article figures ([threats](.context/docs/design/04-evals.md#9-threats-to-validity)).
+- **Summaries still slip.** The `/summary` default has an unsupported detail (minor slips included) in 50% of dev and
+  42% of test summaries, and a material error in 10% [0%, 20%] and 17% [7%, 27%]; `/analyze` summaries degrade on
+  unseen articles, to 25% [15%, 35%] material errors (10% on dev). Numbers are not re-checked at serve time.
 - **Latency is one machine at concurrency 1.** Tails exceed the budgets, split mode's concurrent pair and multi-user
   load were not measured, and the docker-cpu figures are indicative.
 - **Coverage and hardening.** 10 profiled English sources (others fall back to JSON-LD and density, unmeasured),
