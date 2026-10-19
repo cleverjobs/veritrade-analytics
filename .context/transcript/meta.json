@@ -6,14 +6,14 @@
     "version": "2.1.301",
     "versions_seen": {
       "2.1.301": 27983,
-      "2.1.302": 4252
+      "2.1.302": 4359
     },
     "entrypoint": "cli"
   },
   "models": {
     "note": "responses per model, deduped by message.id",
     "main": {
-      "claude-opus-5-5": 559,
+      "claude-opus-5-5": 577,
       "<synthetic>": 1
     },
     "subagents": {
@@ -24,10 +24,10 @@
   "effort": {
     "note": "assistant records per value",
     "effort": {
-      "xhigh": 11582
+      "xhigh": 11618
     },
     "perTurnEffort": {
-      "xhigh": 11582
+      "xhigh": 11618
     }
   },
   "thinking": {
@@ -35,20 +35,20 @@
       {
         "type": "adaptive",
         "display": "updates",
-        "requests": 4705
+        "requests": 4724
       }
     ],
     "display_on_records": {
-      "updates": 3566
+      "updates": 3580
     }
   },
   "modes": {
     "permission_modes": {
       "plan": 28,
-      "auto": 594
+      "auto": 615
     },
     "modes": {
-      "normal": 622
+      "normal": 643
     },
     "plan_mode": true,
     "ultracode": true,
@@ -68,10 +68,10 @@
     }
   },
   "tools_used": {
-    "Bash": 2861,
-    "Read": 1411,
+    "Bash": 2874,
+    "Read": 1413,
     "Write": 1188,
-    "Edit": 1146,
+    "Edit": 1147,
     "WebFetch": 247,
     "WebSearch": 74,
     "SendMessage": 46,
@@ -704,20 +704,20 @@
   "usage_tokens": {
     "note": "summed once per (file, message.id); thinking is a subset of output",
     "total": {
-      "input": 9428,
-      "cache_creation": 29166682,
-      "cache_read": 990346696,
-      "output": 1635881,
-      "thinking": 697857
+      "input": 9466,
+      "cache_creation": 29204383,
+      "cache_read": 995540773,
+      "output": 1650736,
+      "thinking": 704756
     },
     "by_scope_and_model": {
       "main": {
         "claude-opus-5-5": {
-          "input": 1270,
-          "cache_creation": 2726848,
-          "cache_read": 150907407,
-          "output": 562071,
-          "thinking": 267152
+          "input": 1308,
+          "cache_creation": 2764549,
+          "cache_read": 156101484,
+          "output": 576926,
+          "thinking": 274051
         },
         "<synthetic>": {
           "input": 0,
@@ -747,47 +747,47 @@
   },
   "date_range": {
     "start": "2026-10-16T10:22:16.947Z",
-    "end": "2026-10-19T17:02:53.275Z"
+    "end": "2026-10-19T17:32:39.363Z"
   },
   "records": {
-    "kept_total": 22456,
-    "dropped_total": 22186,
+    "kept_total": 22622,
+    "dropped_total": 22308,
     "kept": {
-      "agent-name": 617,
-      "ai-title": 620,
-      "assistant": 11584,
+      "agent-name": 638,
+      "ai-title": 641,
+      "assistant": 11620,
       "attachment:date": 78,
       "attachment:model": 76,
       "attachment:plan_mode": 14,
-      "attachment:queued_command": 63,
+      "attachment:queued_command": 64,
       "attachment:skill_mention": 1,
       "attachment:ultra_effort_enter": 5,
-      "custom-title": 617,
+      "custom-title": 638,
       "journal:launched": 12,
       "journal:result": 56,
       "journal:started": 56,
-      "mode": 622,
-      "permission-mode": 622,
-      "system:away_summary": 16,
-      "system:informational": 6,
-      "system:turn_duration": 24,
-      "user": 7367
+      "mode": 643,
+      "permission-mode": 643,
+      "system:away_summary": 18,
+      "system:informational": 7,
+      "system:turn_duration": 27,
+      "user": 7385
     },
     "dropped": {
-      "api-request": 4705,
-      "api request blob": 7657,
+      "api-request": 4724,
+      "api request blob": 7682,
       "api-request-shape": 100,
-      "atis-latch": 621,
+      "atis-latch": 642,
       "attachment:agent_listing_delta": 18,
       "attachment:auto_mode": 64,
       "attachment:command_permissions": 3,
       "attachment:compact_file_reference": 5,
       "attachment:credential_org": 77,
-      "attachment:deferred_tools_delta": 154,
-      "attachment:deferred_tools_record": 2343,
+      "attachment:deferred_tools_delta": 155,
+      "attachment:deferred_tools_record": 2344,
       "attachment:diagnostics": 5,
-      "attachment:edited_text_file": 223,
-      "attachment:environment": 115,
+      "attachment:edited_text_file": 225,
+      "attachment:environment": 117,
       "attachment:file": 25,
       "attachment:hook_additional_context": 16,
       "attachment:hook_success": 9,
@@ -795,36 +795,36 @@
       "attachment:mcp_instructions_delta": 77,
       "attachment:opened_file_in_ide": 1,
       "attachment:plan_file_reference": 3,
-      "attachment:plan_mode_exit": 2,
+      "attachment:plan_mode_exit": 3,
       "attachment:prompt_snapshot": 153,
       "attachment:read_truncation_notice": 3,
       "attachment:remote_session_change": 76,
       "attachment:session context": 76,
       "attachment:silent_turn_reminder": 19,
-      "attachment:skill_listing": 75,
+      "attachment:skill_listing": 76,
       "attachment:structured_output": 21,
       "attachment:task_status": 2,
       "attachment:thinking_drop": 5,
-      "attachment:total_tokens_reminder": 4459,
-      "cost-state": 3,
+      "attachment:total_tokens_reminder": 4475,
+      "cost-state": 5,
       "file-history-delta": 32,
-      "file-history-snapshot": 14,
+      "file-history-snapshot": 16,
       "fork-context-ref": 1,
-      "last-prompt": 623,
-      "queue-operation": 234,
+      "last-prompt": 645,
+      "queue-operation": 238,
       "system:compact_boundary": 6,
       "system:local_command": 2,
-      "system:stop_hook_summary": 88
+      "system:stop_hook_summary": 91
     },
     "unparseable_lines": 0
   },
   "redactions": {
-    "denylist": 830,
+    "denylist": 831,
     "email": 77,
-    "home_path": 27082,
+    "home_path": 27170,
     "marker_neutralized": 195,
     "omitted:html": 14,
-    "omitted:private_config": 162,
+    "omitted:private_config": 166,
     "omitted:private_data": 2717,
     "omitted:skill_body": 16,
     "omitted:web_fetch": 8,

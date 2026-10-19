@@ -1,4 +1,4 @@
-"""Export this repo's Claude Code session as a redacted transcript: raw JSONL, HTML/Markdown, meta.json.
+"""Export this repo's Claude Code session as a redacted transcript: a Markdown render and meta.json.
 
 Everything is built in a staging dir; outputs reach --out only after a leak gate scans every file.
 """
@@ -27,7 +27,8 @@ RENDERER = "claude-code-log@1.7.0"
 RENDER_FLAGS = ("--depth", "tool", "--image-export-mode", "placeholder", "--no-cache")
 PROJECT_NAME = "veritrade-analytics"
 STAGING_MARKER = ".transcript-staging"
-OUTPUT_NAMES = ("raw", "rendered", "meta.json", "README.md")
+TRANSCRIPT_NAME = "transcript.md"
+OUTPUT_NAMES = (TRANSCRIPT_NAME, "meta.json", "README.md")
 # Hand-written and committed beside the outputs; publish() never touches it.
 NOTE_NAME = "NOTE.md"
 MAX_FILE_BYTES = 50 * 1024 * 1024
@@ -712,16 +713,10 @@ def build_meta(harvest: Harvest, san: Sanitizer, sid: str) -> dict[str, Any]:
     return cleaned
 
 
-def html_names(parts: int) -> list[str]:
-    return ["transcript.html"] if parts <= 1 else [f"transcript-{i}.html" for i in range(1, parts + 1)]
-
-
-def readme(meta: dict[str, Any], note: bool = False, html_parts: int = 1) -> str:
+def readme(meta: dict[str, Any], note: bool = False) -> str:
     dates = meta["date_range"]
     pointer = f"\nStart with [`{NOTE_NAME}`]({NOTE_NAME}), a note from Kris to the reviewers.\n"
     pointer = pointer if note else ""
-    html = ", ".join(f"`rendered/{name}`" for name in html_names(html_parts))
-    split = " (HTML in time-ordered parts, each under GitHub's 50 MB file limit)" if html_parts > 1 else ""
     return f"""# AI conversation transcript
 
 Exported from the Claude Code session that built this repo (`{meta["session_id"]}`,
@@ -729,9 +724,7 @@ Exported from the Claude Code session that built this repo (`{meta["session_id"]
 {pointer}
 ## Contents
 
-- {html}, `rendered/transcript.md`: readable render ({RENDERER}, depth `tool`){split}.
-- `raw/`: the filtered, redacted JSONL in the original session layout (main thread, `subagents/**`,
-  `workflows/**`); re-renderable with claude-code-log.
+- `{TRANSCRIPT_NAME}`: the readable render ({RENDERER}, Markdown, depth `tool`).
 - `meta.json`: harness version, models, effort and thinking settings, modes, skills, workflows,
   subagent counts, token usage, record counts and redaction counts.
 
@@ -759,45 +752,21 @@ and pushed it are not included.
 """
 
 
-def render_jobs(splits: list[str]) -> list[tuple[str, str, list[str]]]:
-    """(format, file name, date filters) per output; HTML parts cover the gaps between split times."""
-    bounds: list[str | None] = [None, *splits, None]
-    jobs = []
-    for name, start, end in zip(html_names(len(splits) + 1), bounds[:-1], bounds[1:], strict=True):
-        dates = (["--from-date", start] if start else []) + (["--to-date", end] if end else [])
-        jobs.append(("html", name, dates))
-    return [*jobs, ("md", "transcript.md", [])]
-
-
-def render(session_file: Path, out_dir: Path, cache: Path, splits: list[str]) -> None:
-    out_dir.mkdir(parents=True, exist_ok=True)
+def render(session_file: Path, dest: Path, cache: Path) -> None:
     env = {**os.environ, "CLAUDE_CODE_LOG_CACHE_PATH": str(cache)}
-    for fmt, name, dates in render_jobs(splits):
-        cmd = [
-            "uvx",
-            RENDERER,
-            str(session_file),
-            "-o",
-            str(out_dir / name),
-            "-f",
-            fmt,
-            *RENDER_FLAGS,
-            *dates,
-        ]
-        try:
-            subprocess.run(cmd, check=True, env=env, stdout=subprocess.DEVNULL)
-        except (OSError, subprocess.CalledProcessError) as exc:
-            sys.exit(f"render failed ({' '.join(cmd[:2])} -f {fmt}): {exc}; staging kept for inspection")
+    cmd = ["uvx", RENDERER, str(session_file), "-o", str(dest), "-f", "md", *RENDER_FLAGS]
+    try:
+        subprocess.run(cmd, check=True, env=env, stdout=subprocess.DEVNULL)
+    except (OSError, subprocess.CalledProcessError) as exc:
+        sys.exit(f"render failed ({' '.join(cmd[:2])}): {exc}; staging kept for inspection")
 
 
-def scrub_rendered(out_dir: Path, san: Sanitizer) -> None:
+def scrub_render(path: Path, san: Sanitizer) -> None:
     """The renderer may echo staging paths into its output; run the redactor over it once more."""
-    for path in sorted(out_dir.rglob("*")):
-        if path.is_file() and path.suffix in (".html", ".md", ".json", ".txt"):
-            text = path.read_text(encoding="utf-8", errors="replace")
-            cleaned = san.redact(text)
-            if cleaned != text:
-                path.write_text(cleaned, encoding="utf-8")
+    text = path.read_text(encoding="utf-8", errors="replace")
+    cleaned = san.redact(text)
+    if cleaned != text:
+        path.write_text(cleaned, encoding="utf-8")
 
 
 def scan_line(line: str, deny: re.Pattern[str] | None, structural: bool = True) -> list[str]:
@@ -876,13 +845,11 @@ def reset_staging(staging: Path) -> None:
 
 def publish(export_dir: Path, out: Path) -> None:
     out.mkdir(parents=True, exist_ok=True)
+    # Only what this run produced is replaced, so a --no-render run keeps the published transcript.
     for name in OUTPUT_NAMES:
-        target = out / name
-        if target.is_dir():
-            shutil.rmtree(target)
-        elif target.exists():
-            target.unlink()
-        shutil.move(str(export_dir / name), str(target))
+        source = export_dir / name
+        if source.exists():
+            source.replace(out / name)
 
 
 def export(args: argparse.Namespace) -> int:
@@ -896,23 +863,19 @@ def export(args: argparse.Namespace) -> int:
     san, harvest = Sanitizer(denylist=denylist), Harvest()
     stage_session(project_dir, sid, session_root, san, harvest)
     meta = build_meta(harvest, san, sid)
-    shutil.copytree(session_root, export_dir / "raw")
+    export_dir.mkdir(parents=True)
+    transcript = export_dir / TRANSCRIPT_NAME
     if not args.no_render:
-        render(
-            session_root / f"{sid}.jsonl", export_dir / "rendered", staging / "ccl-cache.db", args.html_split
-        )
-        scrub_rendered(export_dir / "rendered", Sanitizer(denylist=denylist))
-    else:
-        (export_dir / "rendered").mkdir(parents=True)
+        render(session_root / f"{sid}.jsonl", transcript, staging / "ccl-cache.db")
+        scrub_render(transcript, Sanitizer(denylist=denylist))
     (export_dir / "meta.json").write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n", "utf-8")
     note = (args.out / NOTE_NAME).exists()
-    readme_text = readme(meta, note=note, html_parts=len(args.html_split) + 1)
-    (export_dir / "README.md").write_text(readme_text, encoding="utf-8")
+    (export_dir / "README.md").write_text(readme(meta, note=note), encoding="utf-8")
     records = meta["records"]
     print(f"records kept {records['kept_total']}, dropped {records['dropped_total']}")
     print("redactions " + json.dumps(meta["redactions"]))
-    for path in sorted((export_dir / "rendered").glob("*")):
-        print(f"rendered {path.name}: {path.stat().st_size / 1_048_576:.1f} MB")
+    if transcript.exists():
+        print(f"rendered {TRANSCRIPT_NAME}: {transcript.stat().st_size / 1_048_576:.1f} MB")
     if report_gate(scan_paths(export_dir, denylist)):
         print(f"export kept in {export_dir}; nothing moved to {args.out}", file=sys.stderr)
         return 1
@@ -930,14 +893,8 @@ def main() -> None:
     parser.add_argument("--projects-root", type=Path, default=config_dir / "projects")
     parser.add_argument("--session", help="session id or prefix (default: most recently written)")
     parser.add_argument("--denylist", type=Path, default=DEFAULT_DENYLIST)
-    parser.add_argument("--no-render", action="store_true", help="skip claude-code-log (raw + meta only)")
     parser.add_argument(
-        "--html-split",
-        action="append",
-        default=[],
-        metavar="TIME",
-        help="split the HTML render at this time (repeatable, claude-code-log date syntax); pick times "
-        "inside idle gaps so no message sits on a boundary",
+        "--no-render", action="store_true", help="skip claude-code-log (meta and README only)"
     )
     args = parser.parse_args()
     if args.scan_only:

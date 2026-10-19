@@ -376,7 +376,6 @@ def test_export_publishes_only_when_gate_passes(tmp_path: Path, monkeypatch: pyt
         session=SID[:8],
         denylist=tmp_path / "missing.txt",
         no_render=True,
-        html_split=[],
     )
     monkeypatch.setattr(et, "scan_paths", lambda *_: ["raw/x.jsonl:1: email"])
     assert et.export(args) == 1
@@ -384,7 +383,7 @@ def test_export_publishes_only_when_gate_passes(tmp_path: Path, monkeypatch: pyt
 
     monkeypatch.undo()
     assert et.export(args) == 0
-    assert sorted(p.name for p in args.out.iterdir()) == ["README.md", "meta.json", "raw", "rendered"]
+    assert sorted(p.name for p in args.out.iterdir()) == ["README.md", "meta.json"]
     meta = json.loads((args.out / "meta.json").read_text())
     assert meta["session_id"] == SID
     assert meta["records"]["kept"] == {"user": 1}
@@ -405,21 +404,25 @@ def test_reexport_keeps_the_note_and_points_to_it(tmp_path: Path) -> None:
         session=SID[:8],
         denylist=tmp_path / "missing.txt",
         no_render=True,
-        html_split=[],
     )
     assert et.export(args) == 0
     assert (out / "NOTE.md").read_text() == "Dear reviewers\n"
     assert "[`NOTE.md`](NOTE.md)" in (out / "README.md").read_text()
 
 
-def test_html_split_renders_time_ordered_parts_and_lists_them() -> None:
-    assert et.render_jobs([]) == [("html", "transcript.html", []), ("md", "transcript.md", [])]
-    assert et.render_jobs(["2026-10-19 01:00"]) == [
-        ("html", "transcript-1.html", ["--to-date", "2026-10-19 01:00"]),
-        ("html", "transcript-2.html", ["--from-date", "2026-10-19 01:00"]),
-        ("md", "transcript.md", []),
-    ]
-    meta = {"session_id": SID, "date_range": {"start": "a", "end": "b"}}
-    text = et.readme(meta, html_parts=2)
-    assert "`rendered/transcript-1.html`, `rendered/transcript-2.html`" in text
-    assert "transcript.html" not in text.replace("transcript-", "")
+def test_no_render_keeps_the_published_transcript(tmp_path: Path) -> None:
+    write_jsonl(tmp_path / "proj" / f"{SID}.jsonl", [user("u1", None, "hello")])
+    out = tmp_path / "out"
+    out.mkdir()
+    (out / "transcript.md").write_text("published\n")
+    args = argparse.Namespace(
+        out=out,
+        staging=tmp_path / "staging",
+        projects_root=tmp_path / "proj",
+        session=SID[:8],
+        denylist=tmp_path / "missing.txt",
+        no_render=True,
+    )
+    assert et.export(args) == 0
+    assert (out / "transcript.md").read_text() == "published\n"
+    assert "`transcript.md`" in (out / "README.md").read_text()

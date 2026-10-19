@@ -460,7 +460,7 @@ fetches the real publishers weekly and never gates, because publishers change ma
 
 Kris set the direction and settled every decision; Claude Code planned, wrote the code, tests, eval harness and docs,
 and ran the evaluations. The full, redacted conversation (main loop, subagents, workflows) is in
-[`.context/transcript/`](.context/transcript/): rendered HTML and Markdown, raw JSONL, and `meta.json` with the
+[`.context/transcript/`](.context/transcript/): one Markdown file, `transcript.md`, and `meta.json` with the
 harness, model, effort, subagents and token usage.
 
 ## Limitations and next steps
