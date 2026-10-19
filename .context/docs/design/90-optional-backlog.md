@@ -46,8 +46,8 @@ earlier doc or a results file already names as future work link back to it.
    default catches 10 of 20 directional articles and clef-flash 17 of 20, with 1 inversion each
    ([articles dev](../../../evals/results/articles_dev/summary.md)).
 3. **A GPU compose profile.** A `gpu` profile with a device reservation would give Linux hosts with a CUDA GPU the
-   bundled path at native-like speed. CPU-only Docker measured roughly 5-15x slower than Metal on the build machine
-   (indicative, [01 build-time findings](01-decisions.md#build-time-findings-that-adjusted-the-plan)).
+   bundled path at native-like speed. CPU-only Docker measured 7.5-14.0x slower than Metal on the build machine
+   and over every budget ([05](05-latency.md#docker-cpu)).
 4. **Split-mode concurrency on one Ollama.** The latency suite runs at client concurrency 1, yet split mode fires
    `/signal` and `/summary/stream` at once against two resident models on one GPU. Measure that pair, then tune
    `OLLAMA_NUM_PARALLEL` and `OLLAMA_MAX_LOADED_MODELS` (3 native, 2 bundled). Payoff: the split-mode TTFT a user
@@ -85,9 +85,11 @@ earlier doc or a results file already names as future work link back to it.
    give honest CIs on the precision knobs.
 6. **A sharper key-fact metric.** Embedding coverage agrees with hand labels on 33 of 45 facts at cosine 0.60. A
    per-fact entailment check would track the Opus judge more closely and could gate summary prompts in CI.
-7. **Latency on a dedicated host and under load.** Grid and extraction timings came from a shared workstation, and
-   contention invalidated a docker-cpu pass. A dedicated runner plus a 1 / 4 / 16 client sweep would give p95s fit
-   for capacity planning.
+7. **Latency on a dedicated host and under load.** Grid and extraction timings came from a shared workstation,
+   contention stalled the `/signal` cell and timed out 4 `/analyze` requests in a discarded docker-cpu pass, and
+   docker-cpu p50s varied about 2x between passes on the same laptop
+   ([05](05-latency.md#discarded-passes-and-run-to-run-variance)). A dedicated runner plus a 1 / 4 / 16 client sweep
+   would give p95s fit for capacity planning.
 8. **A label-noise pass.** 20 directional dev300 tweets get no correct call from any model
    ([grid notes](../../../evals/results/grid/notes.md)); review them before reading that recall loss as model error.
 9. **A second vantage point for the source probe.** One EU residential IP chose the final 10, and datacenter IPs

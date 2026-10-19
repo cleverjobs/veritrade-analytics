@@ -99,18 +99,21 @@ probe were synthetic (`evals/results/ollama_probe.json`, native Metal, warm, n=5
   cell), and each JSON cell re-sent prompts its SSE twin had just evaluated on the same articles, so its prompt eval
   read 118-171 ms. `container_reload` in `evals/src/veritrade_evals/latency.py` now stops the model inside the
   bundled container (`docker exec ... ollama stop`) before every warm phase, mirroring the native suite's unload.
-- **Docker-cpu pass 2 was invalidated by host contention**: unrelated workloads on the same Mac pushed the load
-  average to 50-64 (6.89 at the native preflight, [`preflight.json`](../../../evals/results/latency/preflight.json)),
-  `qwen3.5:0.8b` decode went from about 31 ms to about 2.8 s per token, and 4 `/analyze` requests timed out. The
-  bundled Ollama runs llama.cpp with 14 threads on a 14-vCPU Docker VM over a 14-core host, and its spin-barrier
-  threads stall whenever the host takes cores. The samples of both passes were discarded and are not committed.
-  - Pass 1's valid rows (the SSE rows, plus `/signal`'s JSON row, which has no SSE twin), indicative only
-    (native-metal p50 from [`latency.md`](../../../evals/results/latency/latency.md) in brackets): `/signal` 0.8b
-    lede p50 2,657 ms (178); `/summary` 4B SSE TTFT 8,768 ms (1,128), complete 14,405 ms (2,199); `/analyze` 4B
-    SSE time to signal 8,644 ms (1,098), TTFT 9,147 ms (1,292), complete 12,106 ms (2,584). CPU-only Docker is
-    roughly 5-15x slower than Metal on this machine, which is why native Ollama is the macOS default (Q1) and the
-    bundled profile is for Linux and CI.
-<!-- PENDING:docker-cpu one line: date and load average of the quiet-host re-run and its per-endpoint docker-cpu p50 / TTFT against native, linking evals/results/latency/latency.md -->
+- **Docker-cpu pass 2 was discarded after contention in part of the pass**: other workloads ran during it
+  (another container was starting), its `/signal` cell decoded at about 2.4 s per token against about 35 ms in the
+  clean pass, and 4 `/analyze` JSON requests timed out. Its 4B cells show the same per-token rates as the clean
+  pass, but the whole pass was discarded. The host load average is no evidence here: a clean docker-cpu pass runs at
+  35-75 by itself. The samples of both passes are not committed.
+- **Docker-cpu measured 7.5-14.0x slower than Metal**: one clean pass on 2026-10-19 (warm n=10 per cell, reload
+  hook on, 0 errors, laptop on battery from 67% to 46%) put every docker-cpu p50 over its budget. Against the native
+  p50 of the same cell: `/signal` 0.8b lede 2,291 ms (12.9x), `/summary` 4B 7.5-9.5x (SSE TTFT 10,169 ms, complete
+  20,820 ms; JSON 16,357 ms), `/analyze` 4B 9.5-14.0x (SSE signal 10,428 ms, complete 30,145 ms; JSON 36,093 ms)
+  ([05](05-latency.md#docker-cpu), [`latency.md`](../../../evals/results/latency/latency.md#docker-cpu)). This is
+  why native Ollama is the macOS default (Q1) and the bundled profile is for Linux and CI.
+  - The figures vary about 2x between runs: pass 1's streaming cells (discarded, not committed) completed in
+    14,405 ms (`/summary`) and 12,106 ms (`/analyze`), 1.4x and 2.5x faster than the clean pass on the same
+    protocol. Power source, background load and how the VM's 14 threads land on performance and efficiency cores
+    all move CPU inference in Docker on a laptop.
 - **`OLLAMA_CPUS` is a quota, not a thread count**: compose's `cpus:` caps CPU time but does not lower llama.cpp's
   thread count, so a quota below the visible core count can make CPU inference slower, not just capped. A `cpuset`
   or `num_thread` is the fix ([90-optional-backlog.md](90-optional-backlog.md)).

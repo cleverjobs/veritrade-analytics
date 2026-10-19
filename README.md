@@ -82,9 +82,10 @@ docker compose --profile bundled --env-file deploy/bundled.env up -d
 
 An `ollama/ollama` container pulls the two defaults listed in [`bundled.env`](deploy/bundled.env) (written by
 `veritrade_evals select --write`) into a named volume on the first start, and the app waits for the pull. CPU-only
-inference was roughly 5-15x slower than Metal on the build machine ([indicative](#native-vs-docker-cpu)), so this is
-a portability path, not a latency path. Leave `OLLAMA_CPUS` unset: it is a CPU quota, not a thread count, and a
-quota below the visible cores can slow llama.cpp down rather than just cap it.
+inference measured 7.5-14.0x slower than Metal on the build machine, with every p50 over its budget and about 2x
+variance between runs ([measured](#native-vs-docker-cpu)), so this is a portability path, not a latency path. Leave `OLLAMA_CPUS`
+unset: it is a CPU quota, not a thread count, and a quota below the visible cores can slow llama.cpp down rather
+than just cap it.
 
 ### 3. Local development without Docker
 
@@ -266,29 +267,37 @@ The budget was reported, never moved; both 9B models stay selectable per request
 
 ### Native vs docker-cpu
 
-The bundled Ollama runs llama.cpp on CPU, measured through the bundled app over HTTP (warm n=10 per cell, fetch
-subtracted). Two passes were discarded, and neither is committed:
+The bundled Ollama runs llama.cpp on CPU. `latency docker-cpu` measures the bundled defaults through the bundled
+app over HTTP, warm n=10 per cell, fetch subtracted; x native divides each p50 by the native-metal p50 of the same
+cell ([`latency.md`](evals/results/latency/latency.md#docker-cpu)):
+
+| Endpoint | Transport | docker-cpu p50 | docker-cpu p95 | x native |
+|---|---|---|---|---|
+| `/signal` 0.8B lede | JSON | 2,291 ms | 3,184 ms | 12.9x |
+| `/summary` 4B | SSE | TTFT 10,169 ms, complete 20,820 ms | complete 34,195 ms | 9.0x / 9.5x |
+| `/summary` 4B | JSON | 16,357 ms | 23,560 ms | 7.5x |
+| `/analyze` 4B | SSE | signal 10,428 ms, TTFT 13,106 ms, complete 30,145 ms | complete 40,812 ms | 9.5x / 10.1x / 11.7x |
+| `/analyze` 4B | JSON | 36,093 ms | 45,378 ms | 14.0x |
+
+Conditions: one pass on 2026-10-19 from 15:40 local time, reload hook on, 0 errors; the laptop on battery (67% to
+46%), Low Power Mode off, no thermal warning; 1-minute load average 7.1 before the pass and 35-75 during it, almost
+all of it the bundled Ollama (processes outside the Docker VM stayed under about 3.7 cores).
+
+CPU-only Docker is 7.5-14.0x slower than Metal on this machine and every p50 is over its budget, so the bundled
+profile is for Linux and CI. Per token, the 4B prefills at 11-14 ms against 1.0-1.2 ms on Metal and decodes at
+about 100-200 ms against about 16 ms. Read the rows as one run, not a constant: CPU inference in Docker on a laptop
+varies about 2x between runs (power source, background load, how the VM's 14 threads land on performance and
+efficiency cores). Two earlier passes were discarded, and neither is committed:
 
 - **Pass 1**: the JSON rows were biased by Ollama's prompt cache (prompt eval 118-171 ms), because each JSON cell
   re-sent prompts its SSE twin had just evaluated. Fix: a reload hook (`container_reload` in
   [`latency.py`](evals/src/veritrade_evals/latency.py)) runs `docker exec ... ollama stop` before every warm phase.
-- **Pass 2**: invalidated by unrelated workloads on the same Mac (load average 50-64 against 6.9 at the native
-  preflight): `qwen3.5:0.8b` decode went from about 31 ms to about 2.8 s per token and 4 `/analyze` requests timed
-  out, because llama.cpp's 14 spin-barrier threads on a 14-vCPU Docker VM over a 14-core host stall whenever the
-  host takes cores.
-
-Pass 1's valid rows, indicative only (n=10, not committed): CPU-only Docker is roughly 5-15x slower than Metal on
-this machine and would miss every budget, so the bundled profile is for Linux and CI.
-
-| Endpoint | Transport | docker-cpu p50 | x native |
-|---|---|---|---|
-| `/signal` 0.8B lede | JSON | 2,657 ms | 14.9x |
-| `/summary` 4B | SSE | TTFT 8,768 ms, complete 14,405 ms | 7.8x / 6.6x |
-| `/analyze` 4B | SSE | signal 8,644 ms, TTFT 9,147 ms, complete 12,106 ms | 7.9x / 7.1x / 4.7x |
-
-The quiet-host re-run uses the same protocol, reload hook included, and its rows go to the `docker-cpu` section of
-[`latency.md`](evals/results/latency/latency.md).
-<!-- PENDING:docker-cpu warm n=10 rows from the quiet-host re-run (signal 0.8b lede JSON; summary and analyze qwen3.5:4b SSE): complete p50, TTFT p50, time to signal p50, ratio to native and the preflight load average, linking evals/results/latency/latency.md -->
+  Its streaming cells completed in 14,405 ms (`/summary`) and 12,106 ms (`/analyze`), 1.4x and 2.5x faster than
+  the committed pass on the same protocol: that spread is the run-to-run variance above.
+- **Pass 2**: other workloads ran during it (another container was starting). Its `/signal` cell decoded at about
+  2.4 s per token against about 35 ms in the committed pass, and 4 `/analyze` JSON requests timed out; its 4B cells
+  match the committed pass per token, so contention hit the `/signal` cell and the timeouts, not every cell, but the
+  whole pass was discarded. The load average is no evidence either way: a clean pass runs at 35-75 by itself.
 
 ## Evaluation
 
@@ -418,7 +427,8 @@ harness, model, effort, subagents and token usage.
   42% of test summaries, and a material error in 10% [0%, 20%] and 17% [7%, 27%]; `/analyze` summaries degrade on
   unseen articles, to 25% [15%, 35%] material errors (10% on dev). Numbers are not re-checked at serve time.
 - **Latency is one machine at concurrency 1.** Tails exceed the budgets, split mode's concurrent pair and multi-user
-  load were not measured, and the docker-cpu figures are indicative.
+  load were not measured, and the docker-cpu figures are measured but come from a single n=10 run on battery power;
+  CPU inference in Docker varied about 2x between passes.
 - **Coverage and hardening.** 10 profiled English sources (others fall back to JSON-LD and density, unmeasured),
   no PDFs; no authentication or inbound rate limiting, and the caches are in-process (per replica).
 

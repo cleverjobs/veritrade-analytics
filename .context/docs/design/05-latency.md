@@ -207,37 +207,69 @@ their accuracy with 0.5 to 0.9 s more per signal.
 Docker Desktop cannot pass Apple's GPU into a Linux container (01, Q1), so the bundled Ollama runs llama.cpp on
 CPU. `latency docker-cpu` measures the bundled defaults over HTTP (`/signal` 0.8B lede JSON; `/summary` and
 `/analyze` `qwen3.5:4b`, SSE and JSON), warm n=10 per cell; the app fetches live, so fetch and consent are
-subtracted, and it warms up on an 11th dev article.
+subtracted, and it warms up on an 11th dev article. Before every warm phase a reload hook (`container_reload` in
+`latency.py`) runs `docker exec ... ollama stop <model>` and waits until `ollama ps` drops it, mirroring the
+native unload.
+
+Warm p50 / p95 in ms, copied from the `docker-cpu` section of
+[latency.md](../../../evals/results/latency/latency.md#docker-cpu); x native divides each docker-cpu p50 by the
+native-metal p50 of the same cell above.
+
+| endpoint | model | transport | n warm | p50 ms | p95 ms | TTFT p50 | to signal p50 | x native (complete / TTFT / signal) |
+|---|---|---|---|---|---|---|---|---|
+| /signal | `qwen3.5:0.8b-q8_0` lede | JSON | 10 | 2,291 | 3,184 | - | 2,291 | 12.9x |
+| /summary | `qwen3.5:4b-q4_K_M` | SSE | 10 | 20,820 | 34,195 | 10,169 | - | 9.5x / 9.0x |
+| /summary | `qwen3.5:4b-q4_K_M` | JSON | 10 | 16,357 | 23,560 | - | - | 7.5x |
+| /analyze | `qwen3.5:4b-q4_K_M` | SSE | 10 | 30,145 | 40,812 | 13,106 | 10,428 | 11.7x / 10.1x / 9.5x |
+| /analyze | `qwen3.5:4b-q4_K_M` | JSON | 10 | 36,093 | 45,378 | - | 36,093 | 14.0x |
+
+**Conditions.** One pass on 2026-10-19 from 15:40 local time, 50 warm samples, 0 errors. The laptop ran on
+battery (67% at the start, 46% at the end), Low Power Mode off, no thermal warning. The 1-minute load average was
+7.1 just before the pass and 35-75 during it, and that was the bundled Ollama itself: the Docker VM took most of
+the 14 cores, and processes outside it stayed under about 3.7 cores (a watchdog flagged two brief spikes of about
+3.6 cores from ordinary desktop apps).
+
+**Every budget is missed.** CPU-only Docker is 7.5 to 14.0 times slower than Metal on this machine: `/signal`
+lede takes 2,291 ms against its 500 ms budget, and the 4B shows first text after 10 to 13 s and completes in 16 to
+36 s. That is why native Ollama is the macOS default and the bundled profile is for Linux and CI: a portability
+path, not a latency path.
+
+**Per token**, docker-cpu is the warm p50 of the raw samples and Metal the ratio of the p50s in "Where the time
+goes":
+
+| model | prefill ms/token, docker-cpu / Metal | decode ms/token, docker-cpu / Metal |
+|---|---|---|
+| `qwen3.5:0.8b-q8_0` | about 3.7 / 0.24 | about 35 / 6.1 |
+| `qwen3.5:4b-q4_K_M` | 11 to 14 / 1.0 to 1.2 | about 100 to 200 / 15.8 to 16.0 |
+
+### Discarded passes and run-to-run variance
 
 Two earlier passes were discarded, and neither is committed:
 
 1. **Pass 1 found a prompt-cache bias.** The bundled Ollama has no host port, so the native unload was not
    available, and each JSON cell re-sent the prompts its SSE twin had just evaluated on the same articles;
-   those rows showed prompt eval of 118 to 171 ms. Fix: a reload hook (`container_reload` in `latency.py`) runs
-   `docker exec ... ollama stop <model>` before every warm phase and waits until `ollama ps` drops it,
-   mirroring the native unload.
-2. **Pass 2 was invalidated by host contention.** Unrelated workloads on the same Mac pushed the load average
-   to 50-64 (6.9 at the native preflight). `qwen3.5:0.8b` decode went from about 31 ms/token to about
-   2.8 s/token and 4 `/analyze` requests timed out. Root cause: the bundled Ollama runs llama.cpp with 14
-   threads on a 14-vCPU Docker VM over a 14-core host, and its spin-barrier threads stall whenever the host
-   takes cores, so CPU inference collapses instead of slowing in proportion.
+   those rows showed prompt eval of 118 to 171 ms. The reload hook above is the fix.
+2. **Pass 2 had contention in part of the pass.** Other workloads ran during it (another container was starting).
+   Its `/signal` cell decoded at about 2.4 s per token, against about 35 ms in the committed pass, and 4
+   `/analyze` JSON requests timed out; its 4B cells show the same per-token rates as the committed pass. The whole
+   pass was discarded anyway. Its load average proves nothing either way, since a clean pass runs at 35-75 by itself.
 
-Indicative only (pass-1 rows the cache bias did not touch, n=10, not committed):
+Pass 1's rows that the cache bias did not touch (discarded, n=10, not committed) show how far one CPU run lands
+from the next on the same protocol:
 
-| endpoint | model | transport | complete p50 | TTFT p50 | to signal p50 | x native (complete / TTFT / signal) |
-|---|---|---|---|---|---|---|
-| /signal | `qwen3.5:0.8b-q8_0` lede | JSON | 2,657 | - | - | 14.9x |
-| /summary | `qwen3.5:4b-q4_K_M` | SSE | 14,405 | 8,768 | - | 6.6x / 7.8x |
-| /analyze | `qwen3.5:4b-q4_K_M` | SSE | 12,106 | 9,147 | 8,644 | 4.7x / 7.1x / 7.9x |
+| cell | pass 1 p50 | committed p50 | committed / pass 1 |
+|---|---|---|---|
+| /signal 0.8B lede JSON | 2,657 | 2,291 | 0.9x |
+| /summary 4B SSE, complete | 14,405 | 20,820 | 1.4x |
+| /analyze 4B SSE, complete | 12,106 | 30,145 | 2.5x |
 
-In pass 1, CPU-only Docker was roughly 5 to 15 times slower than Metal on this machine and would miss every
-budget. That is why native Ollama is the macOS default and the bundled profile is for Linux and CI: a portability path, not
-a latency path. `OLLAMA_CPUS` in `compose.yaml` sets a `cpus:` quota, which does not lower llama.cpp's thread
-count, so a quota below the visible core count can make CPU inference slower rather than just capped; a cpuset
-or `num_thread` is the fix (backlog). The re-run repeats pass 1's protocol, reload hook included, on a quiet
-host, and its rows go in the `docker-cpu` section of `latency.md`.
+CPU-only inference in Docker on a laptop varies about 2x from run to run: the power source, background load and
+how the VM's 14 threads land on performance and efficiency cores all move it. The committed rows are one measured
+run on battery, not a constant; pass 1 and the committed pass both miss every budget by a wide margin.
 
-<!-- PENDING:docker-cpu warm n=10 table from the quiet-host re-run (signal 0.8b lede JSON; summary and analyze qwen3.5:4b SSE and JSON): complete p50/p95, TTFT p50, time to signal p50, ratio to native, preflight load average -->
+`OLLAMA_CPUS` in `compose.yaml` sets a `cpus:` quota, which does not lower llama.cpp's thread count, so a quota
+below the visible core count can make CPU inference slower rather than just capped; a cpuset or `num_thread` is
+the fix (backlog).
 
 ## Levers
 
