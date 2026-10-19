@@ -16,8 +16,8 @@
 
 [defaults]
 signal = "qwen3.5:0.8b-q8_0"
-summary = "qwen3.5:2b-q4_K_M"
-analyze = "ministral-3:3b"
+summary = "qwen3.5:4b-q4_K_M"
+analyze = "qwen3.5:4b-q4_K_M"
 
 [models."clef-flash:9b-q8_0"]
 kind = "decision"

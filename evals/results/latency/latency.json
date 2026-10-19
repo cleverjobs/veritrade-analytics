@@ -1,0 +1,1706 @@
+{
+ "version": 1,
+ "generatedAt": "2026-10-19T05:54:28+00:00",
+ "generatedBy": "uv run python -m veritrade_evals latency report",
+ "session": "20261018T200825Z",
+ "clean": true,
+ "complete": true,
+ "missing": [],
+ "partial": [],
+ "dockerSession": null,
+ "budgets": {
+  "signalLedeP50Ms": 500.0,
+  "ttftP50Ms": 1500.0,
+  "completeP50Ms": 4000.0
+ },
+ "method": {
+  "native": "in-process app (create_app) with a local fetcher serving the stored HTML of the 30 dev articles; no_cache=true; client concurrency 1; parser selectolax, extractor cascade",
+  "cold": "n=3 per cell on the first dev articles, the model unloaded before each request",
+  "warm": "n=30 per cell, one per dev article, after one unrecorded warm-up request",
+  "docker": "warm n=10 over HTTP against the bundled app; it fetches live, so fetch and consent time are subtracted from every metric",
+  "clock": "server-side from request receipt; totals, TTFT and time to signal exclude fetch and consent; TTFT = first summary_delta, time to signal = the sentiment event (JSON: total)"
+ },
+ "environment": {
+  "chip": "Apple M4 Pro",
+  "cpus": 14,
+  "ramGb": 48,
+  "os": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "python": "3.13.12",
+  "ollamaVersion": "0.40.6",
+  "backend": "native-metal",
+  "ollamaBaseUrl": "http://localhost:11434",
+  "ollamaService": {
+   "service": "sh.brew.ollama",
+   "running": true,
+   "env": {
+    "OLLAMA_FLASH_ATTENTION": "1",
+    "OLLAMA_KEEP_ALIVE": "30m",
+    "OLLAMA_KV_CACHE_TYPE": "q8_0",
+    "OLLAMA_MAX_LOADED_MODELS": "3"
+   }
+  },
+  "ollamaResident": [],
+  "modelSizes": {
+   "clef-flash:9b-q8_0": 10578965269,
+   "ministral-3:3b": 2953840808,
+   "nimble:9b-q4_K_M": 5629111625,
+   "qwen3-embedding:0.6b": 639150858,
+   "qwen3.5:0.8b-q8_0": 1019201423,
+   "qwen3.5:2b-q4_K_M": 1945781358,
+   "qwen3.5:4b-q4_K_M": 3324173934,
+   "qwen3.5:9b-q4_K_M": 6550825550,
+   "qwen3:4b-instruct-2507-q4_K_M": 2497293803,
+   "tev1:0.8b-q8_0": 833606657
+  },
+  "loadAverage": [
+   6.89,
+   5.35,
+   4.11
+  ],
+  "memory": {
+   "freePct": 70,
+   "swapUsedMb": 23199.94,
+   "swapTotalMb": 25600.0
+  },
+  "dockerRunning": 0
+ },
+ "preflight": {
+  "ok": true,
+  "at": "2026-10-18T20:08:25+00:00",
+  "checks": [
+   {
+    "name": "no running Docker containers",
+    "ok": true,
+    "detail": "0 running"
+   },
+   {
+    "name": "Ollama reachable",
+    "ok": true,
+    "detail": "0.40.6"
+   }
+  ],
+  "warnings": [
+   "swap in use: 23200 of 25600 MB"
+  ]
+ },
+ "fetchReference": {
+  "source": "evals/data/source_probe.json",
+  "vantage": "EU (Bulgaria) residential ISP, macOS, 2026-10-18",
+  "generatedAt": "2026-10-18T13:29:45+00:00",
+  "perSourceMedianMs": {
+   "bbc": 26.4,
+   "cnbc": 161.0,
+   "cnn": 34.6,
+   "fool": 201.9,
+   "fortune": 367.2,
+   "globenewswire": 552.2,
+   "guardian": 116.1,
+   "prnewswire": 33.7,
+   "sec": 134.9,
+   "yahoo": 476.6
+  },
+  "medianMs": 147.9,
+  "maxMs": 552.2
+ },
+ "cells": [
+  {
+   "key": "signal/qwen3.5:0.8b-q8_0/lede/json",
+   "endpoint": "signal",
+   "model": "qwen3.5:0.8b-q8_0",
+   "scope": "lede",
+   "streaming": false,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 992.2,
+     "p95": 2165.0
+    },
+    "totalInclFetchMs": {
+     "p50": 992.2,
+     "p95": 2165.0
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 992.2,
+     "p95": 2165.0
+    },
+    "clientMs": {
+     "p50": 992.7,
+     "p95": 2168.5
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.4,
+     "extract": 0.9,
+     "wall": 989.1,
+     "load": 785.2,
+     "prompt_eval": 147.5,
+     "eval": 51.7
+    },
+    "tokensP50": {
+     "prompt": 546.0,
+     "eval": 7.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 178.2,
+     "p95": 195.2
+    },
+    "totalInclFetchMs": {
+     "p50": 178.2,
+     "p95": 195.2
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 178.2,
+     "p95": 195.2
+    },
+    "clientMs": {
+     "p50": 178.8,
+     "p95": 195.8
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.2,
+     "extract": 1.6,
+     "wall": 173.4,
+     "load": 0.5,
+     "prompt_eval": 126.0,
+     "eval": 42.7
+    },
+    "tokensP50": {
+     "prompt": 529.5,
+     "eval": 7.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "met",
+    "checks": [
+     {
+      "metric": "p50 excl. fetch",
+      "value": 178.2,
+      "limit": 500.0,
+      "met": true
+     }
+    ],
+    "utilisation": 0.356
+   }
+  },
+  {
+   "key": "signal/qwen3.5:0.8b-q8_0/full/json",
+   "endpoint": "signal",
+   "model": "qwen3.5:0.8b-q8_0",
+   "scope": "full",
+   "streaming": false,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 1077.2,
+     "p95": 1157.5
+    },
+    "totalInclFetchMs": {
+     "p50": 1077.2,
+     "p95": 1157.5
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 1077.2,
+     "p95": 1157.5
+    },
+    "clientMs": {
+     "p50": 1077.7,
+     "p95": 1157.8
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.5,
+     "extract": 0.9,
+     "wall": 1074.3,
+     "load": 788.2,
+     "prompt_eval": 239.7,
+     "eval": 45.4
+    },
+    "tokensP50": {
+     "prompt": 992.0,
+     "eval": 7.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 230.7,
+     "p95": 532.3
+    },
+    "totalInclFetchMs": {
+     "p50": 230.7,
+     "p95": 532.3
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 230.7,
+     "p95": 532.3
+    },
+    "clientMs": {
+     "p50": 231.8,
+     "p95": 533.1
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.4,
+     "extract": 1.6,
+     "wall": 226.4,
+     "load": 0.5,
+     "prompt_eval": 177.9,
+     "eval": 41.2
+    },
+    "tokensP50": {
+     "prompt": 1074.0,
+     "eval": 7.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "n/a",
+    "checks": [],
+    "utilisation": null
+   }
+  },
+  {
+   "key": "signal/clef-flash:9b-q8_0/lede/json",
+   "endpoint": "signal",
+   "model": "clef-flash:9b-q8_0",
+   "scope": "lede",
+   "streaming": false,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 6064.1,
+     "p95": 8593.7
+    },
+    "totalInclFetchMs": {
+     "p50": 6064.2,
+     "p95": 8593.7
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 6064.1,
+     "p95": 8593.7
+    },
+    "clientMs": {
+     "p50": 6066.4,
+     "p95": 8598.6
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 2.9,
+     "extract": 2.1,
+     "wall": 6054.8,
+     "load": null,
+     "prompt_eval": null,
+     "eval": null
+    },
+    "tokensP50": {
+     "prompt": 303.0,
+     "eval": null
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 659.3,
+     "p95": 807.0
+    },
+    "totalInclFetchMs": {
+     "p50": 659.3,
+     "p95": 807.1
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 659.3,
+     "p95": 807.0
+    },
+    "clientMs": {
+     "p50": 660.5,
+     "p95": 808.0
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.6,
+     "extract": 2.5,
+     "wall": 654.4,
+     "load": null,
+     "prompt_eval": null,
+     "eval": null
+    },
+    "tokensP50": {
+     "prompt": 286.5,
+     "eval": null
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "missed",
+    "checks": [
+     {
+      "metric": "p50 excl. fetch",
+      "value": 659.3,
+      "limit": 500.0,
+      "met": false
+     }
+    ],
+    "utilisation": 1.319
+   }
+  },
+  {
+   "key": "signal/clef-flash:9b-q8_0/full/json",
+   "endpoint": "signal",
+   "model": "clef-flash:9b-q8_0",
+   "scope": "full",
+   "streaming": false,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 8090.6,
+     "p95": 8753.5
+    },
+    "totalInclFetchMs": {
+     "p50": 8090.6,
+     "p95": 8753.5
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 8090.6,
+     "p95": 8753.5
+    },
+    "clientMs": {
+     "p50": 8092.2,
+     "p95": 8755.5
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 2.9,
+     "extract": 2.2,
+     "wall": 8084.8,
+     "load": null,
+     "prompt_eval": null,
+     "eval": null
+    },
+    "tokensP50": {
+     "prompt": 749.0,
+     "eval": null
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 1892.6,
+     "p95": 4006.6
+    },
+    "totalInclFetchMs": {
+     "p50": 1892.7,
+     "p95": 4006.7
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 1892.6,
+     "p95": 4006.6
+    },
+    "clientMs": {
+     "p50": 1893.5,
+     "p95": 4007.9
+    },
+    "stagesP50Ms": {
+     "fetch": 0.1,
+     "parse": 1.5,
+     "extract": 2.4,
+     "wall": 1889.3,
+     "load": null,
+     "prompt_eval": null,
+     "eval": null
+    },
+    "tokensP50": {
+     "prompt": 831.0,
+     "eval": null
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "n/a",
+    "checks": [],
+    "utilisation": null
+   }
+  },
+  {
+   "key": "signal/nimble:9b-q4_K_M/lede/json",
+   "endpoint": "signal",
+   "model": "nimble:9b-q4_K_M",
+   "scope": "lede",
+   "streaming": false,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 2218.9,
+     "p95": 5412.0
+    },
+    "totalInclFetchMs": {
+     "p50": 2218.9,
+     "p95": 5412.0
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 2218.9,
+     "p95": 5412.0
+    },
+    "clientMs": {
+     "p50": 2219.9,
+     "p95": 5412.9
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 2.7,
+     "extract": 1.8,
+     "wall": 2214.2,
+     "load": null,
+     "prompt_eval": null,
+     "eval": null
+    },
+    "tokensP50": {
+     "prompt": 463.0,
+     "eval": null
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 1060.9,
+     "p95": 1182.3
+    },
+    "totalInclFetchMs": {
+     "p50": 1060.9,
+     "p95": 1182.4
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 1060.9,
+     "p95": 1182.3
+    },
+    "clientMs": {
+     "p50": 1062.1,
+     "p95": 1183.5
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.6,
+     "extract": 1.7,
+     "wall": 1057.3,
+     "load": null,
+     "prompt_eval": null,
+     "eval": null
+    },
+    "tokensP50": {
+     "prompt": 447.5,
+     "eval": null
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "missed",
+    "checks": [
+     {
+      "metric": "p50 excl. fetch",
+      "value": 1060.9,
+      "limit": 500.0,
+      "met": false
+     }
+    ],
+    "utilisation": 2.122
+   }
+  },
+  {
+   "key": "signal/nimble:9b-q4_K_M/full/json",
+   "endpoint": "signal",
+   "model": "nimble:9b-q4_K_M",
+   "scope": "full",
+   "streaming": false,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 3193.5,
+     "p95": 3846.1
+    },
+    "totalInclFetchMs": {
+     "p50": 3193.5,
+     "p95": 3846.2
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 3193.5,
+     "p95": 3846.1
+    },
+    "clientMs": {
+     "p50": 3194.6,
+     "p95": 3846.7
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 2.7,
+     "extract": 1.7,
+     "wall": 3188.6,
+     "load": null,
+     "prompt_eval": null,
+     "eval": null
+    },
+    "tokensP50": {
+     "prompt": 915.0,
+     "eval": null
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 2320.7,
+     "p95": 5242.3
+    },
+    "totalInclFetchMs": {
+     "p50": 2320.8,
+     "p95": 5242.3
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 2320.7,
+     "p95": 5242.3
+    },
+    "clientMs": {
+     "p50": 2321.6,
+     "p95": 5243.2
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.5,
+     "extract": 1.8,
+     "wall": 2315.7,
+     "load": null,
+     "prompt_eval": null,
+     "eval": null
+    },
+    "tokensP50": {
+     "prompt": 1003.0,
+     "eval": null
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "n/a",
+    "checks": [],
+    "utilisation": null
+   }
+  },
+  {
+   "key": "summary/qwen3.5:2b-q4_K_M/full/stream",
+   "endpoint": "summary",
+   "model": "qwen3.5:2b-q4_K_M",
+   "scope": "full",
+   "streaming": true,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 2304.7,
+     "p95": 3004.8
+    },
+    "totalInclFetchMs": {
+     "p50": 2304.7,
+     "p95": 3004.9
+    },
+    "ttftMs": {
+     "p50": 1485.4,
+     "p95": 2303.2
+    },
+    "signalMs": null,
+    "clientMs": {
+     "p50": 2307.3,
+     "p95": 3008.7
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 3.0,
+     "extract": 1.7,
+     "wall": 2299.0,
+     "load": 1041.2,
+     "prompt_eval": 401.6,
+     "eval": 721.7
+    },
+    "tokensP50": {
+     "prompt": 743.0,
+     "eval": 86.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 1271.8,
+     "p95": 2094.4
+    },
+    "totalInclFetchMs": {
+     "p50": 1271.8,
+     "p95": 2094.4
+    },
+    "ttftMs": {
+     "p50": 484.3,
+     "p95": 1107.8
+    },
+    "signalMs": null,
+    "clientMs": {
+     "p50": 1273.3,
+     "p95": 2096.8
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.5,
+     "extract": 1.6,
+     "wall": 1267.2,
+     "load": 0.7,
+     "prompt_eval": 423.1,
+     "eval": 826.6
+    },
+    "tokensP50": {
+     "prompt": 825.0,
+     "eval": 92.0
+    },
+    "truncated": 1,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "met",
+    "checks": [
+     {
+      "metric": "complete p50",
+      "value": 1271.8,
+      "limit": 4000.0,
+      "met": true
+     },
+     {
+      "metric": "TTFT p50",
+      "value": 484.3,
+      "limit": 1500.0,
+      "met": true
+     }
+    ],
+    "utilisation": 0.323
+   }
+  },
+  {
+   "key": "summary/qwen3.5:2b-q4_K_M/full/json",
+   "endpoint": "summary",
+   "model": "qwen3.5:2b-q4_K_M",
+   "scope": "full",
+   "streaming": false,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 2540.9,
+     "p95": 2856.0
+    },
+    "totalInclFetchMs": {
+     "p50": 2540.9,
+     "p95": 2856.1
+    },
+    "ttftMs": null,
+    "signalMs": null,
+    "clientMs": {
+     "p50": 2541.8,
+     "p95": 2857.4
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 2.7,
+     "extract": 1.9,
+     "wall": 2535.7,
+     "load": 1327.7,
+     "prompt_eval": 404.9,
+     "eval": 704.3
+    },
+    "tokensP50": {
+     "prompt": 743.0,
+     "eval": 86.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 1309.8,
+     "p95": 2071.4
+    },
+    "totalInclFetchMs": {
+     "p50": 1309.8,
+     "p95": 2071.4
+    },
+    "ttftMs": null,
+    "signalMs": null,
+    "clientMs": {
+     "p50": 1310.8,
+     "p95": 2072.3
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.5,
+     "extract": 1.8,
+     "wall": 1304.8,
+     "load": 0.9,
+     "prompt_eval": 416.9,
+     "eval": 869.4
+    },
+    "tokensP50": {
+     "prompt": 825.0,
+     "eval": 92.0
+    },
+    "truncated": 1,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "met",
+    "checks": [
+     {
+      "metric": "complete p50",
+      "value": 1309.8,
+      "limit": 4000.0,
+      "met": true
+     }
+    ],
+    "utilisation": 0.327
+   }
+  },
+  {
+   "key": "summary/qwen3.5:4b-q4_K_M/full/stream",
+   "endpoint": "summary",
+   "model": "qwen3.5:4b-q4_K_M",
+   "scope": "full",
+   "streaming": true,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 2881.9,
+     "p95": 5499.2
+    },
+    "totalInclFetchMs": {
+     "p50": 2881.9,
+     "p95": 5499.2
+    },
+    "ttftMs": {
+     "p50": 2132.0,
+     "p95": 4324.7
+    },
+    "signalMs": null,
+    "clientMs": {
+     "p50": 2884.8,
+     "p95": 5501.4
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 2.9,
+     "extract": 1.8,
+     "wall": 2876.0,
+     "load": 1050.0,
+     "prompt_eval": 1003.6,
+     "eval": 966.0
+    },
+    "tokensP50": {
+     "prompt": 743.0,
+     "eval": 62.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 2198.6,
+     "p95": 4231.5
+    },
+    "totalInclFetchMs": {
+     "p50": 2198.6,
+     "p95": 4231.5
+    },
+    "ttftMs": {
+     "p50": 1128.4,
+     "p95": 2705.5
+    },
+    "signalMs": null,
+    "clientMs": {
+     "p50": 2201.0,
+     "p95": 4234.2
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.5,
+     "extract": 1.8,
+     "wall": 2193.7,
+     "load": 0.7,
+     "prompt_eval": 1029.0,
+     "eval": 1075.0
+    },
+    "tokensP50": {
+     "prompt": 825.0,
+     "eval": 68.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "met",
+    "checks": [
+     {
+      "metric": "complete p50",
+      "value": 2198.6,
+      "limit": 4000.0,
+      "met": true
+     },
+     {
+      "metric": "TTFT p50",
+      "value": 1128.4,
+      "limit": 1500.0,
+      "met": true
+     }
+    ],
+    "utilisation": 0.752
+   }
+  },
+  {
+   "key": "summary/qwen3.5:4b-q4_K_M/full/json",
+   "endpoint": "summary",
+   "model": "qwen3.5:4b-q4_K_M",
+   "scope": "full",
+   "streaming": false,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 2891.1,
+     "p95": 3637.3
+    },
+    "totalInclFetchMs": {
+     "p50": 2891.1,
+     "p95": 3637.3
+    },
+    "ttftMs": null,
+    "signalMs": null,
+    "clientMs": {
+     "p50": 2892.3,
+     "p95": 3638.8
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 3.0,
+     "extract": 1.9,
+     "wall": 2885.9,
+     "load": 1054.0,
+     "prompt_eval": 1047.1,
+     "eval": 965.7
+    },
+    "tokensP50": {
+     "prompt": 743.0,
+     "eval": 62.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 2193.5,
+     "p95": 4210.8
+    },
+    "totalInclFetchMs": {
+     "p50": 2193.5,
+     "p95": 4210.9
+    },
+    "ttftMs": null,
+    "signalMs": null,
+    "clientMs": {
+     "p50": 2194.4,
+     "p95": 4211.8
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.5,
+     "extract": 1.8,
+     "wall": 2189.6,
+     "load": 0.8,
+     "prompt_eval": 1017.8,
+     "eval": 1069.7
+    },
+    "tokensP50": {
+     "prompt": 825.0,
+     "eval": 68.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "met",
+    "checks": [
+     {
+      "metric": "complete p50",
+      "value": 2193.5,
+      "limit": 4000.0,
+      "met": true
+     }
+    ],
+    "utilisation": 0.548
+   }
+  },
+  {
+   "key": "analyze/ministral-3:3b/full/stream",
+   "endpoint": "analyze",
+   "model": "ministral-3:3b",
+   "scope": "full",
+   "streaming": true,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 3253.3,
+     "p95": 5784.2
+    },
+    "totalInclFetchMs": {
+     "p50": 3253.3,
+     "p95": 5784.2
+    },
+    "ttftMs": {
+     "p50": 2307.8,
+     "p95": 4195.5
+    },
+    "signalMs": {
+     "p50": 2056.1,
+     "p95": 3934.1
+    },
+    "clientMs": {
+     "p50": 3254.5,
+     "p95": 5786.5
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 3.3,
+     "extract": 2.1,
+     "wall": 3247.2,
+     "load": 1040.7,
+     "prompt_eval": 938.0,
+     "eval": 1348.0
+    },
+    "tokensP50": {
+     "prompt": 895.0,
+     "eval": 103.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 2242.5,
+     "p95": 3976.4
+    },
+    "totalInclFetchMs": {
+     "p50": 2242.5,
+     "p95": 3976.4
+    },
+    "ttftMs": {
+     "p50": 1051.1,
+     "p95": 2469.0
+    },
+    "signalMs": {
+     "p50": 802.3,
+     "p95": 2171.6
+    },
+    "clientMs": {
+     "p50": 2245.1,
+     "p95": 3978.2
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.5,
+     "extract": 1.8,
+     "wall": 2236.2,
+     "load": 0.8,
+     "prompt_eval": 713.4,
+     "eval": 1361.0
+    },
+    "tokensP50": {
+     "prompt": 979.0,
+     "eval": 92.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "met",
+    "checks": [
+     {
+      "metric": "complete p50",
+      "value": 2242.5,
+      "limit": 4000.0,
+      "met": true
+     },
+     {
+      "metric": "TTFT p50",
+      "value": 1051.1,
+      "limit": 1500.0,
+      "met": true
+     }
+    ],
+    "utilisation": 0.701
+   }
+  },
+  {
+   "key": "analyze/ministral-3:3b/full/json",
+   "endpoint": "analyze",
+   "model": "ministral-3:3b",
+   "scope": "full",
+   "streaming": false,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 3515.8,
+     "p95": 4748.7
+    },
+    "totalInclFetchMs": {
+     "p50": 3515.8,
+     "p95": 4748.7
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 3515.8,
+     "p95": 4748.7
+    },
+    "clientMs": {
+     "p50": 3517.1,
+     "p95": 4749.9
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 3.0,
+     "extract": 2.2,
+     "wall": 3510.0,
+     "load": 1312.4,
+     "prompt_eval": 910.7,
+     "eval": 1372.4
+    },
+    "tokensP50": {
+     "prompt": 895.0,
+     "eval": 103.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 2218.6,
+     "p95": 3974.3
+    },
+    "totalInclFetchMs": {
+     "p50": 2218.6,
+     "p95": 3974.4
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 2218.6,
+     "p95": 3974.3
+    },
+    "clientMs": {
+     "p50": 2219.8,
+     "p95": 3975.3
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.6,
+     "extract": 1.8,
+     "wall": 2213.3,
+     "load": 0.8,
+     "prompt_eval": 713.2,
+     "eval": 1349.5
+    },
+    "tokensP50": {
+     "prompt": 979.0,
+     "eval": 92.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "met",
+    "checks": [
+     {
+      "metric": "complete p50",
+      "value": 2218.6,
+      "limit": 4000.0,
+      "met": true
+     }
+    ],
+    "utilisation": 0.555
+   }
+  },
+  {
+   "key": "analyze/qwen3:4b-instruct-2507-q4_K_M/full/stream",
+   "endpoint": "analyze",
+   "model": "qwen3:4b-instruct-2507-q4_K_M",
+   "scope": "full",
+   "streaming": true,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 3479.1,
+     "p95": 5171.8
+    },
+    "totalInclFetchMs": {
+     "p50": 3479.2,
+     "p95": 5171.8
+    },
+    "ttftMs": {
+     "p50": 2284.6,
+     "p95": 3939.4
+    },
+    "signalMs": {
+     "p50": 2203.1,
+     "p95": 3868.8
+    },
+    "clientMs": {
+     "p50": 3481.2,
+     "p95": 5173.4
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 2.8,
+     "extract": 1.8,
+     "wall": 3473.2,
+     "load": 787.7,
+     "prompt_eval": 1120.8,
+     "eval": 1497.2
+    },
+    "tokensP50": {
+     "prompt": 888.0,
+     "eval": 107.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 2234.0,
+     "p95": 4979.0
+    },
+    "totalInclFetchMs": {
+     "p50": 2234.1,
+     "p95": 4979.0
+    },
+    "ttftMs": {
+     "p50": 1201.4,
+     "p95": 2937.5
+    },
+    "signalMs": {
+     "p50": 1118.2,
+     "p95": 2864.1
+    },
+    "clientMs": {
+     "p50": 2236.3,
+     "p95": 4981.7
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.5,
+     "extract": 1.7,
+     "wall": 2229.3,
+     "load": 0.7,
+     "prompt_eval": 862.1,
+     "eval": 1236.4
+    },
+    "tokensP50": {
+     "prompt": 969.5,
+     "eval": 88.5
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "met",
+    "checks": [
+     {
+      "metric": "complete p50",
+      "value": 2234.0,
+      "limit": 4000.0,
+      "met": true
+     },
+     {
+      "metric": "TTFT p50",
+      "value": 1201.4,
+      "limit": 1500.0,
+      "met": true
+     }
+    ],
+    "utilisation": 0.801
+   }
+  },
+  {
+   "key": "analyze/qwen3:4b-instruct-2507-q4_K_M/full/json",
+   "endpoint": "analyze",
+   "model": "qwen3:4b-instruct-2507-q4_K_M",
+   "scope": "full",
+   "streaming": false,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 3403.2,
+     "p95": 3785.9
+    },
+    "totalInclFetchMs": {
+     "p50": 3403.2,
+     "p95": 3785.9
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 3403.2,
+     "p95": 3785.9
+    },
+    "clientMs": {
+     "p50": 3404.2,
+     "p95": 3787.1
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 3.1,
+     "extract": 1.8,
+     "wall": 3397.6,
+     "load": 786.2,
+     "prompt_eval": 1116.3,
+     "eval": 1513.1
+    },
+    "tokensP50": {
+     "prompt": 888.0,
+     "eval": 107.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 2243.1,
+     "p95": 4968.6
+    },
+    "totalInclFetchMs": {
+     "p50": 2243.1,
+     "p95": 4968.7
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 2243.1,
+     "p95": 4968.6
+    },
+    "clientMs": {
+     "p50": 2244.0,
+     "p95": 4970.0
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.5,
+     "extract": 1.8,
+     "wall": 2237.4,
+     "load": 0.7,
+     "prompt_eval": 867.9,
+     "eval": 1242.5
+    },
+    "tokensP50": {
+     "prompt": 969.5,
+     "eval": 88.5
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "met",
+    "checks": [
+     {
+      "metric": "complete p50",
+      "value": 2243.1,
+      "limit": 4000.0,
+      "met": true
+     }
+    ],
+    "utilisation": 0.561
+   }
+  },
+  {
+   "key": "analyze/qwen3.5:4b-q4_K_M/full/stream",
+   "endpoint": "analyze",
+   "model": "qwen3.5:4b-q4_K_M",
+   "scope": "full",
+   "streaming": true,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 3570.1,
+     "p95": 4563.6
+    },
+    "totalInclFetchMs": {
+     "p50": 3570.2,
+     "p95": 4563.6
+    },
+    "ttftMs": {
+     "p50": 2554.3,
+     "p95": 2875.7
+    },
+    "signalMs": {
+     "p50": 2305.5,
+     "p95": 2668.5
+    },
+    "clientMs": {
+     "p50": 3572.4,
+     "p95": 4566.9
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 2.8,
+     "extract": 2.5,
+     "wall": 3563.4,
+     "load": 1046.6,
+     "prompt_eval": 1170.0,
+     "eval": 1498.0
+    },
+    "tokensP50": {
+     "prompt": 881.0,
+     "eval": 94.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 2583.7,
+     "p95": 4627.1
+    },
+    "totalInclFetchMs": {
+     "p50": 2583.8,
+     "p95": 4627.2
+    },
+    "ttftMs": {
+     "p50": 1291.7,
+     "p95": 2994.9
+    },
+    "signalMs": {
+     "p50": 1097.7,
+     "p95": 2711.1
+    },
+    "clientMs": {
+     "p50": 2586.5,
+     "p95": 4628.6
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.4,
+     "extract": 1.6,
+     "wall": 2578.0,
+     "load": 0.7,
+     "prompt_eval": 992.5,
+     "eval": 1538.9
+    },
+    "tokensP50": {
+     "prompt": 963.0,
+     "eval": 96.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "met",
+    "checks": [
+     {
+      "metric": "complete p50",
+      "value": 2583.7,
+      "limit": 4000.0,
+      "met": true
+     },
+     {
+      "metric": "TTFT p50",
+      "value": 1291.7,
+      "limit": 1500.0,
+      "met": true
+     }
+    ],
+    "utilisation": 0.861
+   }
+  },
+  {
+   "key": "analyze/qwen3.5:4b-q4_K_M/full/json",
+   "endpoint": "analyze",
+   "model": "qwen3.5:4b-q4_K_M",
+   "scope": "full",
+   "streaming": false,
+   "backend": "native-metal",
+   "targets": {
+    "cold": 3,
+    "warm": 30
+   },
+   "partial": false,
+   "cold": {
+    "n": 3,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 3544.1,
+     "p95": 4533.9
+    },
+    "totalInclFetchMs": {
+     "p50": 3544.1,
+     "p95": 4533.9
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 3544.1,
+     "p95": 4533.9
+    },
+    "clientMs": {
+     "p50": 3545.5,
+     "p95": 4535.5
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 2.9,
+     "extract": 2.2,
+     "wall": 3538.1,
+     "load": 1053.6,
+     "prompt_eval": 1165.6,
+     "eval": 1461.2
+    },
+    "tokensP50": {
+     "prompt": 881.0,
+     "eval": 94.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 30,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 2579.7,
+     "p95": 4581.6
+    },
+    "totalInclFetchMs": {
+     "p50": 2579.8,
+     "p95": 4581.6
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 2579.7,
+     "p95": 4581.6
+    },
+    "clientMs": {
+     "p50": 2580.9,
+     "p95": 4582.4
+    },
+    "stagesP50Ms": {
+     "fetch": 0.0,
+     "parse": 1.5,
+     "extract": 1.7,
+     "wall": 2575.0,
+     "load": 0.8,
+     "prompt_eval": 992.0,
+     "eval": 1503.8
+    },
+    "tokensP50": {
+     "prompt": 963.0,
+     "eval": 96.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "met",
+    "checks": [
+     {
+      "metric": "complete p50",
+      "value": 2579.7,
+      "limit": 4000.0,
+      "met": true
+     }
+    ],
+    "utilisation": 0.645
+   }
+  }
+ ]
+}

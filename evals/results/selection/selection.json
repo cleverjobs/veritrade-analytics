@@ -1,0 +1,1612 @@
+{
+ "version": 1,
+ "generatedAt": "2026-10-18T20:27:26+00:00",
+ "generatedBy": "uv run python -m veritrade_evals select",
+ "provisional": false,
+ "notes": [],
+ "rules": {
+  "signal": "Candidates: the frozen /signal configs at the default lede scope. Filters: dev300 inversion rate <= 2% at the frozen operating point (n=300); the articles dev set must not fail the cap, meaning the 95% CI of its inversion rate reaches down to 2% (the freeze's clear-failure rule: at n=30 one inversion is about 5% of the calls); warm native p50 excluding fetch <= 500 ms at lede. Rank: dev300 F0.5 macro (primary, n=300), then articles dev F0.5, then lower latency.",
+  "analyze": "Candidates: the frozen /analyze configs (full scope, ordinal |score| >= t, sentiment-first). Filters: the same inversion rules as /signal; streamed TTFT p50 <= 1.5 s and complete p50 <= 4 s (warm, native, excluding fetch). Rank: dev300 F0.5 macro, then articles dev F0.5, then lower latency.",
+  "summary": "Candidates: the frozen /summary models. Filter: deterministic pass rate >= 0.8 on the dev articles; streamed TTFT p50 <= 1.5 s and complete p50 <= 4 s. Rank: Opus judge faithfulness, then judge coverage, then key-fact coverage (key-fact coverage leads while the judge is pending).",
+  "winner": "The best-ranked candidate inside every filter. When no accuracy-eligible candidate meets its latency budget, the Pareto knee (metrics.knee) of quality against budget utilisation (the worst measured metric divided by its limit) among the measured candidates, with the reason stated.",
+  "bundle": "R8: the per-endpoint winners when their model files total <= 10 GB (decimal), else the combination of accuracy-eligible candidates that fits with the fewest rank steps away from the winners (ties: signal, then summary, then analyze keeps its better pick; then the smaller total)."
+ },
+ "inversionCap": 0.02,
+ "passGate": 0.8,
+ "latency": {
+  "session": "20261018T200825Z",
+  "clean": true,
+  "complete": true,
+  "budgets": {
+   "signalLedeP50Ms": 500.0,
+   "ttftP50Ms": 1500.0,
+   "completeP50Ms": 4000.0
+  }
+ },
+ "sizesSource": "ollama /api/tags",
+ "endpoints": {
+  "signal": {
+   "winner": "qwen3.5:0.8b-q8_0",
+   "how": "inside-budget",
+   "reason": "Best dev300 F0.5 0.730 among the candidates inside every filter; p50 excl. fetch 178 ms (limit 500).",
+   "provisional": false,
+   "candidates": [
+    {
+     "model": "qwen3.5:0.8b-q8_0",
+     "config": "v2-label",
+     "rule": "label-logprob+tau @ 0.28",
+     "quality": {
+      "label": "dev300 F0.5",
+      "value": 0.7297,
+      "secondary": [
+       0.6846
+      ]
+     },
+     "checks": [
+      {
+       "name": "dev300 inversion <= 2%",
+       "passed": true,
+       "detail": "0.0% (n=300)"
+      },
+      {
+       "name": "articles dev inversion cap",
+       "passed": true,
+       "detail": "1/14 calls (7.1%), 95% CI low 0.0%; the point estimate alone would fail the cap"
+      }
+     ],
+     "eligible": true,
+     "budget": "met",
+     "utilisation": 0.356,
+     "latencyChecks": [
+      {
+       "metric": "p50 excl. fetch",
+       "value": 178.2,
+       "limit": 500.0,
+       "met": true
+      }
+     ],
+     "latencyWarmN": 30,
+     "sizeBytes": 1019201423,
+     "numbers": {
+      "dev300F05": {
+       "point": 0.7297,
+       "low": 0.6507,
+       "high": 0.7954
+      },
+      "dev300Inversion": 0.0,
+      "dev300Coverage": 1.0,
+      "dev300Point": {
+       "threshold": 0.28,
+       "metrics": {
+        "n": 300,
+        "per_class": {
+         "bullish": {
+          "precision": 0.9137,
+          "recall": 0.34,
+          "f05": 0.6831,
+          "calls": 22.4961,
+          "support": 60.4527
+         },
+         "bearish": {
+          "precision": 0.9181,
+          "recall": 0.48,
+          "f05": 0.7764,
+          "calls": 23.7014,
+          "support": 45.3317
+         }
+        },
+        "f05_macro": 0.7297,
+        "inversion_rate": 0.0,
+        "coverage": 1.0,
+        "signal_rate": 0.154,
+        "accuracy": 0.7755,
+        "selective_accuracy": 0.7755,
+        "confusion": {
+         "rows_gold": [
+          "bullish",
+          "bearish",
+          "neutral"
+         ],
+         "columns_pred": [
+          "bullish",
+          "bearish",
+          "neutral",
+          "abstain"
+         ],
+         "counts": [
+          [
+           34,
+           0,
+           66,
+           0
+          ],
+          [
+           0,
+           48,
+           52,
+           0
+          ],
+          [
+           1,
+           1,
+           98,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "articlesF05": {
+       "point": 0.6846,
+       "low": 0.4727,
+       "high": 0.8333
+      },
+      "articlesInversions": "1/14",
+      "articlesCoverage": 1.0,
+      "articlesInferenceP50Ms": 178.8559,
+      "articlesFullF05": {
+       "point": 0.6349,
+       "low": 0.3289,
+       "high": 0.8167
+      },
+      "promptVersion": "signal/qwen3.5:0.8b-q8_0/v2@ff82e957"
+     },
+     "verdict": "won (inside-budget)"
+    },
+    {
+     "model": "clef-flash:9b-q8_0",
+     "config": "v4",
+     "rule": "probability @ 0.8",
+     "quality": {
+      "label": "dev300 F0.5",
+      "value": 0.8743,
+      "secondary": [
+       0.8477
+      ]
+     },
+     "checks": [
+      {
+       "name": "dev300 inversion <= 2%",
+       "passed": true,
+       "detail": "0.0% (n=300)"
+      },
+      {
+       "name": "articles dev inversion cap",
+       "passed": true,
+       "detail": "1/20 calls (5.0%), 95% CI low 0.0%; the point estimate alone would fail the cap"
+      }
+     ],
+     "eligible": true,
+     "budget": "missed",
+     "utilisation": 1.319,
+     "latencyChecks": [
+      {
+       "metric": "p50 excl. fetch",
+       "value": 659.3,
+       "limit": 500.0,
+       "met": false
+      }
+     ],
+     "latencyWarmN": 30,
+     "sizeBytes": 10578965269,
+     "numbers": {
+      "dev300F05": {
+       "point": 0.8743,
+       "low": 0.8111,
+       "high": 0.9366
+      },
+      "dev300Inversion": 0.0,
+      "dev300Coverage": 0.7285,
+      "dev300Point": {
+       "threshold": 0.8,
+       "metrics": {
+        "n": 300,
+        "per_class": {
+         "bullish": {
+          "precision": 0.8673,
+          "recall": 0.84,
+          "f05": 0.8617,
+          "calls": 58.5489,
+          "support": 60.4527
+         },
+         "bearish": {
+          "precision": 0.9054,
+          "recall": 0.82,
+          "f05": 0.8869,
+          "calls": 41.0563,
+          "support": 45.3317
+         }
+        },
+        "f05_macro": 0.8743,
+        "inversion_rate": 0.0,
+        "coverage": 0.7285,
+        "signal_rate": 0.332,
+        "accuracy": 0.9017,
+        "selective_accuracy": 0.9356,
+        "confusion": {
+         "rows_gold": [
+          "bullish",
+          "bearish",
+          "neutral"
+         ],
+         "columns_pred": [
+          "bullish",
+          "bearish",
+          "neutral",
+          "abstain"
+         ],
+         "counts": [
+          [
+           84,
+           0,
+           1,
+           15
+          ],
+          [
+           0,
+           82,
+           4,
+           14
+          ],
+          [
+           4,
+           2,
+           60,
+           34
+          ]
+         ]
+        }
+       }
+      },
+      "articlesF05": {
+       "point": 0.8477,
+       "low": 0.7077,
+       "high": 0.963
+      },
+      "articlesInversions": "1/20",
+      "articlesCoverage": 0.7667,
+      "articlesInferenceP50Ms": 718.4293,
+      "articlesFullF05": {
+       "point": 0.9072,
+       "low": 0.82,
+       "high": 0.9891
+      },
+      "promptVersion": "signal/clef-flash:9b-q8_0/v4@fcc93f1b"
+     },
+     "verdict": "misses the budget: p50 excl. fetch 659 ms (limit 500)"
+    },
+    {
+     "model": "nimble:9b-q4_K_M",
+     "config": "v1",
+     "rule": "probability @ 0.97",
+     "quality": {
+      "label": "dev300 F0.5",
+      "value": 0.8429,
+      "secondary": [
+       0.8947
+      ]
+     },
+     "checks": [
+      {
+       "name": "dev300 inversion <= 2%",
+       "passed": true,
+       "detail": "0.0% (n=300)"
+      },
+      {
+       "name": "articles dev inversion cap",
+       "passed": true,
+       "detail": "0/17 calls (0.0%), 95% CI low 0.0%"
+      }
+     ],
+     "eligible": true,
+     "budget": "missed",
+     "utilisation": 2.122,
+     "latencyChecks": [
+      {
+       "metric": "p50 excl. fetch",
+       "value": 1060.9,
+       "limit": 500.0,
+       "met": false
+      }
+     ],
+     "latencyWarmN": 30,
+     "sizeBytes": 5629111625,
+     "numbers": {
+      "dev300F05": {
+       "point": 0.8429,
+       "low": 0.7733,
+       "high": 0.9008
+      },
+      "dev300Inversion": 0.0,
+      "dev300Coverage": 0.263,
+      "dev300Point": {
+       "threshold": 0.97,
+       "metrics": {
+        "n": 300,
+        "per_class": {
+         "bullish": {
+          "precision": 0.9475,
+          "recall": 0.58,
+          "f05": 0.8409,
+          "calls": 37.0047,
+          "support": 60.4527
+         },
+         "bearish": {
+          "precision": 0.8909,
+          "recall": 0.7,
+          "f05": 0.8449,
+          "calls": 35.6165,
+          "support": 45.3317
+         }
+        },
+        "f05_macro": 0.8429,
+        "inversion_rate": 0.0,
+        "coverage": 0.263,
+        "signal_rate": 0.2421,
+        "accuracy": 0.8506,
+        "selective_accuracy": 0.9204,
+        "confusion": {
+         "rows_gold": [
+          "bullish",
+          "bearish",
+          "neutral"
+         ],
+         "columns_pred": [
+          "bullish",
+          "bearish",
+          "neutral",
+          "abstain"
+         ],
+         "counts": [
+          [
+           58,
+           0,
+           0,
+           42
+          ],
+          [
+           0,
+           70,
+           1,
+           29
+          ],
+          [
+           1,
+           2,
+           3,
+           94
+          ]
+         ]
+        }
+       }
+      },
+      "articlesF05": {
+       "point": 0.8947,
+       "low": 0.7715,
+       "high": 0.9762
+      },
+      "articlesInversions": "0/17",
+      "articlesCoverage": 0.6,
+      "articlesInferenceP50Ms": 1064.1686,
+      "articlesFullF05": {
+       "point": 0.8796,
+       "low": 0.7606,
+       "high": 0.9762
+      },
+      "promptVersion": "signal/nimble:9b-q4_K_M/v1@a1e34f63"
+     },
+     "verdict": "misses the budget: p50 excl. fetch 1,061 ms (limit 500)"
+    }
+   ]
+  },
+  "summary": {
+   "winner": "qwen3.5:4b-q4_K_M",
+   "how": "inside-budget",
+   "reason": "Best judge faithfulness 4.400 among the candidates inside every filter; complete p50 2,199 ms (limit 4,000), TTFT p50 1,128 ms (limit 1,500).",
+   "provisional": false,
+   "candidates": [
+    {
+     "model": "qwen3.5:4b-q4_K_M",
+     "config": "v2",
+     "rule": "full scope, served 3-sentence / 60-word cap",
+     "quality": {
+      "label": "judge faithfulness",
+      "value": 4.4,
+      "secondary": [
+       4.567,
+       0.4667
+      ]
+     },
+     "checks": [
+      {
+       "name": "deterministic pass >= 0.8",
+       "passed": true,
+       "detail": "90.0% of 30 articles"
+      }
+     ],
+     "eligible": true,
+     "budget": "met",
+     "utilisation": 0.752,
+     "latencyChecks": [
+      {
+       "metric": "complete p50",
+       "value": 2198.6,
+       "limit": 4000.0,
+       "met": true
+      },
+      {
+       "metric": "TTFT p50",
+       "value": 1128.4,
+       "limit": 1500.0,
+       "met": true
+      }
+     ],
+     "latencyWarmN": 30,
+     "sizeBytes": 3324173934,
+     "numbers": {
+      "summary": {
+       "endpoint": "summary",
+       "model": "qwen3.5:4b-q4_K_M",
+       "n": 30,
+       "deterministicPassRate": 0.9,
+       "keyFactCoverage": 0.4667,
+       "keyFactCoverageStrict": 0.2317,
+       "judgeFaithfulness": 4.4,
+       "judgeCoverage": 4.567,
+       "hallucinationRate": 0.5,
+       "materialErrorRate": 0.1,
+       "wordsOkRate": 1.0,
+       "sentencesOkRate": 1.0,
+       "numbersGroundedRate": 0.9333,
+       "entityNamedRate": 0.9667,
+       "truncatedRate": 0.0,
+       "cappedRate": 0.0333,
+       "errorRate": 0.0,
+       "medianWords": 40.0,
+       "unsupportedNumbers": 2,
+       "unsupportedNumbersInInput": 0,
+       "keyFactCoverageAt": {
+        "0.65": 0.3883,
+        "0.70": 0.315,
+        "0.80": 0.1633
+       },
+       "judgeN": 30,
+       "judgeLeadsRate": 1.0,
+       "judgeFaithfulnessCi": [
+        4.167,
+        4.6
+       ],
+       "judgeCoverageCi": [
+        4.4,
+        4.733
+       ],
+       "hallucinationRateCi": [
+        0.333,
+        0.667
+       ],
+       "materialErrorRateCi": [
+        0.0,
+        0.2
+       ],
+       "passesGate": true,
+       "promptVersion": "summary/qwen3.5:4b-q4_K_M/v2@84ce3858",
+       "modelDigest": "d8b0f5e9760c"
+      },
+      "jsonLatency": {
+       "key": "summary/qwen3.5:4b-q4_K_M/full/json",
+       "endpoint": "summary",
+       "model": "qwen3.5:4b-q4_K_M",
+       "scope": "full",
+       "streaming": false,
+       "backend": "native-metal",
+       "targets": {
+        "cold": 3,
+        "warm": 30
+       },
+       "partial": false,
+       "cold": {
+        "n": 3,
+        "errors": 0,
+        "errorCodes": {},
+        "totalMs": {
+         "p50": 2891.1,
+         "p95": 3637.3
+        },
+        "totalInclFetchMs": {
+         "p50": 2891.1,
+         "p95": 3637.3
+        },
+        "ttftMs": null,
+        "signalMs": null,
+        "clientMs": {
+         "p50": 2892.3,
+         "p95": 3638.8
+        },
+        "stagesP50Ms": {
+         "fetch": 0.0,
+         "parse": 3.0,
+         "extract": 1.9,
+         "wall": 2885.9,
+         "load": 1054.0,
+         "prompt_eval": 1047.1,
+         "eval": 965.7
+        },
+        "tokensP50": {
+         "prompt": 743.0,
+         "eval": 62.0
+        },
+        "truncated": 0,
+        "orderViolations": 0
+       },
+       "warm": {
+        "n": 30,
+        "errors": 0,
+        "errorCodes": {},
+        "totalMs": {
+         "p50": 2193.5,
+         "p95": 4210.8
+        },
+        "totalInclFetchMs": {
+         "p50": 2193.5,
+         "p95": 4210.9
+        },
+        "ttftMs": null,
+        "signalMs": null,
+        "clientMs": {
+         "p50": 2194.4,
+         "p95": 4211.8
+        },
+        "stagesP50Ms": {
+         "fetch": 0.0,
+         "parse": 1.5,
+         "extract": 1.8,
+         "wall": 2189.6,
+         "load": 0.8,
+         "prompt_eval": 1017.8,
+         "eval": 1069.7
+        },
+        "tokensP50": {
+         "prompt": 825.0,
+         "eval": 68.0
+        },
+        "truncated": 0,
+        "orderViolations": 0
+       },
+       "budget": {
+        "status": "met",
+        "checks": [
+         {
+          "metric": "complete p50",
+          "value": 2193.5,
+          "limit": 4000.0,
+          "met": true
+         }
+        ],
+        "utilisation": 0.548
+       }
+      },
+      "promptVersion": "summary/qwen3.5:4b-q4_K_M/v2@84ce3858"
+     },
+     "verdict": "won (inside-budget)"
+    },
+    {
+     "model": "qwen3.5:2b-q4_K_M",
+     "config": "v2",
+     "rule": "full scope, served 3-sentence / 60-word cap",
+     "quality": {
+      "label": "judge faithfulness",
+      "value": 3.967,
+      "secondary": [
+       4.3,
+       0.5217
+      ]
+     },
+     "checks": [
+      {
+       "name": "deterministic pass >= 0.8",
+       "passed": true,
+       "detail": "90.0% of 30 articles"
+      }
+     ],
+     "eligible": true,
+     "budget": "met",
+     "utilisation": 0.323,
+     "latencyChecks": [
+      {
+       "metric": "complete p50",
+       "value": 1271.8,
+       "limit": 4000.0,
+       "met": true
+      },
+      {
+       "metric": "TTFT p50",
+       "value": 484.3,
+       "limit": 1500.0,
+       "met": true
+      }
+     ],
+     "latencyWarmN": 30,
+     "sizeBytes": 1945781358,
+     "numbers": {
+      "summary": {
+       "endpoint": "summary",
+       "model": "qwen3.5:2b-q4_K_M",
+       "n": 30,
+       "deterministicPassRate": 0.9,
+       "keyFactCoverage": 0.5217,
+       "keyFactCoverageStrict": 0.2417,
+       "judgeFaithfulness": 3.967,
+       "judgeCoverage": 4.3,
+       "hallucinationRate": 0.6667,
+       "materialErrorRate": 0.3,
+       "wordsOkRate": 1.0,
+       "sentencesOkRate": 1.0,
+       "numbersGroundedRate": 0.9667,
+       "entityNamedRate": 0.9333,
+       "truncatedRate": 0.0333,
+       "cappedRate": 0.3667,
+       "errorRate": 0.0,
+       "medianWords": 49.0,
+       "unsupportedNumbers": 1,
+       "unsupportedNumbersInInput": 1,
+       "keyFactCoverageAt": {
+        "0.65": 0.4567,
+        "0.70": 0.3317,
+        "0.80": 0.1733
+       },
+       "judgeN": 30,
+       "judgeLeadsRate": 0.9,
+       "judgeFaithfulnessCi": [
+        3.667,
+        4.233
+       ],
+       "judgeCoverageCi": [
+        4.033,
+        4.567
+       ],
+       "hallucinationRateCi": [
+        0.533,
+        0.8
+       ],
+       "materialErrorRateCi": [
+        0.166,
+        0.467
+       ],
+       "passesGate": true,
+       "promptVersion": "summary/qwen3.5:2b-q4_K_M/v2@84ce3858",
+       "modelDigest": "1e2d21a4f03a"
+      },
+      "jsonLatency": {
+       "key": "summary/qwen3.5:2b-q4_K_M/full/json",
+       "endpoint": "summary",
+       "model": "qwen3.5:2b-q4_K_M",
+       "scope": "full",
+       "streaming": false,
+       "backend": "native-metal",
+       "targets": {
+        "cold": 3,
+        "warm": 30
+       },
+       "partial": false,
+       "cold": {
+        "n": 3,
+        "errors": 0,
+        "errorCodes": {},
+        "totalMs": {
+         "p50": 2540.9,
+         "p95": 2856.0
+        },
+        "totalInclFetchMs": {
+         "p50": 2540.9,
+         "p95": 2856.1
+        },
+        "ttftMs": null,
+        "signalMs": null,
+        "clientMs": {
+         "p50": 2541.8,
+         "p95": 2857.4
+        },
+        "stagesP50Ms": {
+         "fetch": 0.0,
+         "parse": 2.7,
+         "extract": 1.9,
+         "wall": 2535.7,
+         "load": 1327.7,
+         "prompt_eval": 404.9,
+         "eval": 704.3
+        },
+        "tokensP50": {
+         "prompt": 743.0,
+         "eval": 86.0
+        },
+        "truncated": 0,
+        "orderViolations": 0
+       },
+       "warm": {
+        "n": 30,
+        "errors": 0,
+        "errorCodes": {},
+        "totalMs": {
+         "p50": 1309.8,
+         "p95": 2071.4
+        },
+        "totalInclFetchMs": {
+         "p50": 1309.8,
+         "p95": 2071.4
+        },
+        "ttftMs": null,
+        "signalMs": null,
+        "clientMs": {
+         "p50": 1310.8,
+         "p95": 2072.3
+        },
+        "stagesP50Ms": {
+         "fetch": 0.0,
+         "parse": 1.5,
+         "extract": 1.8,
+         "wall": 1304.8,
+         "load": 0.9,
+         "prompt_eval": 416.9,
+         "eval": 869.4
+        },
+        "tokensP50": {
+         "prompt": 825.0,
+         "eval": 92.0
+        },
+        "truncated": 1,
+        "orderViolations": 0
+       },
+       "budget": {
+        "status": "met",
+        "checks": [
+         {
+          "metric": "complete p50",
+          "value": 1309.8,
+          "limit": 4000.0,
+          "met": true
+         }
+        ],
+        "utilisation": 0.327
+       }
+      },
+      "promptVersion": "summary/qwen3.5:2b-q4_K_M/v2@84ce3858"
+     },
+     "verdict": "ranks below the winner (judge faithfulness 3.967 vs 4.400)"
+    }
+   ]
+  },
+  "analyze": {
+   "winner": "qwen3.5:4b-q4_K_M",
+   "how": "inside-budget",
+   "reason": "Best dev300 F0.5 0.752 among the candidates inside every filter; complete p50 2,584 ms (limit 4,000), TTFT p50 1,292 ms (limit 1,500).",
+   "provisional": false,
+   "candidates": [
+    {
+     "model": "ministral-3:3b",
+     "config": "v5",
+     "rule": "ordinal |s| >= 1, sentiment-first",
+     "quality": {
+      "label": "dev300 F0.5",
+      "value": 0.6851,
+      "secondary": [
+       0.7407
+      ]
+     },
+     "checks": [
+      {
+       "name": "dev300 inversion <= 2%",
+       "passed": true,
+       "detail": "1.0% (n=300)"
+      },
+      {
+       "name": "articles dev inversion cap",
+       "passed": true,
+       "detail": "0/19 calls (0.0%), 95% CI low 0.0%"
+      }
+     ],
+     "eligible": true,
+     "budget": "met",
+     "utilisation": 0.701,
+     "latencyChecks": [
+      {
+       "metric": "complete p50",
+       "value": 2242.5,
+       "limit": 4000.0,
+       "met": true
+      },
+      {
+       "metric": "TTFT p50",
+       "value": 1051.1,
+       "limit": 1500.0,
+       "met": true
+      }
+     ],
+     "latencyWarmN": 30,
+     "sizeBytes": 2953840808,
+     "numbers": {
+      "dev300F05": {
+       "point": 0.6851,
+       "low": 0.5889,
+       "high": 0.7724
+      },
+      "dev300Inversion": 0.0101,
+      "dev300Point": {
+       "threshold": 1.0,
+       "metrics": {
+        "n": 300,
+        "per_class": {
+         "bullish": {
+          "precision": 0.837,
+          "recall": 0.33,
+          "f05": 0.6403,
+          "calls": 23.8337,
+          "support": 60.4527
+         },
+         "bearish": {
+          "precision": 0.7676,
+          "recall": 0.61,
+          "f05": 0.7299,
+          "calls": 36.0255,
+          "support": 45.3317
+         }
+        },
+        "f05_macro": 0.6851,
+        "inversion_rate": 0.0101,
+        "coverage": 1.0,
+        "signal_rate": 0.1995,
+        "accuracy": 0.7672,
+        "selective_accuracy": 0.7672,
+        "confusion": {
+         "rows_gold": [
+          "bullish",
+          "bearish",
+          "neutral"
+         ],
+         "columns_pred": [
+          "bullish",
+          "bearish",
+          "neutral",
+          "abstain"
+         ],
+         "counts": [
+          [
+           33,
+           1,
+           66,
+           0
+          ],
+          [
+           0,
+           61,
+           39,
+           0
+          ],
+          [
+           2,
+           4,
+           94,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "articlesF05": {
+       "point": 0.7407,
+       "low": 0.611,
+       "high": 0.8578
+      },
+      "articlesInversions": "0/19",
+      "articlesCoverage": 1.0,
+      "articlesInferenceP50Ms": 825.2126,
+      "jsonLatency": {
+       "key": "analyze/ministral-3:3b/full/json",
+       "endpoint": "analyze",
+       "model": "ministral-3:3b",
+       "scope": "full",
+       "streaming": false,
+       "backend": "native-metal",
+       "targets": {
+        "cold": 3,
+        "warm": 30
+       },
+       "partial": false,
+       "cold": {
+        "n": 3,
+        "errors": 0,
+        "errorCodes": {},
+        "totalMs": {
+         "p50": 3515.8,
+         "p95": 4748.7
+        },
+        "totalInclFetchMs": {
+         "p50": 3515.8,
+         "p95": 4748.7
+        },
+        "ttftMs": null,
+        "signalMs": {
+         "p50": 3515.8,
+         "p95": 4748.7
+        },
+        "clientMs": {
+         "p50": 3517.1,
+         "p95": 4749.9
+        },
+        "stagesP50Ms": {
+         "fetch": 0.0,
+         "parse": 3.0,
+         "extract": 2.2,
+         "wall": 3510.0,
+         "load": 1312.4,
+         "prompt_eval": 910.7,
+         "eval": 1372.4
+        },
+        "tokensP50": {
+         "prompt": 895.0,
+         "eval": 103.0
+        },
+        "truncated": 0,
+        "orderViolations": 0
+       },
+       "warm": {
+        "n": 30,
+        "errors": 0,
+        "errorCodes": {},
+        "totalMs": {
+         "p50": 2218.6,
+         "p95": 3974.3
+        },
+        "totalInclFetchMs": {
+         "p50": 2218.6,
+         "p95": 3974.4
+        },
+        "ttftMs": null,
+        "signalMs": {
+         "p50": 2218.6,
+         "p95": 3974.3
+        },
+        "clientMs": {
+         "p50": 2219.8,
+         "p95": 3975.3
+        },
+        "stagesP50Ms": {
+         "fetch": 0.0,
+         "parse": 1.6,
+         "extract": 1.8,
+         "wall": 2213.3,
+         "load": 0.8,
+         "prompt_eval": 713.2,
+         "eval": 1349.5
+        },
+        "tokensP50": {
+         "prompt": 979.0,
+         "eval": 92.0
+        },
+        "truncated": 0,
+        "orderViolations": 0
+       },
+       "budget": {
+        "status": "met",
+        "checks": [
+         {
+          "metric": "complete p50",
+          "value": 2218.6,
+          "limit": 4000.0,
+          "met": true
+         }
+        ],
+        "utilisation": 0.555
+       }
+      },
+      "summaryQuality": {
+       "endpoint": "analyze",
+       "model": "ministral-3:3b",
+       "n": 30,
+       "deterministicPassRate": 0.7667,
+       "keyFactCoverage": 0.45,
+       "keyFactCoverageStrict": 0.1883,
+       "judgeFaithfulness": 3.767,
+       "judgeCoverage": 4.267,
+       "hallucinationRate": 0.6333,
+       "materialErrorRate": 0.4,
+       "wordsOkRate": 1.0,
+       "sentencesOkRate": 1.0,
+       "numbersGroundedRate": 0.8,
+       "entityNamedRate": 0.9667,
+       "truncatedRate": 0.0,
+       "cappedRate": 0.0,
+       "errorRate": 0.0,
+       "medianWords": 37.0,
+       "unsupportedNumbers": 8,
+       "unsupportedNumbersInInput": 1,
+       "keyFactCoverageAt": {
+        "0.65": 0.3633,
+        "0.70": 0.2583,
+        "0.80": 0.1433
+       },
+       "judgeN": 30,
+       "judgeLeadsRate": 0.8,
+       "judgeFaithfulnessCi": [
+        3.367,
+        4.2
+       ],
+       "judgeCoverageCi": [
+        3.967,
+        4.6
+       ],
+       "hallucinationRateCi": [
+        0.467,
+        0.8
+       ],
+       "materialErrorRateCi": [
+        0.233,
+        0.567
+       ],
+       "passesGate": false,
+       "promptVersion": "analyze/ministral-3:3b/v5@e2b57fc6",
+       "modelDigest": "f04aa1c738f6"
+      },
+      "promptVersion": "analyze/ministral-3:3b/v5@e2b57fc6"
+     },
+     "verdict": "ranks below the winner (dev300 F0.5 0.685 vs 0.752)"
+    },
+    {
+     "model": "qwen3:4b-instruct-2507-q4_K_M",
+     "config": "v5",
+     "rule": "ordinal |s| >= 1, sentiment-first",
+     "quality": {
+      "label": "dev300 F0.5",
+      "value": 0.6468,
+      "secondary": [
+       0.779
+      ]
+     },
+     "checks": [
+      {
+       "name": "dev300 inversion <= 2%",
+       "passed": true,
+       "detail": "0.0% (n=300)"
+      },
+      {
+       "name": "articles dev inversion cap",
+       "passed": true,
+       "detail": "1/22 calls (4.5%), 95% CI low 0.0%; the point estimate alone would fail the cap"
+      }
+     ],
+     "eligible": true,
+     "budget": "met",
+     "utilisation": 0.801,
+     "latencyChecks": [
+      {
+       "metric": "complete p50",
+       "value": 2234.0,
+       "limit": 4000.0,
+       "met": true
+      },
+      {
+       "metric": "TTFT p50",
+       "value": 1201.4,
+       "limit": 1500.0,
+       "met": true
+      }
+     ],
+     "latencyWarmN": 30,
+     "sizeBytes": 2497293803,
+     "numbers": {
+      "dev300F05": {
+       "point": 0.6468,
+       "low": 0.5529,
+       "high": 0.7405
+      },
+      "dev300Inversion": 0.0,
+      "dev300Point": {
+       "threshold": 1.0,
+       "metrics": {
+        "n": 300,
+        "per_class": {
+         "bullish": {
+          "precision": 0.7021,
+          "recall": 0.53,
+          "f05": 0.6593,
+          "calls": 45.635,
+          "support": 60.4527
+         },
+         "bearish": {
+          "precision": 0.7521,
+          "recall": 0.39,
+          "f05": 0.6343,
+          "calls": 23.5058,
+          "support": 45.3317
+         }
+        },
+        "f05_macro": 0.6468,
+        "inversion_rate": 0.0,
+        "coverage": 1.0,
+        "signal_rate": 0.2305,
+        "accuracy": 0.7484,
+        "selective_accuracy": 0.7484,
+        "confusion": {
+         "rows_gold": [
+          "bullish",
+          "bearish",
+          "neutral"
+         ],
+         "columns_pred": [
+          "bullish",
+          "bearish",
+          "neutral",
+          "abstain"
+         ],
+         "counts": [
+          [
+           53,
+           0,
+           47,
+           0
+          ],
+          [
+           0,
+           39,
+           61,
+           0
+          ],
+          [
+           7,
+           3,
+           90,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "articlesF05": {
+       "point": 0.779,
+       "low": 0.6458,
+       "high": 0.8794
+      },
+      "articlesInversions": "1/22",
+      "articlesCoverage": 1.0,
+      "articlesInferenceP50Ms": 1210.8939,
+      "jsonLatency": {
+       "key": "analyze/qwen3:4b-instruct-2507-q4_K_M/full/json",
+       "endpoint": "analyze",
+       "model": "qwen3:4b-instruct-2507-q4_K_M",
+       "scope": "full",
+       "streaming": false,
+       "backend": "native-metal",
+       "targets": {
+        "cold": 3,
+        "warm": 30
+       },
+       "partial": false,
+       "cold": {
+        "n": 3,
+        "errors": 0,
+        "errorCodes": {},
+        "totalMs": {
+         "p50": 3403.2,
+         "p95": 3785.9
+        },
+        "totalInclFetchMs": {
+         "p50": 3403.2,
+         "p95": 3785.9
+        },
+        "ttftMs": null,
+        "signalMs": {
+         "p50": 3403.2,
+         "p95": 3785.9
+        },
+        "clientMs": {
+         "p50": 3404.2,
+         "p95": 3787.1
+        },
+        "stagesP50Ms": {
+         "fetch": 0.0,
+         "parse": 3.1,
+         "extract": 1.8,
+         "wall": 3397.6,
+         "load": 786.2,
+         "prompt_eval": 1116.3,
+         "eval": 1513.1
+        },
+        "tokensP50": {
+         "prompt": 888.0,
+         "eval": 107.0
+        },
+        "truncated": 0,
+        "orderViolations": 0
+       },
+       "warm": {
+        "n": 30,
+        "errors": 0,
+        "errorCodes": {},
+        "totalMs": {
+         "p50": 2243.1,
+         "p95": 4968.6
+        },
+        "totalInclFetchMs": {
+         "p50": 2243.1,
+         "p95": 4968.7
+        },
+        "ttftMs": null,
+        "signalMs": {
+         "p50": 2243.1,
+         "p95": 4968.6
+        },
+        "clientMs": {
+         "p50": 2244.0,
+         "p95": 4970.0
+        },
+        "stagesP50Ms": {
+         "fetch": 0.0,
+         "parse": 1.5,
+         "extract": 1.8,
+         "wall": 2237.4,
+         "load": 0.7,
+         "prompt_eval": 867.9,
+         "eval": 1242.5
+        },
+        "tokensP50": {
+         "prompt": 969.5,
+         "eval": 88.5
+        },
+        "truncated": 0,
+        "orderViolations": 0
+       },
+       "budget": {
+        "status": "met",
+        "checks": [
+         {
+          "metric": "complete p50",
+          "value": 2243.1,
+          "limit": 4000.0,
+          "met": true
+         }
+        ],
+        "utilisation": 0.561
+       }
+      },
+      "summaryQuality": {
+       "endpoint": "analyze",
+       "model": "qwen3:4b-instruct-2507-q4_K_M",
+       "n": 30,
+       "deterministicPassRate": 0.9,
+       "keyFactCoverage": 0.5583,
+       "keyFactCoverageStrict": 0.2467,
+       "judgeFaithfulness": 4.733,
+       "judgeCoverage": 4.433,
+       "hallucinationRate": 0.2,
+       "materialErrorRate": 0.0667,
+       "wordsOkRate": 1.0,
+       "sentencesOkRate": 1.0,
+       "numbersGroundedRate": 0.9,
+       "entityNamedRate": 1.0,
+       "truncatedRate": 0.0,
+       "cappedRate": 0.0667,
+       "errorRate": 0.0,
+       "medianWords": 40.5,
+       "unsupportedNumbers": 3,
+       "unsupportedNumbersInInput": 0,
+       "keyFactCoverageAt": {
+        "0.65": 0.4833,
+        "0.70": 0.3167,
+        "0.80": 0.1717
+       },
+       "judgeN": 30,
+       "judgeLeadsRate": 0.8333,
+       "judgeFaithfulnessCi": [
+        4.533,
+        4.933
+       ],
+       "judgeCoverageCi": [
+        4.167,
+        4.667
+       ],
+       "hallucinationRateCi": [
+        0.067,
+        0.333
+       ],
+       "materialErrorRateCi": [
+        0.0,
+        0.167
+       ],
+       "passesGate": true,
+       "promptVersion": "analyze/qwen3:4b-instruct-2507-q4_K_M/v5@e2b57fc6",
+       "modelDigest": "0edcdef34593"
+      },
+      "promptVersion": "analyze/qwen3:4b-instruct-2507-q4_K_M/v5@e2b57fc6"
+     },
+     "verdict": "ranks below the winner (dev300 F0.5 0.647 vs 0.752)"
+    },
+    {
+     "model": "qwen3.5:4b-q4_K_M",
+     "config": "v1",
+     "rule": "ordinal |s| >= 1, sentiment-first",
+     "quality": {
+      "label": "dev300 F0.5",
+      "value": 0.7521,
+      "secondary": [
+       0.8796
+      ]
+     },
+     "checks": [
+      {
+       "name": "dev300 inversion <= 2%",
+       "passed": true,
+       "detail": "0.0% (n=300)"
+      },
+      {
+       "name": "articles dev inversion cap",
+       "passed": true,
+       "detail": "0/22 calls (0.0%), 95% CI low 0.0%"
+      }
+     ],
+     "eligible": true,
+     "budget": "met",
+     "utilisation": 0.861,
+     "latencyChecks": [
+      {
+       "metric": "complete p50",
+       "value": 2583.7,
+       "limit": 4000.0,
+       "met": true
+      },
+      {
+       "metric": "TTFT p50",
+       "value": 1291.7,
+       "limit": 1500.0,
+       "met": true
+      }
+     ],
+     "latencyWarmN": 30,
+     "sizeBytes": 3324173934,
+     "numbers": {
+      "dev300F05": {
+       "point": 0.7521,
+       "low": 0.6638,
+       "high": 0.8339
+      },
+      "dev300Inversion": 0.0,
+      "dev300Point": {
+       "threshold": 1.0,
+       "metrics": {
+        "n": 300,
+        "per_class": {
+         "bullish": {
+          "precision": 0.8774,
+          "recall": 0.46,
+          "f05": 0.7427,
+          "calls": 31.6925,
+          "support": 60.4527
+         },
+         "bearish": {
+          "precision": 0.8211,
+          "recall": 0.59,
+          "f05": 0.7615,
+          "calls": 32.5721,
+          "support": 45.3317
+         }
+        },
+        "f05_macro": 0.7521,
+        "inversion_rate": 0.0,
+        "coverage": 1.0,
+        "signal_rate": 0.2142,
+        "accuracy": 0.7969,
+        "selective_accuracy": 0.7969,
+        "confusion": {
+         "rows_gold": [
+          "bullish",
+          "bearish",
+          "neutral"
+         ],
+         "columns_pred": [
+          "bullish",
+          "bearish",
+          "neutral",
+          "abstain"
+         ],
+         "counts": [
+          [
+           46,
+           0,
+           54,
+           0
+          ],
+          [
+           0,
+           59,
+           41,
+           0
+          ],
+          [
+           2,
+           3,
+           95,
+           0
+          ]
+         ]
+        }
+       }
+      },
+      "articlesF05": {
+       "point": 0.8796,
+       "low": 0.7911,
+       "high": 0.9891
+      },
+      "articlesInversions": "0/22",
+      "articlesCoverage": 1.0,
+      "articlesInferenceP50Ms": 1221.9865,
+      "jsonLatency": {
+       "key": "analyze/qwen3.5:4b-q4_K_M/full/json",
+       "endpoint": "analyze",
+       "model": "qwen3.5:4b-q4_K_M",
+       "scope": "full",
+       "streaming": false,
+       "backend": "native-metal",
+       "targets": {
+        "cold": 3,
+        "warm": 30
+       },
+       "partial": false,
+       "cold": {
+        "n": 3,
+        "errors": 0,
+        "errorCodes": {},
+        "totalMs": {
+         "p50": 3544.1,
+         "p95": 4533.9
+        },
+        "totalInclFetchMs": {
+         "p50": 3544.1,
+         "p95": 4533.9
+        },
+        "ttftMs": null,
+        "signalMs": {
+         "p50": 3544.1,
+         "p95": 4533.9
+        },
+        "clientMs": {
+         "p50": 3545.5,
+         "p95": 4535.5
+        },
+        "stagesP50Ms": {
+         "fetch": 0.0,
+         "parse": 2.9,
+         "extract": 2.2,
+         "wall": 3538.1,
+         "load": 1053.6,
+         "prompt_eval": 1165.6,
+         "eval": 1461.2
+        },
+        "tokensP50": {
+         "prompt": 881.0,
+         "eval": 94.0
+        },
+        "truncated": 0,
+        "orderViolations": 0
+       },
+       "warm": {
+        "n": 30,
+        "errors": 0,
+        "errorCodes": {},
+        "totalMs": {
+         "p50": 2579.7,
+         "p95": 4581.6
+        },
+        "totalInclFetchMs": {
+         "p50": 2579.8,
+         "p95": 4581.6
+        },
+        "ttftMs": null,
+        "signalMs": {
+         "p50": 2579.7,
+         "p95": 4581.6
+        },
+        "clientMs": {
+         "p50": 2580.9,
+         "p95": 4582.4
+        },
+        "stagesP50Ms": {
+         "fetch": 0.0,
+         "parse": 1.5,
+         "extract": 1.7,
+         "wall": 2575.0,
+         "load": 0.8,
+         "prompt_eval": 992.0,
+         "eval": 1503.8
+        },
+        "tokensP50": {
+         "prompt": 963.0,
+         "eval": 96.0
+        },
+        "truncated": 0,
+        "orderViolations": 0
+       },
+       "budget": {
+        "status": "met",
+        "checks": [
+         {
+          "metric": "complete p50",
+          "value": 2579.7,
+          "limit": 4000.0,
+          "met": true
+         }
+        ],
+        "utilisation": 0.645
+       }
+      },
+      "summaryQuality": {
+       "endpoint": "analyze",
+       "model": "qwen3.5:4b-q4_K_M",
+       "n": 30,
+       "deterministicPassRate": 0.9333,
+       "keyFactCoverage": 0.57,
+       "keyFactCoverageStrict": 0.2917,
+       "judgeFaithfulness": 4.467,
+       "judgeCoverage": 4.633,
+       "hallucinationRate": 0.4,
+       "materialErrorRate": 0.1,
+       "wordsOkRate": 1.0,
+       "sentencesOkRate": 1.0,
+       "numbersGroundedRate": 0.9667,
+       "entityNamedRate": 0.9667,
+       "truncatedRate": 0.0,
+       "cappedRate": 0.3333,
+       "errorRate": 0.0,
+       "medianWords": 48.0,
+       "unsupportedNumbers": 1,
+       "unsupportedNumbersInInput": 0,
+       "keyFactCoverageAt": {
+        "0.65": 0.4767,
+        "0.70": 0.3983,
+        "0.80": 0.2317
+       },
+       "judgeN": 30,
+       "judgeLeadsRate": 1.0,
+       "judgeFaithfulnessCi": [
+        4.2,
+        4.7
+       ],
+       "judgeCoverageCi": [
+        4.467,
+        4.8
+       ],
+       "hallucinationRateCi": [
+        0.266,
+        0.567
+       ],
+       "materialErrorRateCi": [
+        0.0,
+        0.2
+       ],
+       "passesGate": true,
+       "promptVersion": "analyze/qwen3.5:4b-q4_K_M/v1@7daf4f28",
+       "modelDigest": "d8b0f5e9760c"
+      },
+      "promptVersion": "analyze/qwen3.5:4b-q4_K_M/v1@7daf4f28"
+     },
+     "verdict": "won (inside-budget)"
+    }
+   ]
+  }
+ },
+ "bundle": {
+  "status": "winners",
+  "fits": true,
+  "defaults": {
+   "signal": "qwen3.5:0.8b-q8_0",
+   "summary": "qwen3.5:4b-q4_K_M",
+   "analyze": "qwen3.5:4b-q4_K_M"
+  },
+  "models": [
+   "qwen3.5:0.8b-q8_0",
+   "qwen3.5:4b-q4_K_M"
+  ],
+  "totalBytes": 4343375357,
+  "winnersBytes": 4343375357,
+  "capBytes": 10000000000,
+  "swaps": {},
+  "unknownSizes": []
+ }
+}

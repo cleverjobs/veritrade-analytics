@@ -14,7 +14,7 @@ import subprocess
 import sys
 import time
 from collections import Counter
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Awaitable, Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -49,6 +49,7 @@ HTTP_TIMEOUT_S = 600.0
 UNLOAD_WAIT_S = 30.0
 NATIVE_BACKEND = "native-metal"
 DOCKER_BACKEND = "docker-cpu"
+DOCKER_OLLAMA_CONTAINER = "veritrade-ollama-1"
 # Fields a raw sample may carry; anything else (titles, summaries, entities) is dropped before writing.
 SAMPLE_FIELDS = (
     "session", "cell", "endpoint", "model", "scope", "streaming", "backend", "phase", "article", "ok",
@@ -563,10 +564,12 @@ async def run_suite(
     ollama: OllamaClient | None,
     shared: bool,
     warmup_url: str = WARMUP_URL,
+    reload: Callable[[str], Awaitable[None]] | None = None,
     log: TextIO = sys.stderr,
 ) -> int:
     """Cold samples (model unloaded first), then a reload through one warm-up on an unmeasured page and the
-    warm samples, cell by cell; returns the number of new samples. An unreachable Ollama aborts the run."""
+    warm samples, cell by cell; returns the number of new samples. An unreachable Ollama aborts the run.
+    `reload` unloads a model when the Ollama API is out of reach (the bundled container)."""
     cold = list(articles[:cold_n]) if ollama is not None else []
     added = 0
     for model, group in by_model(cells):
@@ -586,6 +589,8 @@ async def run_suite(
                 # A reload empties the prompt cache, so no warm sample reuses a prompt an earlier cell sent.
                 if ollama is not None:
                     await unload(ollama, model)
+                elif reload is not None:
+                    await reload(model)
                 warmed, _, _ = await post(http, cell, warmup_url)
                 if not warmed["ok"]:
                     print(f"[{cell.key}] warm-up failed: {warmed['error']}", file=log, flush=True)
@@ -983,6 +988,23 @@ def bundled_defaults(path: Path = BUNDLED_ENV) -> dict[Endpoint, str]:
     return out
 
 
+def container_reload(container: str, wait_s: float = UNLOAD_WAIT_S) -> Callable[[str], Awaitable[None]]:
+    """The bundled Ollama has no host port, so models are stopped inside its container."""
+
+    async def reload(model: str) -> None:
+        if _cmd(["docker", "exec", container, "ollama", "stop", model]) is None:
+            raise LatencyError(f"could not stop {model} in container {container}")
+        deadline = time.monotonic() + wait_s
+        while time.monotonic() < deadline:
+            listed = _cmd(["docker", "exec", container, "ollama", "ps"])
+            if listed is not None and model not in listed:
+                return
+            await asyncio.sleep(0.5)
+        raise LatencyError(f"{model} is still resident in {container} {wait_s:.0f} s after `ollama stop`")
+
+    return reload
+
+
 def docker_cells(models: Sequence[str] | None, defaults: Mapping[Endpoint, str]) -> list[Cell]:
     """The bundled default per endpoint (signal at lede), or every matrix cell of the given models."""
     if models:
@@ -1003,6 +1025,7 @@ async def run_docker(
     *,
     warmup: ArticleExample,
     session: str,
+    reload: Callable[[str], Awaitable[None]] | None,
     log: TextIO,
 ) -> int:
     """The bundled app fetches live, so its warm-up is a dev article outside the measured slice."""
@@ -1025,6 +1048,7 @@ async def run_docker(
             ollama=None,
             shared=True,
             warmup_url=warmup.url,
+            reload=reload,
             log=log,
         )
 
@@ -1095,7 +1119,15 @@ def cmd_docker(args: argparse.Namespace) -> int:
     cells = docker_cells(args.model, bundled_defaults())
     print(f"{DOCKER_BACKEND} session {session}: {len(cells)} cells x {len(articles)} warm", file=sys.stderr)
     added = asyncio.run(
-        run_docker(args.base_url, cells, articles, warmup=warmup, session=session, log=sys.stderr)
+        run_docker(
+            args.base_url,
+            cells,
+            articles,
+            warmup=warmup,
+            session=session,
+            reload=container_reload(args.ollama_container),
+            log=sys.stderr,
+        )
     )
     write_report()
     print(f"{added} new samples; wrote {_rel(LATENCY_JSON)}")
@@ -1141,6 +1173,11 @@ def add_parser(subparsers: Any) -> argparse.ArgumentParser:
     )
     docker.add_argument("--n", type=int, default=DOCKER_WARM_N, help="warm samples per cell")
     docker.add_argument("--session", default=None, help="session id (default: the preflight session)")
+    docker.add_argument(
+        "--ollama-container",
+        default=DOCKER_OLLAMA_CONTAINER,
+        help="bundled Ollama container, unloaded through `docker exec` before each cell's warm phase",
+    )
     docker.set_defaults(latency_func=cmd_docker)
 
     rep = actions.add_parser("report", help="re-aggregate raw samples into latency.{json,md}")

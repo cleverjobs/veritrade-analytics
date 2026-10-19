@@ -1,0 +1,65 @@
+{
+ "version": 1,
+ "session": "20261018T200825Z",
+ "ok": true,
+ "at": "2026-10-18T20:08:25+00:00",
+ "checks": [
+  {
+   "name": "no running Docker containers",
+   "ok": true,
+   "detail": "0 running"
+  },
+  {
+   "name": "Ollama reachable",
+   "ok": true,
+   "detail": "0.40.6"
+  }
+ ],
+ "warnings": [
+  "swap in use: 23200 of 25600 MB"
+ ],
+ "environment": {
+  "chip": "Apple M4 Pro",
+  "cpus": 14,
+  "ramGb": 48,
+  "os": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "python": "3.13.12",
+  "ollamaVersion": "0.40.6",
+  "backend": "native-metal",
+  "ollamaBaseUrl": "http://localhost:11434",
+  "ollamaService": {
+   "service": "sh.brew.ollama",
+   "running": true,
+   "env": {
+    "OLLAMA_FLASH_ATTENTION": "1",
+    "OLLAMA_KEEP_ALIVE": "30m",
+    "OLLAMA_KV_CACHE_TYPE": "q8_0",
+    "OLLAMA_MAX_LOADED_MODELS": "3"
+   }
+  },
+  "ollamaResident": [],
+  "modelSizes": {
+   "clef-flash:9b-q8_0": 10578965269,
+   "ministral-3:3b": 2953840808,
+   "nimble:9b-q4_K_M": 5629111625,
+   "qwen3-embedding:0.6b": 639150858,
+   "qwen3.5:0.8b-q8_0": 1019201423,
+   "qwen3.5:2b-q4_K_M": 1945781358,
+   "qwen3.5:4b-q4_K_M": 3324173934,
+   "qwen3.5:9b-q4_K_M": 6550825550,
+   "qwen3:4b-instruct-2507-q4_K_M": 2497293803,
+   "tev1:0.8b-q8_0": 833606657
+  },
+  "loadAverage": [
+   6.89,
+   5.35,
+   4.11
+  ],
+  "memory": {
+   "freePct": 70,
+   "swapUsedMb": 23199.94,
+   "swapTotalMb": 25600.0
+  },
+  "dockerRunning": 0
+ }
+}

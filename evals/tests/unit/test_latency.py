@@ -271,6 +271,59 @@ async def test_native_suite_measures_cold_and_warm_through_the_app(
     assert again == 0
 
 
+async def test_container_reload_stops_the_model_and_waits_until_it_is_gone(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[list[str]] = []
+    listings = iter([f"{SUMMARY.model} 3 GB\n", ""])
+
+    def fake_cmd(args: list[str], timeout: float = 20.0) -> str | None:
+        calls.append(list(args))
+        return next(listings) if args[-1] == "ps" else ""
+
+    monkeypatch.setattr(lat, "_cmd", fake_cmd)
+    await lat.container_reload("box", wait_s=5)(SUMMARY.model)
+    assert calls[0] == ["docker", "exec", "box", "ollama", "stop", SUMMARY.model]
+    assert sum(c[-1] == "ps" for c in calls) == 2
+
+    monkeypatch.setattr(lat, "_cmd", lambda args, timeout=20.0: None)
+    with pytest.raises(lat.LatencyError, match="could not stop"):
+        await lat.container_reload("box")(SUMMARY.model)
+
+
+async def test_suite_without_an_ollama_client_reloads_through_the_hook_before_each_warm_phase(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    async def fake_post(http: Any, cell: Cell, url: str) -> tuple[dict[str, Any], Any, Any]:
+        return {"ok": True}, None, None
+
+    async def fake_measure(http: Any, cell: Cell, article: ArticleExample, **kw: Any) -> dict[str, Any]:
+        return {"cell": cell.key, "phase": kw["phase"], "article": article.id, "ok": True, "error": None}
+
+    monkeypatch.setattr(lat, "post", fake_post)
+    monkeypatch.setattr(lat, "measure", fake_measure)
+    reloaded: list[str] = []
+
+    async def reload(model: str) -> None:
+        reloaded.append(model)
+
+    store = lat.RawStore(tmp_path / "docker.jsonl")
+    async with httpx.AsyncClient() as http:
+        await lat.run_suite(
+            http,
+            [SIGNAL, SUMMARY],
+            [_article(0)],
+            store,
+            session="t",
+            backend=lat.DOCKER_BACKEND,
+            cold_n=0,
+            ollama=None,
+            shared=True,
+            reload=reload,
+        )
+    assert reloaded == [SIGNAL.model, SUMMARY.model]
+
+
 def test_docker_rows_come_from_their_own_samples_and_carry_no_native_budget() -> None:
     cell = Cell("summary", "qwen3.5:0.8b-q8_0", "full", True)
     docker = [
