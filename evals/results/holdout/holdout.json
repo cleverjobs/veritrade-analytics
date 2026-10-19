@@ -1,0 +1,2851 @@
+{
+ "version": 1,
+ "generatedAt": "2026-10-19T12:01:47+00:00",
+ "generatedBy": "uv run python -m veritrade_evals holdout",
+ "dryRun": false,
+ "frozenSha256": "8dfd2f322299ce57e8d294006e6a45041756d5c00c4a54adf8372211a80de1f1",
+ "selectionSha256": "269179b04a1ca577f9e3d0b0fc88524b906c6f6d6416d3fcf66e056ab1551065",
+ "guard": {
+  "status": "complete",
+  "startedAt": "2026-10-19T05:57:57+00:00",
+  "completedAt": "2026-10-19T10:03:25+00:00",
+  "resumed": [
+   "2026-10-19T09:07:50+00:00"
+  ],
+  "forced": [],
+  "selectionSha256": "269179b04a1ca577f9e3d0b0fc88524b906c6f6d6416d3fcf66e056ab1551065",
+  "cells": 22,
+  "gitSha": "5f6bd982fe66d3415a215debcad09162bff5ba91"
+ },
+ "nBoot": 1000,
+ "rules": "frozen thresholds and prompts, no re-tuning; natural class priors (unweighted); 95% stratified bootstrap CIs; gap = holdout F0.5 minus the dev F0.5 of the same rule (articles: the articles dev set at the same scope; tweets and cross-domain sets: dev300)",
+ "rows": [
+  {
+   "key": "articles_test/signal/qwen3.5:0.8b-q8_0/v2-label/lede",
+   "split": "articles_test",
+   "dataset": "articles",
+   "datasetSplit": "test",
+   "endpoint": "signal",
+   "model": "qwen3.5:0.8b-q8_0",
+   "kind": "generative",
+   "role": "finalist",
+   "config": "v2-label",
+   "policy": "label-logprob+tau",
+   "threshold": 0.28,
+   "scope": "lede",
+   "fieldOrder": null,
+   "promptVersion": "signal/qwen3.5:0.8b-q8_0/v2@ff82e957",
+   "n": 60,
+   "gold": {
+    "bullish": 20,
+    "bearish": 20,
+    "neutral": 20
+   },
+   "metrics": {
+    "n": 60,
+    "per_class": {
+     "bullish": {
+      "precision": 0.8182,
+      "recall": 0.9,
+      "f05": 0.8333,
+      "calls": 22.0,
+      "support": 20.0
+     },
+     "bearish": {
+      "precision": 1.0,
+      "recall": 0.4,
+      "f05": 0.7692,
+      "calls": 8.0,
+      "support": 20.0
+     }
+    },
+    "f05_macro": 0.8013,
+    "inversion_rate": 0.0333,
+    "coverage": 1.0,
+    "signal_rate": 0.5,
+    "accuracy": 0.7167,
+    "selective_accuracy": 0.7167,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       18,
+       0,
+       2,
+       0
+      ],
+      [
+       1,
+       8,
+       11,
+       0
+      ],
+      [
+       3,
+       0,
+       17,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.8013,
+     "low": 0.6684,
+     "high": 0.8864
+    },
+    "inversion_rate": {
+     "point": 0.0333,
+     "low": 0.0,
+     "high": 0.1034
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.5,
+     "low": 0.4,
+     "high": 0.6
+    },
+    "accuracy": {
+     "point": 0.7167,
+     "low": 0.6167,
+     "high": 0.8167
+    }
+   },
+   "counts": {
+    "n": 60,
+    "done": 60,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 60,
+    "wall_ms_p50": 948.5016,
+    "wall_ms_p95": 1899.6171,
+    "server_ms_p50": 932.1906
+   },
+   "dev": {
+    "reference": "articles_dev/lede",
+    "f05Macro": 0.6846
+   },
+   "gap": 0.1167
+  },
+  {
+   "key": "articles_test/signal/qwen3.5:0.8b-q8_0/v2-label/full",
+   "split": "articles_test",
+   "dataset": "articles",
+   "datasetSplit": "test",
+   "endpoint": "signal",
+   "model": "qwen3.5:0.8b-q8_0",
+   "kind": "generative",
+   "role": "finalist",
+   "config": "v2-label",
+   "policy": "label-logprob+tau",
+   "threshold": 0.28,
+   "scope": "full",
+   "fieldOrder": null,
+   "promptVersion": "signal/qwen3.5:0.8b-q8_0/v2@ff82e957",
+   "n": 60,
+   "gold": {
+    "bullish": 20,
+    "bearish": 20,
+    "neutral": 20
+   },
+   "metrics": {
+    "n": 60,
+    "per_class": {
+     "bullish": {
+      "precision": 0.9286,
+      "recall": 0.65,
+      "f05": 0.8553,
+      "calls": 14.0,
+      "support": 20.0
+     },
+     "bearish": {
+      "precision": 0.875,
+      "recall": 0.35,
+      "f05": 0.6731,
+      "calls": 8.0,
+      "support": 20.0
+     }
+    },
+    "f05_macro": 0.7642,
+    "inversion_rate": 0.0,
+    "coverage": 1.0,
+    "signal_rate": 0.3667,
+    "accuracy": 0.6333,
+    "selective_accuracy": 0.6333,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       13,
+       0,
+       7,
+       0
+      ],
+      [
+       0,
+       7,
+       13,
+       0
+      ],
+      [
+       1,
+       1,
+       18,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.7642,
+     "low": 0.6146,
+     "high": 0.8649
+    },
+    "inversion_rate": {
+     "point": 0.0,
+     "low": 0.0,
+     "high": 0.0
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.3667,
+     "low": 0.25,
+     "high": 0.4667
+    },
+    "accuracy": {
+     "point": 0.6333,
+     "low": 0.5167,
+     "high": 0.7333
+    }
+   },
+   "counts": {
+    "n": 60,
+    "done": 60,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 60,
+    "wall_ms_p50": 779.8425,
+    "wall_ms_p95": 1587.6981,
+    "server_ms_p50": 777.3032
+   },
+   "dev": {
+    "reference": "articles_dev/full",
+    "f05Macro": 0.6349
+   },
+   "gap": 0.1293
+  },
+  {
+   "key": "tfns_val/signal/qwen3.5:0.8b-q8_0/v2-label",
+   "split": "tfns_val",
+   "dataset": "twitter-fns",
+   "datasetSplit": "validation",
+   "endpoint": "signal",
+   "model": "qwen3.5:0.8b-q8_0",
+   "kind": "generative",
+   "role": "finalist",
+   "config": "v2-label",
+   "policy": "label-logprob+tau",
+   "threshold": 0.28,
+   "scope": null,
+   "fieldOrder": null,
+   "promptVersion": "signal/qwen3.5:0.8b-q8_0/v2@ff82e957",
+   "n": 2388,
+   "gold": {
+    "bearish": 347,
+    "bullish": 475,
+    "neutral": 1566
+   },
+   "metrics": {
+    "n": 2388,
+    "per_class": {
+     "bullish": {
+      "precision": 0.7897,
+      "recall": 0.3874,
+      "f05": 0.6539,
+      "calls": 233.0,
+      "support": 475.0
+     },
+     "bearish": {
+      "precision": 0.8039,
+      "recall": 0.3545,
+      "f05": 0.6413,
+      "calls": 153.0,
+      "support": 347.0
+     }
+    },
+    "f05_macro": 0.6476,
+    "inversion_rate": 0.0052,
+    "coverage": 1.0,
+    "signal_rate": 0.1616,
+    "accuracy": 0.7521,
+    "selective_accuracy": 0.7521,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       184,
+       2,
+       289,
+       0
+      ],
+      [
+       0,
+       123,
+       224,
+       0
+      ],
+      [
+       49,
+       28,
+       1489,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.6476,
+     "low": 0.6117,
+     "high": 0.679
+    },
+    "inversion_rate": {
+     "point": 0.0052,
+     "low": 0.0,
+     "high": 0.0134
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.1616,
+     "low": 0.1491,
+     "high": 0.1755
+    },
+    "accuracy": {
+     "point": 0.7521,
+     "low": 0.7387,
+     "high": 0.7655
+    }
+   },
+   "counts": {
+    "n": 2388,
+    "done": 2388,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 2388,
+    "wall_ms_p50": 203.7101,
+    "wall_ms_p95": 864.6577,
+    "server_ms_p50": 201.1782
+   },
+   "dev": {
+    "reference": "dev300",
+    "f05Macro": 0.7297
+   },
+   "gap": -0.0821
+  },
+  {
+   "key": "fpb_allagree/signal/qwen3.5:0.8b-q8_0/v2-label",
+   "split": "fpb_allagree",
+   "dataset": "fpb",
+   "datasetSplit": "allagree",
+   "endpoint": "signal",
+   "model": "qwen3.5:0.8b-q8_0",
+   "kind": "generative",
+   "role": "finalist",
+   "config": "v2-label",
+   "policy": "label-logprob+tau",
+   "threshold": 0.28,
+   "scope": null,
+   "fieldOrder": null,
+   "promptVersion": "signal/qwen3.5:0.8b-q8_0/v2@ff82e957",
+   "n": 2259,
+   "gold": {
+    "neutral": 1386,
+    "bullish": 570,
+    "bearish": 303
+   },
+   "metrics": {
+    "n": 2259,
+    "per_class": {
+     "bullish": {
+      "precision": 0.9268,
+      "recall": 0.2,
+      "f05": 0.5367,
+      "calls": 123.0,
+      "support": 570.0
+     },
+     "bearish": {
+      "precision": 0.978,
+      "recall": 0.5875,
+      "f05": 0.8632,
+      "calls": 182.0,
+      "support": 303.0
+     }
+    },
+    "f05_macro": 0.7,
+    "inversion_rate": 0.0098,
+    "coverage": 1.0,
+    "signal_rate": 0.135,
+    "accuracy": 0.7384,
+    "selective_accuracy": 0.7384,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       114,
+       3,
+       453,
+       0
+      ],
+      [
+       0,
+       178,
+       125,
+       0
+      ],
+      [
+       9,
+       1,
+       1376,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.7,
+     "low": 0.669,
+     "high": 0.7282
+    },
+    "inversion_rate": {
+     "point": 0.0098,
+     "low": 0.0,
+     "high": 0.0224
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.135,
+     "low": 0.1244,
+     "high": 0.147
+    },
+    "accuracy": {
+     "point": 0.7384,
+     "low": 0.7273,
+     "high": 0.7503
+    }
+   },
+   "counts": {
+    "n": 2259,
+    "done": 2259,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 2259,
+    "wall_ms_p50": 162.7096,
+    "wall_ms_p95": 319.9921,
+    "server_ms_p50": 160.5279
+   },
+   "dev": {
+    "reference": "dev300",
+    "f05Macro": 0.7297
+   },
+   "gap": -0.0297
+  },
+  {
+   "key": "finentity_single/signal/qwen3.5:0.8b-q8_0/v2-label",
+   "split": "finentity_single",
+   "dataset": "finentity",
+   "datasetSplit": "single-label",
+   "endpoint": "signal",
+   "model": "qwen3.5:0.8b-q8_0",
+   "kind": "generative",
+   "role": "finalist",
+   "config": "v2-label",
+   "policy": "label-logprob+tau",
+   "threshold": 0.28,
+   "scope": null,
+   "fieldOrder": null,
+   "promptVersion": "signal/qwen3.5:0.8b-q8_0/v2@ff82e957",
+   "n": 851,
+   "gold": {
+    "bullish": 181,
+    "bearish": 180,
+    "neutral": 490
+   },
+   "metrics": {
+    "n": 851,
+    "per_class": {
+     "bullish": {
+      "precision": 0.7857,
+      "recall": 0.4862,
+      "f05": 0.6995,
+      "calls": 112.0,
+      "support": 181.0
+     },
+     "bearish": {
+      "precision": 0.7468,
+      "recall": 0.6389,
+      "f05": 0.7224,
+      "calls": 154.0,
+      "support": 180.0
+     }
+    },
+    "f05_macro": 0.7109,
+    "inversion_rate": 0.0,
+    "coverage": 1.0,
+    "signal_rate": 0.3126,
+    "accuracy": 0.7403,
+    "selective_accuracy": 0.7403,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       88,
+       0,
+       93,
+       0
+      ],
+      [
+       0,
+       115,
+       65,
+       0
+      ],
+      [
+       24,
+       39,
+       427,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.7109,
+     "low": 0.6723,
+     "high": 0.7487
+    },
+    "inversion_rate": {
+     "point": 0.0,
+     "low": 0.0,
+     "high": 0.0
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.3126,
+     "low": 0.2867,
+     "high": 0.3396
+    },
+    "accuracy": {
+     "point": 0.7403,
+     "low": 0.7156,
+     "high": 0.7662
+    }
+   },
+   "counts": {
+    "n": 851,
+    "done": 851,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 851,
+    "wall_ms_p50": 186.4724,
+    "wall_ms_p95": 253.4722,
+    "server_ms_p50": 184.1594
+   },
+   "dev": {
+    "reference": "dev300",
+    "f05Macro": 0.7297
+   },
+   "gap": -0.0188
+  },
+  {
+   "key": "articles_test/signal/clef-flash:9b-q8_0/v4/lede",
+   "split": "articles_test",
+   "dataset": "articles",
+   "datasetSplit": "test",
+   "endpoint": "signal",
+   "model": "clef-flash:9b-q8_0",
+   "kind": "decision",
+   "role": "finalist",
+   "config": "v4",
+   "policy": "probability",
+   "threshold": 0.8,
+   "scope": "lede",
+   "fieldOrder": null,
+   "promptVersion": "signal/clef-flash:9b-q8_0/v4@fcc93f1b",
+   "n": 60,
+   "gold": {
+    "bullish": 20,
+    "bearish": 20,
+    "neutral": 20
+   },
+   "metrics": {
+    "n": 60,
+    "per_class": {
+     "bullish": {
+      "precision": 0.8,
+      "recall": 1.0,
+      "f05": 0.8333,
+      "calls": 25.0,
+      "support": 20.0
+     },
+     "bearish": {
+      "precision": 0.8947,
+      "recall": 0.85,
+      "f05": 0.8854,
+      "calls": 19.0,
+      "support": 20.0
+     }
+    },
+    "f05_macro": 0.8594,
+    "inversion_rate": 0.0227,
+    "coverage": 0.85,
+    "signal_rate": 0.7333,
+    "accuracy": 0.85,
+    "selective_accuracy": 0.8627,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       20,
+       0,
+       0,
+       0
+      ],
+      [
+       1,
+       17,
+       0,
+       2
+      ],
+      [
+       4,
+       2,
+       7,
+       7
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.8594,
+     "low": 0.7843,
+     "high": 0.938
+    },
+    "inversion_rate": {
+     "point": 0.0227,
+     "low": 0.0,
+     "high": 0.0698
+    },
+    "coverage": {
+     "point": 0.85,
+     "low": 0.7667,
+     "high": 0.9171
+    },
+    "signal_rate": {
+     "point": 0.7333,
+     "low": 0.65,
+     "high": 0.8167
+    },
+    "accuracy": {
+     "point": 0.85,
+     "low": 0.7667,
+     "high": 0.9333
+    }
+   },
+   "counts": {
+    "n": 60,
+    "done": 60,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 60,
+    "wall_ms_p50": 706.739,
+    "wall_ms_p95": 895.1079,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": "articles_dev/lede",
+    "f05Macro": 0.8477
+   },
+   "gap": 0.0117
+  },
+  {
+   "key": "articles_test/signal/clef-flash:9b-q8_0/v4/full",
+   "split": "articles_test",
+   "dataset": "articles",
+   "datasetSplit": "test",
+   "endpoint": "signal",
+   "model": "clef-flash:9b-q8_0",
+   "kind": "decision",
+   "role": "finalist",
+   "config": "v4",
+   "policy": "probability",
+   "threshold": 0.8,
+   "scope": "full",
+   "fieldOrder": null,
+   "promptVersion": "signal/clef-flash:9b-q8_0/v4@fcc93f1b",
+   "n": 60,
+   "gold": {
+    "bullish": 20,
+    "bearish": 20,
+    "neutral": 20
+   },
+   "metrics": {
+    "n": 60,
+    "per_class": {
+     "bullish": {
+      "precision": 0.7826,
+      "recall": 0.9,
+      "f05": 0.8036,
+      "calls": 23.0,
+      "support": 20.0
+     },
+     "bearish": {
+      "precision": 0.9444,
+      "recall": 0.85,
+      "f05": 0.9239,
+      "calls": 18.0,
+      "support": 20.0
+     }
+    },
+    "f05_macro": 0.8637,
+    "inversion_rate": 0.0,
+    "coverage": 0.7333,
+    "signal_rate": 0.6833,
+    "accuracy": 0.8167,
+    "selective_accuracy": 0.8636,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       18,
+       0,
+       0,
+       2
+      ],
+      [
+       0,
+       17,
+       0,
+       3
+      ],
+      [
+       5,
+       1,
+       3,
+       11
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.8637,
+     "low": 0.7946,
+     "high": 0.9307
+    },
+    "inversion_rate": {
+     "point": 0.0,
+     "low": 0.0,
+     "high": 0.0
+    },
+    "coverage": {
+     "point": 0.7333,
+     "low": 0.6333,
+     "high": 0.8167
+    },
+    "signal_rate": {
+     "point": 0.6833,
+     "low": 0.5833,
+     "high": 0.7667
+    },
+    "accuracy": {
+     "point": 0.8167,
+     "low": 0.7167,
+     "high": 0.9
+    }
+   },
+   "counts": {
+    "n": 60,
+    "done": 60,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 60,
+    "wall_ms_p50": 2041.8982,
+    "wall_ms_p95": 3922.7426,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": "articles_dev/full",
+    "f05Macro": 0.9072
+   },
+   "gap": -0.0435
+  },
+  {
+   "key": "tfns_val/signal/clef-flash:9b-q8_0/v4",
+   "split": "tfns_val",
+   "dataset": "twitter-fns",
+   "datasetSplit": "validation",
+   "endpoint": "signal",
+   "model": "clef-flash:9b-q8_0",
+   "kind": "decision",
+   "role": "finalist",
+   "config": "v4",
+   "policy": "probability",
+   "threshold": 0.8,
+   "scope": null,
+   "fieldOrder": null,
+   "promptVersion": "signal/clef-flash:9b-q8_0/v4@fcc93f1b",
+   "n": 2388,
+   "gold": {
+    "bearish": 347,
+    "bullish": 475,
+    "neutral": 1566
+   },
+   "metrics": {
+    "n": 2388,
+    "per_class": {
+     "bullish": {
+      "precision": 0.7694,
+      "recall": 0.8147,
+      "f05": 0.778,
+      "calls": 503.0,
+      "support": 475.0
+     },
+     "bearish": {
+      "precision": 0.7837,
+      "recall": 0.804,
+      "f05": 0.7877,
+      "calls": 356.0,
+      "support": 347.0
+     }
+    },
+    "f05_macro": 0.7829,
+    "inversion_rate": 0.0047,
+    "coverage": 0.7529,
+    "signal_rate": 0.3597,
+    "accuracy": 0.8555,
+    "selective_accuracy": 0.8765,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       387,
+       3,
+       15,
+       70
+      ],
+      [
+       1,
+       279,
+       14,
+       53
+      ],
+      [
+       115,
+       74,
+       910,
+       467
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.7829,
+     "low": 0.7606,
+     "high": 0.8055
+    },
+    "inversion_rate": {
+     "point": 0.0047,
+     "low": 0.0011,
+     "high": 0.0094
+    },
+    "coverage": {
+     "point": 0.7529,
+     "low": 0.7349,
+     "high": 0.7705
+    },
+    "signal_rate": {
+     "point": 0.3597,
+     "low": 0.3459,
+     "high": 0.374
+    },
+    "accuracy": {
+     "point": 0.8555,
+     "low": 0.8409,
+     "high": 0.8702
+    }
+   },
+   "counts": {
+    "n": 2388,
+    "done": 2388,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 2388,
+    "wall_ms_p50": 586.3819,
+    "wall_ms_p95": 2251.0701,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": "dev300",
+    "f05Macro": 0.8743
+   },
+   "gap": -0.0914
+  },
+  {
+   "key": "articles_test/signal/nimble:9b-q4_K_M/v1/lede",
+   "split": "articles_test",
+   "dataset": "articles",
+   "datasetSplit": "test",
+   "endpoint": "signal",
+   "model": "nimble:9b-q4_K_M",
+   "kind": "decision",
+   "role": "finalist",
+   "config": "v1",
+   "policy": "probability",
+   "threshold": 0.97,
+   "scope": "lede",
+   "fieldOrder": null,
+   "promptVersion": "signal/nimble:9b-q4_K_M/v1@a1e34f63",
+   "n": 60,
+   "gold": {
+    "bullish": 20,
+    "bearish": 20,
+    "neutral": 20
+   },
+   "metrics": {
+    "n": 60,
+    "per_class": {
+     "bullish": {
+      "precision": 0.8947,
+      "recall": 0.85,
+      "f05": 0.8854,
+      "calls": 19.0,
+      "support": 20.0
+     },
+     "bearish": {
+      "precision": 0.9231,
+      "recall": 0.6,
+      "f05": 0.8333,
+      "calls": 13.0,
+      "support": 20.0
+     }
+    },
+    "f05_macro": 0.8594,
+    "inversion_rate": 0.0,
+    "coverage": 0.5667,
+    "signal_rate": 0.5333,
+    "accuracy": 0.7667,
+    "selective_accuracy": 0.9118,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       17,
+       0,
+       0,
+       3
+      ],
+      [
+       0,
+       12,
+       0,
+       8
+      ],
+      [
+       2,
+       1,
+       2,
+       15
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.8594,
+     "low": 0.7548,
+     "high": 0.9375
+    },
+    "inversion_rate": {
+     "point": 0.0,
+     "low": 0.0,
+     "high": 0.0
+    },
+    "coverage": {
+     "point": 0.5667,
+     "low": 0.45,
+     "high": 0.6833
+    },
+    "signal_rate": {
+     "point": 0.5333,
+     "low": 0.4333,
+     "high": 0.6337
+    },
+    "accuracy": {
+     "point": 0.7667,
+     "low": 0.65,
+     "high": 0.8667
+    }
+   },
+   "counts": {
+    "n": 60,
+    "done": 60,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 60,
+    "wall_ms_p50": 1461.1138,
+    "wall_ms_p95": 1709.1126,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": "articles_dev/lede",
+    "f05Macro": 0.8947
+   },
+   "gap": -0.0353
+  },
+  {
+   "key": "articles_test/signal/nimble:9b-q4_K_M/v1/full",
+   "split": "articles_test",
+   "dataset": "articles",
+   "datasetSplit": "test",
+   "endpoint": "signal",
+   "model": "nimble:9b-q4_K_M",
+   "kind": "decision",
+   "role": "finalist",
+   "config": "v1",
+   "policy": "probability",
+   "threshold": 0.97,
+   "scope": "full",
+   "fieldOrder": null,
+   "promptVersion": "signal/nimble:9b-q4_K_M/v1@a1e34f63",
+   "n": 60,
+   "gold": {
+    "bullish": 20,
+    "bearish": 20,
+    "neutral": 20
+   },
+   "metrics": {
+    "n": 60,
+    "per_class": {
+     "bullish": {
+      "precision": 0.9412,
+      "recall": 0.8,
+      "f05": 0.9091,
+      "calls": 17.0,
+      "support": 20.0
+     },
+     "bearish": {
+      "precision": 1.0,
+      "recall": 0.6,
+      "f05": 0.8824,
+      "calls": 12.0,
+      "support": 20.0
+     }
+    },
+    "f05_macro": 0.8957,
+    "inversion_rate": 0.0,
+    "coverage": 0.5167,
+    "signal_rate": 0.4833,
+    "accuracy": 0.7833,
+    "selective_accuracy": 0.9677,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       16,
+       0,
+       0,
+       4
+      ],
+      [
+       0,
+       12,
+       0,
+       8
+      ],
+      [
+       1,
+       0,
+       2,
+       17
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.8957,
+     "low": 0.8185,
+     "high": 0.9497
+    },
+    "inversion_rate": {
+     "point": 0.0,
+     "low": 0.0,
+     "high": 0.0
+    },
+    "coverage": {
+     "point": 0.5167,
+     "low": 0.4167,
+     "high": 0.6167
+    },
+    "signal_rate": {
+     "point": 0.4833,
+     "low": 0.3833,
+     "high": 0.5833
+    },
+    "accuracy": {
+     "point": 0.7833,
+     "low": 0.6833,
+     "high": 0.8667
+    }
+   },
+   "counts": {
+    "n": 60,
+    "done": 60,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 60,
+    "wall_ms_p50": 3130.7814,
+    "wall_ms_p95": 5891.6696,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": "articles_dev/full",
+    "f05Macro": 0.8796
+   },
+   "gap": 0.0161
+  },
+  {
+   "key": "tfns_val/signal/nimble:9b-q4_K_M/v1",
+   "split": "tfns_val",
+   "dataset": "twitter-fns",
+   "datasetSplit": "validation",
+   "endpoint": "signal",
+   "model": "nimble:9b-q4_K_M",
+   "kind": "decision",
+   "role": "finalist",
+   "config": "v1",
+   "policy": "probability",
+   "threshold": 0.97,
+   "scope": null,
+   "fieldOrder": null,
+   "promptVersion": "signal/nimble:9b-q4_K_M/v1@a1e34f63",
+   "n": 2388,
+   "gold": {
+    "bearish": 347,
+    "bullish": 475,
+    "neutral": 1566
+   },
+   "metrics": {
+    "n": 2388,
+    "per_class": {
+     "bullish": {
+      "precision": 0.8237,
+      "recall": 0.5705,
+      "f05": 0.7566,
+      "calls": 329.0,
+      "support": 475.0
+     },
+     "bearish": {
+      "precision": 0.7835,
+      "recall": 0.6571,
+      "f05": 0.7545,
+      "calls": 291.0,
+      "support": 347.0
+     }
+    },
+    "f05_macro": 0.7555,
+    "inversion_rate": 0.0032,
+    "coverage": 0.2714,
+    "signal_rate": 0.2596,
+    "accuracy": 0.8149,
+    "selective_accuracy": 0.8133,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       271,
+       1,
+       0,
+       203
+      ],
+      [
+       1,
+       228,
+       0,
+       118
+      ],
+      [
+       57,
+       62,
+       28,
+       1419
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.7555,
+     "low": 0.7303,
+     "high": 0.7818
+    },
+    "inversion_rate": {
+     "point": 0.0032,
+     "low": 0.0,
+     "high": 0.0081
+    },
+    "coverage": {
+     "point": 0.2714,
+     "low": 0.2575,
+     "high": 0.2852
+    },
+    "signal_rate": {
+     "point": 0.2596,
+     "low": 0.2458,
+     "high": 0.2726
+    },
+    "accuracy": {
+     "point": 0.8149,
+     "low": 0.8007,
+     "high": 0.8296
+    }
+   },
+   "counts": {
+    "n": 2388,
+    "done": 2388,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 2388,
+    "wall_ms_p50": 1138.6976,
+    "wall_ms_p95": 1360.6732,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": "dev300",
+    "f05Macro": 0.8429
+   },
+   "gap": -0.0874
+  },
+  {
+   "key": "articles_test/analyze/ministral-3:3b/v5/full",
+   "split": "articles_test",
+   "dataset": "articles",
+   "datasetSplit": "test",
+   "endpoint": "analyze",
+   "model": "ministral-3:3b",
+   "kind": "generative",
+   "role": "finalist",
+   "config": "v5",
+   "policy": "ordinal",
+   "threshold": 1.0,
+   "scope": "full",
+   "fieldOrder": "sentiment-first",
+   "promptVersion": "analyze/ministral-3:3b/v5@e2b57fc6",
+   "n": 60,
+   "gold": {
+    "bullish": 20,
+    "bearish": 20,
+    "neutral": 20
+   },
+   "metrics": {
+    "n": 60,
+    "per_class": {
+     "bullish": {
+      "precision": 0.6429,
+      "recall": 0.9,
+      "f05": 0.6818,
+      "calls": 28.0,
+      "support": 20.0
+     },
+     "bearish": {
+      "precision": 0.9412,
+      "recall": 0.8,
+      "f05": 0.9091,
+      "calls": 17.0,
+      "support": 20.0
+     }
+    },
+    "f05_macro": 0.7955,
+    "inversion_rate": 0.0444,
+    "coverage": 1.0,
+    "signal_rate": 0.75,
+    "accuracy": 0.75,
+    "selective_accuracy": 0.75,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       18,
+       0,
+       2,
+       0
+      ],
+      [
+       2,
+       16,
+       2,
+       0
+      ],
+      [
+       8,
+       1,
+       11,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.7955,
+     "low": 0.7153,
+     "high": 0.8765
+    },
+    "inversion_rate": {
+     "point": 0.0444,
+     "low": 0.0,
+     "high": 0.1136
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.75,
+     "low": 0.65,
+     "high": 0.85
+    },
+    "accuracy": {
+     "point": 0.75,
+     "low": 0.65,
+     "high": 0.85
+    }
+   },
+   "counts": {
+    "n": 60,
+    "done": 60,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 60,
+    "wall_ms_p50": 1097.7141,
+    "wall_ms_p95": 2155.8505,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": "articles_dev/full",
+    "f05Macro": 0.7407
+   },
+   "gap": 0.0548
+  },
+  {
+   "key": "tfns_val/analyze/ministral-3:3b/v5",
+   "split": "tfns_val",
+   "dataset": "twitter-fns",
+   "datasetSplit": "validation",
+   "endpoint": "analyze",
+   "model": "ministral-3:3b",
+   "kind": "generative",
+   "role": "finalist",
+   "config": "v5",
+   "policy": "ordinal",
+   "threshold": 1.0,
+   "scope": null,
+   "fieldOrder": "sentiment-first",
+   "promptVersion": "analyze/ministral-3:3b/v5@e2b57fc6",
+   "n": 2388,
+   "gold": {
+    "bearish": 347,
+    "bullish": 475,
+    "neutral": 1566
+   },
+   "metrics": {
+    "n": 2388,
+    "per_class": {
+     "bullish": {
+      "precision": 0.6377,
+      "recall": 0.3705,
+      "f05": 0.5573,
+      "calls": 276.0,
+      "support": 475.0
+     },
+     "bearish": {
+      "precision": 0.6747,
+      "recall": 0.562,
+      "f05": 0.6487,
+      "calls": 289.0,
+      "support": 347.0
+     }
+    },
+    "f05_macro": 0.603,
+    "inversion_rate": 0.0106,
+    "coverage": 1.0,
+    "signal_rate": 0.2366,
+    "accuracy": 0.7324,
+    "selective_accuracy": 0.7324,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       176,
+       6,
+       293,
+       0
+      ],
+      [
+       0,
+       195,
+       152,
+       0
+      ],
+      [
+       100,
+       88,
+       1378,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.603,
+     "low": 0.5724,
+     "high": 0.6332
+    },
+    "inversion_rate": {
+     "point": 0.0106,
+     "low": 0.0035,
+     "high": 0.0195
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.2366,
+     "low": 0.2215,
+     "high": 0.2525
+    },
+    "accuracy": {
+     "point": 0.7324,
+     "low": 0.7169,
+     "high": 0.7475
+    }
+   },
+   "counts": {
+    "n": 2388,
+    "done": 2388,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 2388,
+    "wall_ms_p50": 200.8264,
+    "wall_ms_p95": 252.0765,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": "dev300",
+    "f05Macro": 0.6851
+   },
+   "gap": -0.0821
+  },
+  {
+   "key": "articles_test/analyze/qwen3:4b-instruct-2507-q4_K_M/v5/full",
+   "split": "articles_test",
+   "dataset": "articles",
+   "datasetSplit": "test",
+   "endpoint": "analyze",
+   "model": "qwen3:4b-instruct-2507-q4_K_M",
+   "kind": "generative",
+   "role": "finalist",
+   "config": "v5",
+   "policy": "ordinal",
+   "threshold": 1.0,
+   "scope": "full",
+   "fieldOrder": "sentiment-first",
+   "promptVersion": "analyze/qwen3:4b-instruct-2507-q4_K_M/v5@e2b57fc6",
+   "n": 60,
+   "gold": {
+    "bullish": 20,
+    "bearish": 20,
+    "neutral": 20
+   },
+   "metrics": {
+    "n": 60,
+    "per_class": {
+     "bullish": {
+      "precision": 0.6129,
+      "recall": 0.95,
+      "f05": 0.6597,
+      "calls": 31.0,
+      "support": 20.0
+     },
+     "bearish": {
+      "precision": 0.9474,
+      "recall": 0.9,
+      "f05": 0.9375,
+      "calls": 19.0,
+      "support": 20.0
+     }
+    },
+    "f05_macro": 0.7986,
+    "inversion_rate": 0.02,
+    "coverage": 1.0,
+    "signal_rate": 0.8333,
+    "accuracy": 0.75,
+    "selective_accuracy": 0.75,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       19,
+       0,
+       1,
+       0
+      ],
+      [
+       1,
+       18,
+       1,
+       0
+      ],
+      [
+       11,
+       1,
+       8,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.7986,
+     "low": 0.7396,
+     "high": 0.8558
+    },
+    "inversion_rate": {
+     "point": 0.02,
+     "low": 0.0,
+     "high": 0.0638
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.8333,
+     "low": 0.75,
+     "high": 0.9167
+    },
+    "accuracy": {
+     "point": 0.75,
+     "low": 0.6667,
+     "high": 0.8333
+    }
+   },
+   "counts": {
+    "n": 60,
+    "done": 60,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 60,
+    "wall_ms_p50": 1458.5881,
+    "wall_ms_p95": 2830.6063,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": "articles_dev/full",
+    "f05Macro": 0.779
+   },
+   "gap": 0.0196
+  },
+  {
+   "key": "tfns_val/analyze/qwen3:4b-instruct-2507-q4_K_M/v5",
+   "split": "tfns_val",
+   "dataset": "twitter-fns",
+   "datasetSplit": "validation",
+   "endpoint": "analyze",
+   "model": "qwen3:4b-instruct-2507-q4_K_M",
+   "kind": "generative",
+   "role": "finalist",
+   "config": "v5",
+   "policy": "ordinal",
+   "threshold": 1.0,
+   "scope": null,
+   "fieldOrder": "sentiment-first",
+   "promptVersion": "analyze/qwen3:4b-instruct-2507-q4_K_M/v5@e2b57fc6",
+   "n": 2388,
+   "gold": {
+    "bearish": 347,
+    "bullish": 475,
+    "neutral": 1566
+   },
+   "metrics": {
+    "n": 2388,
+    "per_class": {
+     "bullish": {
+      "precision": 0.6056,
+      "recall": 0.5432,
+      "f05": 0.592,
+      "calls": 426.0,
+      "support": 475.0
+     },
+     "bearish": {
+      "precision": 0.7987,
+      "recall": 0.366,
+      "f05": 0.646,
+      "calls": 159.0,
+      "support": 347.0
+     }
+    },
+    "f05_macro": 0.619,
+    "inversion_rate": 0.012,
+    "coverage": 1.0,
+    "signal_rate": 0.245,
+    "accuracy": 0.7362,
+    "selective_accuracy": 0.7362,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       258,
+       4,
+       213,
+       0
+      ],
+      [
+       3,
+       127,
+       217,
+       0
+      ],
+      [
+       165,
+       28,
+       1373,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.619,
+     "low": 0.5857,
+     "high": 0.6495
+    },
+    "inversion_rate": {
+     "point": 0.012,
+     "low": 0.0036,
+     "high": 0.0216
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.245,
+     "low": 0.2307,
+     "high": 0.2605
+    },
+    "accuracy": {
+     "point": 0.7362,
+     "low": 0.7207,
+     "high": 0.7509
+    }
+   },
+   "counts": {
+    "n": 2388,
+    "done": 2388,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 2388,
+    "wall_ms_p50": 381.625,
+    "wall_ms_p95": 591.2055,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": "dev300",
+    "f05Macro": 0.6468
+   },
+   "gap": -0.0278
+  },
+  {
+   "key": "articles_test/analyze/qwen3.5:4b-q4_K_M/v1/full",
+   "split": "articles_test",
+   "dataset": "articles",
+   "datasetSplit": "test",
+   "endpoint": "analyze",
+   "model": "qwen3.5:4b-q4_K_M",
+   "kind": "generative",
+   "role": "finalist",
+   "config": "v1",
+   "policy": "ordinal",
+   "threshold": 1.0,
+   "scope": "full",
+   "fieldOrder": "sentiment-first",
+   "promptVersion": "analyze/qwen3.5:4b-q4_K_M/v1@7daf4f28",
+   "n": 60,
+   "gold": {
+    "bullish": 20,
+    "bearish": 20,
+    "neutral": 20
+   },
+   "metrics": {
+    "n": 60,
+    "per_class": {
+     "bullish": {
+      "precision": 0.7826,
+      "recall": 0.9,
+      "f05": 0.8036,
+      "calls": 23.0,
+      "support": 20.0
+     },
+     "bearish": {
+      "precision": 0.9474,
+      "recall": 0.9,
+      "f05": 0.9375,
+      "calls": 19.0,
+      "support": 20.0
+     }
+    },
+    "f05_macro": 0.8705,
+    "inversion_rate": 0.0,
+    "coverage": 1.0,
+    "signal_rate": 0.7,
+    "accuracy": 0.8333,
+    "selective_accuracy": 0.8333,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       18,
+       0,
+       2,
+       0
+      ],
+      [
+       0,
+       18,
+       2,
+       0
+      ],
+      [
+       5,
+       1,
+       14,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.8705,
+     "low": 0.8041,
+     "high": 0.9399
+    },
+    "inversion_rate": {
+     "point": 0.0,
+     "low": 0.0,
+     "high": 0.0
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.7,
+     "low": 0.6,
+     "high": 0.7833
+    },
+    "accuracy": {
+     "point": 0.8333,
+     "low": 0.7333,
+     "high": 0.9167
+    }
+   },
+   "counts": {
+    "n": 60,
+    "done": 60,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 60,
+    "wall_ms_p50": 1083.6474,
+    "wall_ms_p95": 1954.5858,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": "articles_dev/full",
+    "f05Macro": 0.8796
+   },
+   "gap": -0.0091
+  },
+  {
+   "key": "tfns_val/analyze/qwen3.5:4b-q4_K_M/v1",
+   "split": "tfns_val",
+   "dataset": "twitter-fns",
+   "datasetSplit": "validation",
+   "endpoint": "analyze",
+   "model": "qwen3.5:4b-q4_K_M",
+   "kind": "generative",
+   "role": "finalist",
+   "config": "v1",
+   "policy": "ordinal",
+   "threshold": 1.0,
+   "scope": null,
+   "fieldOrder": "sentiment-first",
+   "promptVersion": "analyze/qwen3.5:4b-q4_K_M/v1@7daf4f28",
+   "n": 2388,
+   "gold": {
+    "bearish": 347,
+    "bullish": 475,
+    "neutral": 1566
+   },
+   "metrics": {
+    "n": 2388,
+    "per_class": {
+     "bullish": {
+      "precision": 0.6984,
+      "recall": 0.4484,
+      "f05": 0.6283,
+      "calls": 305.0,
+      "support": 475.0
+     },
+     "bearish": {
+      "precision": 0.7748,
+      "recall": 0.4957,
+      "f05": 0.6964,
+      "calls": 222.0,
+      "support": 347.0
+     }
+    },
+    "f05_macro": 0.6623,
+    "inversion_rate": 0.0076,
+    "coverage": 1.0,
+    "signal_rate": 0.2207,
+    "accuracy": 0.7592,
+    "selective_accuracy": 0.7592,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       213,
+       2,
+       260,
+       0
+      ],
+      [
+       2,
+       172,
+       173,
+       0
+      ],
+      [
+       90,
+       48,
+       1428,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.6623,
+     "low": 0.6313,
+     "high": 0.6896
+    },
+    "inversion_rate": {
+     "point": 0.0076,
+     "low": 0.0018,
+     "high": 0.0157
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.2207,
+     "low": 0.2056,
+     "high": 0.2358
+    },
+    "accuracy": {
+     "point": 0.7592,
+     "low": 0.7446,
+     "high": 0.7735
+    }
+   },
+   "counts": {
+    "n": 2388,
+    "done": 2388,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 2388,
+    "wall_ms_p50": 276.436,
+    "wall_ms_p95": 308.1261,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": "dev300",
+    "f05Macro": 0.7521
+   },
+   "gap": -0.0898
+  },
+  {
+   "key": "fpb_allagree/analyze/qwen3.5:4b-q4_K_M/v1",
+   "split": "fpb_allagree",
+   "dataset": "fpb",
+   "datasetSplit": "allagree",
+   "endpoint": "analyze",
+   "model": "qwen3.5:4b-q4_K_M",
+   "kind": "generative",
+   "role": "finalist",
+   "config": "v1",
+   "policy": "ordinal",
+   "threshold": 1.0,
+   "scope": null,
+   "fieldOrder": "sentiment-first",
+   "promptVersion": "analyze/qwen3.5:4b-q4_K_M/v1@7daf4f28",
+   "n": 2259,
+   "gold": {
+    "neutral": 1386,
+    "bullish": 570,
+    "bearish": 303
+   },
+   "metrics": {
+    "n": 2259,
+    "per_class": {
+     "bullish": {
+      "precision": 0.9487,
+      "recall": 0.8105,
+      "f05": 0.9174,
+      "calls": 487.0,
+      "support": 570.0
+     },
+     "bearish": {
+      "precision": 0.9754,
+      "recall": 0.9142,
+      "f05": 0.9625,
+      "calls": 284.0,
+      "support": 303.0
+     }
+    },
+    "f05_macro": 0.9399,
+    "inversion_rate": 0.0013,
+    "coverage": 1.0,
+    "signal_rate": 0.3413,
+    "accuracy": 0.927,
+    "selective_accuracy": 0.927,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       462,
+       1,
+       107,
+       0
+      ],
+      [
+       0,
+       277,
+       26,
+       0
+      ],
+      [
+       25,
+       6,
+       1355,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.9399,
+     "low": 0.9276,
+     "high": 0.9518
+    },
+    "inversion_rate": {
+     "point": 0.0013,
+     "low": 0.0,
+     "high": 0.004
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.3413,
+     "low": 0.3311,
+     "high": 0.3506
+    },
+    "accuracy": {
+     "point": 0.927,
+     "low": 0.9159,
+     "high": 0.9371
+    }
+   },
+   "counts": {
+    "n": 2259,
+    "done": 2259,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 2259,
+    "wall_ms_p50": 554.556,
+    "wall_ms_p95": 621.4855,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": "dev300",
+    "f05Macro": 0.7521
+   },
+   "gap": 0.1878
+  },
+  {
+   "key": "finentity_single/analyze/qwen3.5:4b-q4_K_M/v1",
+   "split": "finentity_single",
+   "dataset": "finentity",
+   "datasetSplit": "single-label",
+   "endpoint": "analyze",
+   "model": "qwen3.5:4b-q4_K_M",
+   "kind": "generative",
+   "role": "finalist",
+   "config": "v1",
+   "policy": "ordinal",
+   "threshold": 1.0,
+   "scope": null,
+   "fieldOrder": "sentiment-first",
+   "promptVersion": "analyze/qwen3.5:4b-q4_K_M/v1@7daf4f28",
+   "n": 851,
+   "gold": {
+    "bullish": 181,
+    "bearish": 180,
+    "neutral": 490
+   },
+   "metrics": {
+    "n": 851,
+    "per_class": {
+     "bullish": {
+      "precision": 0.7611,
+      "recall": 0.7569,
+      "f05": 0.7603,
+      "calls": 180.0,
+      "support": 181.0
+     },
+     "bearish": {
+      "precision": 0.7627,
+      "recall": 0.75,
+      "f05": 0.7601,
+      "calls": 177.0,
+      "support": 180.0
+     }
+    },
+    "f05_macro": 0.7602,
+    "inversion_rate": 0.0168,
+    "coverage": 1.0,
+    "signal_rate": 0.4195,
+    "accuracy": 0.8026,
+    "selective_accuracy": 0.8026,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       137,
+       3,
+       41,
+       0
+      ],
+      [
+       3,
+       135,
+       42,
+       0
+      ],
+      [
+       40,
+       39,
+       411,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.7602,
+     "low": 0.7267,
+     "high": 0.7936
+    },
+    "inversion_rate": {
+     "point": 0.0168,
+     "low": 0.0053,
+     "high": 0.0314
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.4195,
+     "low": 0.3936,
+     "high": 0.4442
+    },
+    "accuracy": {
+     "point": 0.8026,
+     "low": 0.7767,
+     "high": 0.8273
+    }
+   },
+   "counts": {
+    "n": 851,
+    "done": 851,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 851,
+    "wall_ms_p50": 614.467,
+    "wall_ms_p95": 682.2621,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": "dev300",
+    "f05Macro": 0.7521
+   },
+   "gap": 0.0081
+  },
+  {
+   "key": "articles_test/analyze/qwen3.5:9b-q4_K_M/v1/full",
+   "split": "articles_test",
+   "dataset": "articles",
+   "datasetSplit": "test",
+   "endpoint": "analyze",
+   "model": "qwen3.5:9b-q4_K_M",
+   "kind": "generative",
+   "role": "ceiling",
+   "config": "v1",
+   "policy": "ordinal",
+   "threshold": 1.0,
+   "scope": "full",
+   "fieldOrder": "sentiment-first",
+   "promptVersion": "analyze/qwen3.5:9b-q4_K_M/v1@7daf4f28",
+   "n": 60,
+   "gold": {
+    "bullish": 20,
+    "bearish": 20,
+    "neutral": 20
+   },
+   "metrics": {
+    "n": 60,
+    "per_class": {
+     "bullish": {
+      "precision": 0.6667,
+      "recall": 1.0,
+      "f05": 0.7143,
+      "calls": 30.0,
+      "support": 20.0
+     },
+     "bearish": {
+      "precision": 0.9048,
+      "recall": 0.95,
+      "f05": 0.9135,
+      "calls": 21.0,
+      "support": 20.0
+     }
+    },
+    "f05_macro": 0.8139,
+    "inversion_rate": 0.0196,
+    "coverage": 1.0,
+    "signal_rate": 0.85,
+    "accuracy": 0.8,
+    "selective_accuracy": 0.8,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       20,
+       0,
+       0,
+       0
+      ],
+      [
+       1,
+       19,
+       0,
+       0
+      ],
+      [
+       9,
+       2,
+       9,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.8139,
+     "low": 0.7589,
+     "high": 0.8796
+    },
+    "inversion_rate": {
+     "point": 0.0196,
+     "low": 0.0,
+     "high": 0.06
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.85,
+     "low": 0.7833,
+     "high": 0.9333
+    },
+    "accuracy": {
+     "point": 0.8,
+     "low": 0.7167,
+     "high": 0.8833
+    }
+   },
+   "counts": {
+    "n": 60,
+    "done": 60,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 60,
+    "wall_ms_p50": 1892.5149,
+    "wall_ms_p95": 3521.4612,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": null,
+    "f05Macro": null
+   },
+   "gap": null
+  },
+  {
+   "key": "fpb_allagree/analyze/qwen3.5:9b-q4_K_M/v1",
+   "split": "fpb_allagree",
+   "dataset": "fpb",
+   "datasetSplit": "allagree",
+   "endpoint": "analyze",
+   "model": "qwen3.5:9b-q4_K_M",
+   "kind": "generative",
+   "role": "ceiling",
+   "config": "v1",
+   "policy": "ordinal",
+   "threshold": 1.0,
+   "scope": null,
+   "fieldOrder": "sentiment-first",
+   "promptVersion": "analyze/qwen3.5:9b-q4_K_M/v1@7daf4f28",
+   "n": 2259,
+   "gold": {
+    "neutral": 1386,
+    "bullish": 570,
+    "bearish": 303
+   },
+   "metrics": {
+    "n": 2259,
+    "per_class": {
+     "bullish": {
+      "precision": 0.9322,
+      "recall": 0.8439,
+      "f05": 0.9131,
+      "calls": 516.0,
+      "support": 570.0
+     },
+     "bearish": {
+      "precision": 0.9561,
+      "recall": 0.934,
+      "f05": 0.9516,
+      "calls": 296.0,
+      "support": 303.0
+     }
+    },
+    "f05_macro": 0.9323,
+    "inversion_rate": 0.0025,
+    "coverage": 1.0,
+    "signal_rate": 0.3595,
+    "accuracy": 0.9314,
+    "selective_accuracy": 0.9314,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       481,
+       1,
+       88,
+       0
+      ],
+      [
+       1,
+       283,
+       19,
+       0
+      ],
+      [
+       34,
+       12,
+       1340,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.9323,
+     "low": 0.9194,
+     "high": 0.9449
+    },
+    "inversion_rate": {
+     "point": 0.0025,
+     "low": 0.0,
+     "high": 0.0062
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.3595,
+     "low": 0.3488,
+     "high": 0.3692
+    },
+    "accuracy": {
+     "point": 0.9314,
+     "low": 0.9212,
+     "high": 0.9407
+    }
+   },
+   "counts": {
+    "n": 2259,
+    "done": 2259,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 2259,
+    "wall_ms_p50": 386.0392,
+    "wall_ms_p95": 467.1483,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": null,
+    "f05Macro": null
+   },
+   "gap": null
+  },
+  {
+   "key": "finentity_single/analyze/qwen3.5:9b-q4_K_M/v1",
+   "split": "finentity_single",
+   "dataset": "finentity",
+   "datasetSplit": "single-label",
+   "endpoint": "analyze",
+   "model": "qwen3.5:9b-q4_K_M",
+   "kind": "generative",
+   "role": "ceiling",
+   "config": "v1",
+   "policy": "ordinal",
+   "threshold": 1.0,
+   "scope": null,
+   "fieldOrder": "sentiment-first",
+   "promptVersion": "analyze/qwen3.5:9b-q4_K_M/v1@7daf4f28",
+   "n": 851,
+   "gold": {
+    "bullish": 181,
+    "bearish": 180,
+    "neutral": 490
+   },
+   "metrics": {
+    "n": 851,
+    "per_class": {
+     "bullish": {
+      "precision": 0.6907,
+      "recall": 0.7403,
+      "f05": 0.7001,
+      "calls": 194.0,
+      "support": 181.0
+     },
+     "bearish": {
+      "precision": 0.6537,
+      "recall": 0.8389,
+      "f05": 0.6839,
+      "calls": 231.0,
+      "support": 180.0
+     }
+    },
+    "f05_macro": 0.692,
+    "inversion_rate": 0.0118,
+    "coverage": 1.0,
+    "signal_rate": 0.4994,
+    "accuracy": 0.7521,
+    "selective_accuracy": 0.7521,
+    "confusion": {
+     "rows_gold": [
+      "bullish",
+      "bearish",
+      "neutral"
+     ],
+     "columns_pred": [
+      "bullish",
+      "bearish",
+      "neutral",
+      "abstain"
+     ],
+     "counts": [
+      [
+       134,
+       2,
+       45,
+       0
+      ],
+      [
+       3,
+       151,
+       26,
+       0
+      ],
+      [
+       57,
+       78,
+       355,
+       0
+      ]
+     ]
+    }
+   },
+   "cis": {
+    "f05_macro": {
+     "point": 0.692,
+     "low": 0.6607,
+     "high": 0.7229
+    },
+    "inversion_rate": {
+     "point": 0.0118,
+     "low": 0.0024,
+     "high": 0.0231
+    },
+    "coverage": {
+     "point": 1.0,
+     "low": 1.0,
+     "high": 1.0
+    },
+    "signal_rate": {
+     "point": 0.4994,
+     "low": 0.4712,
+     "high": 0.5276
+    },
+    "accuracy": {
+     "point": 0.7521,
+     "low": 0.7239,
+     "high": 0.7791
+    }
+   },
+   "counts": {
+    "n": 851,
+    "done": 851,
+    "missing": 0,
+    "errors": 0
+   },
+   "latency": {
+    "n": 851,
+    "wall_ms_p50": 443.5895,
+    "wall_ms_p95": 575.0147,
+    "server_ms_p50": null
+   },
+   "dev": {
+    "reference": null,
+    "f05Macro": null
+   },
+   "gap": null
+  }
+ ],
+ "missing": [],
+ "summaries": {
+  "status": "judged",
+  "n": 60,
+  "rows": [
+   {
+    "endpoint": "summary",
+    "model": "qwen3.5:4b-q4_K_M",
+    "n": 60,
+    "deterministicPassRate": 0.9333,
+    "keyFactCoverage": 0.5842,
+    "keyFactCoverageStrict": 0.3283,
+    "judgeFaithfulness": 4.367,
+    "judgeCoverage": 4.5,
+    "hallucinationRate": 0.4167,
+    "materialErrorRate": 0.1667,
+    "wordsOkRate": 1.0,
+    "sentencesOkRate": 1.0,
+    "numbersGroundedRate": 0.9667,
+    "entityNamedRate": 0.9667,
+    "truncatedRate": 0.0,
+    "cappedRate": 0.0,
+    "errorRate": 0.0,
+    "medianWords": 39.0,
+    "unsupportedNumbers": 3,
+    "unsupportedNumbersInInput": 3,
+    "keyFactCoverageAt": {
+     "0.65": 0.4742,
+     "0.70": 0.4033,
+     "0.80": 0.2375
+    },
+    "judgeN": 60,
+    "judgeLeadsRate": 0.9333,
+    "judgeFaithfulnessCi": [
+     4.167,
+     4.567
+    ],
+    "judgeCoverageCi": [
+     4.283,
+     4.667
+    ],
+    "hallucinationRateCi": [
+     0.3,
+     0.533
+    ],
+    "materialErrorRateCi": [
+     0.083,
+     0.267
+    ],
+    "passesGate": true
+   },
+   {
+    "endpoint": "analyze",
+    "model": "qwen3.5:4b-q4_K_M",
+    "n": 60,
+    "deterministicPassRate": 0.9167,
+    "keyFactCoverage": 0.6317,
+    "keyFactCoverageStrict": 0.3825,
+    "judgeFaithfulness": 4.167,
+    "judgeCoverage": 4.633,
+    "hallucinationRate": 0.5167,
+    "materialErrorRate": 0.25,
+    "wordsOkRate": 1.0,
+    "sentencesOkRate": 1.0,
+    "numbersGroundedRate": 0.95,
+    "entityNamedRate": 0.9667,
+    "truncatedRate": 0.0,
+    "cappedRate": 0.25,
+    "errorRate": 0.0,
+    "medianWords": 49.0,
+    "unsupportedNumbers": 5,
+    "unsupportedNumbersInInput": 3,
+    "keyFactCoverageAt": {
+     "0.65": 0.5583,
+     "0.70": 0.4742,
+     "0.80": 0.2858
+    },
+    "judgeN": 60,
+    "judgeLeadsRate": 0.95,
+    "judgeFaithfulnessCi": [
+     3.967,
+     4.367
+    ],
+    "judgeCoverageCi": [
+     4.5,
+     4.767
+    ],
+    "hallucinationRateCi": [
+     0.4,
+     0.633
+    ],
+    "materialErrorRateCi": [
+     0.133,
+     0.35
+    ],
+    "passesGate": true
+   }
+  ]
+ }
+}

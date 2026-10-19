@@ -62,6 +62,38 @@ Coverage threshold spot check:
 - at 0.75: 25 of 45 flags right, 0 wrongly covered, 20 wrongly not covered
 - Hand labels from reading the summaries as generated before the serving cap; the flags shown in the review file used 0.75.
 
+## test split (n=60 articles)
+
+| Endpoint | Model | Pass | <=60 words | <=3 sent. | Numbers | Entity | Truncated | Capped | Errors | Median words | Key facts | Key facts (strict) | Faithful | Cover | Halluc. | Material | Leads |
+|---|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| summary | `qwen3.5:4b-q4_K_M` | 93% | 100% | 100% | 97% | 97% | 0% | 0% | 0% | 39.0 | 58% | 33% | 4.37 | 4.50 | 42% | 17% | 93% |
+| analyze | `qwen3.5:4b-q4_K_M` | 92% | 100% | 100% | 95% | 97% | 0% | 25% | 0% | 49.0 | 63% | 38% | 4.17 | 4.63 | 52% | 25% | 95% |
+
+Unsupported numbers (distinct per summary, summed) and how many of them the model input had:
+
+- summary `qwen3.5:4b-q4_K_M`: 3 unsupported, 3 present in the extracted input but not in the gold article
+- analyze `qwen3.5:4b-q4_K_M`: 5 unsupported, 3 present in the extracted input but not in the gold article
+
+Key-fact coverage at other thresholds (main threshold 0.60):
+
+- summary `qwen3.5:4b-q4_K_M`: 0.65: 47%, 0.70: 40%, 0.80: 24%
+- analyze `qwen3.5:4b-q4_K_M`: 0.65: 56%, 0.70: 47%, 0.80: 29%
+
+Quality order (deterministic pass rate >= 0.8, then judge faithfulness, then judge
+coverage; latency budgets are applied later by `select`):
+
+- /summary: `qwen3.5:4b-q4_K_M`
+- /analyze: `qwen3.5:4b-q4_K_M`
+
+Judge means with 95% bootstrap CIs (articles resampled within their sentiment label):
+
+- summary `qwen3.5:4b-q4_K_M`: faithfulness 4.37 [4.17, 4.57], coverage 4.50 [4.30, 4.67], hallucination rate 42% [28%, 53%], material error rate 17% [7%, 27%] (n=60)
+- analyze `qwen3.5:4b-q4_K_M`: faithfulness 4.17 [3.97, 4.37], coverage 4.63 [4.50, 4.75], hallucination rate 52% [40%, 63%], material error rate 25% [15%, 35%] (n=60)
+
+Coverage threshold spot check:
+
+- not run
+
 ## Definitions
 
 - **Pass**: <= 60 words, <= 3 sentences (serving sentence splitter), every number

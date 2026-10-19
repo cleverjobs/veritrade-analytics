@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-18T18:25:24+00:00",
+  "generatedAt": "2026-10-19T12:01:34+00:00",
   "config": {
     "embeddingModel": "qwen3-embedding:0.6b",
     "coverageThreshold": 0.6,
@@ -364,6 +364,180 @@
         },
         "note": "Hand labels from reading the summaries as generated before the serving cap; the flags shown in the review file used 0.75."
       }
+    },
+    "test": {
+      "n": 60,
+      "articleIds": [
+        "art-01b99b80804e",
+        "art-0312a11209d7",
+        "art-078e671378a6",
+        "art-0b1fdb87d010",
+        "art-0b34deeb0a56",
+        "art-0d5503098ad6",
+        "art-16586cfef0dc",
+        "art-18ba9fad01ba",
+        "art-1e63175d3468",
+        "art-1ed541ee7a3a",
+        "art-1ee9f07f8385",
+        "art-25d0386a66ab",
+        "art-299e2b7489b4",
+        "art-3ecc41037d5a",
+        "art-460f1591b266",
+        "art-49a60a311829",
+        "art-504c9afed55f",
+        "art-52a231b6633a",
+        "art-54b9eaf524e5",
+        "art-56a659c15178",
+        "art-580a8aff0ded",
+        "art-58f8a36dfd3e",
+        "art-597d095d9d44",
+        "art-600b47563b41",
+        "art-689a1e312e89",
+        "art-6add66dd3c32",
+        "art-6bd299f199bd",
+        "art-7c03d6f2dc7d",
+        "art-7f0eb7b713d3",
+        "art-7f102c11b0ca",
+        "art-8237bba3a929",
+        "art-8a7cb24b6d60",
+        "art-8b5e9cf227ac",
+        "art-8d16fea749e4",
+        "art-8f87b484d8ad",
+        "art-94a91b00d8b9",
+        "art-9b67165c81a5",
+        "art-a2a5ed65a7aa",
+        "art-a5719f6556c5",
+        "art-a70a2c488137",
+        "art-a7bec19957da",
+        "art-b001e623e513",
+        "art-b117b710d3b5",
+        "art-b9106e94bb0e",
+        "art-be1f624a42a1",
+        "art-bff4d79673b2",
+        "art-c21e7efcd115",
+        "art-c2ea57004159",
+        "art-c503c55c9e5a",
+        "art-c50427bda50a",
+        "art-ca10c70fbb8a",
+        "art-cb2d1f97a7b3",
+        "art-d027481ef481",
+        "art-da09df5c5254",
+        "art-da31d0cc629f",
+        "art-e8b685249100",
+        "art-eceb8012be3e",
+        "art-eee3488ffc31",
+        "art-f0ef8cc37a54",
+        "art-fbcf24b55402"
+      ],
+      "rows": [
+        {
+          "endpoint": "summary",
+          "model": "qwen3.5:4b-q4_K_M",
+          "n": 60,
+          "deterministicPassRate": 0.9333,
+          "keyFactCoverage": 0.5842,
+          "keyFactCoverageStrict": 0.3283,
+          "judgeFaithfulness": 4.367,
+          "judgeCoverage": 4.5,
+          "hallucinationRate": 0.4167,
+          "materialErrorRate": 0.1667,
+          "wordsOkRate": 1.0,
+          "sentencesOkRate": 1.0,
+          "numbersGroundedRate": 0.9667,
+          "entityNamedRate": 0.9667,
+          "truncatedRate": 0.0,
+          "cappedRate": 0.0,
+          "errorRate": 0.0,
+          "medianWords": 39.0,
+          "unsupportedNumbers": 3,
+          "unsupportedNumbersInInput": 3,
+          "keyFactCoverageAt": {
+            "0.65": 0.4742,
+            "0.70": 0.4033,
+            "0.80": 0.2375
+          },
+          "judgeN": 60,
+          "judgeLeadsRate": 0.9333,
+          "judgeFaithfulnessCi": [
+            4.167,
+            4.567
+          ],
+          "judgeCoverageCi": [
+            4.3,
+            4.667
+          ],
+          "hallucinationRateCi": [
+            0.283,
+            0.534
+          ],
+          "materialErrorRateCi": [
+            0.067,
+            0.267
+          ],
+          "passesGate": true,
+          "promptVersion": "summary/qwen3.5:4b-q4_K_M/v2@84ce3858",
+          "modelDigest": "d8b0f5e9760c"
+        },
+        {
+          "endpoint": "analyze",
+          "model": "qwen3.5:4b-q4_K_M",
+          "n": 60,
+          "deterministicPassRate": 0.9167,
+          "keyFactCoverage": 0.6317,
+          "keyFactCoverageStrict": 0.3825,
+          "judgeFaithfulness": 4.167,
+          "judgeCoverage": 4.633,
+          "hallucinationRate": 0.5167,
+          "materialErrorRate": 0.25,
+          "wordsOkRate": 1.0,
+          "sentencesOkRate": 1.0,
+          "numbersGroundedRate": 0.95,
+          "entityNamedRate": 0.9667,
+          "truncatedRate": 0.0,
+          "cappedRate": 0.25,
+          "errorRate": 0.0,
+          "medianWords": 49.0,
+          "unsupportedNumbers": 5,
+          "unsupportedNumbersInInput": 3,
+          "keyFactCoverageAt": {
+            "0.65": 0.5583,
+            "0.70": 0.4742,
+            "0.80": 0.2858
+          },
+          "judgeN": 60,
+          "judgeLeadsRate": 0.95,
+          "judgeFaithfulnessCi": [
+            3.967,
+            4.367
+          ],
+          "judgeCoverageCi": [
+            4.5,
+            4.75
+          ],
+          "hallucinationRateCi": [
+            0.4,
+            0.633
+          ],
+          "materialErrorRateCi": [
+            0.15,
+            0.35
+          ],
+          "passesGate": true,
+          "promptVersion": "analyze/qwen3.5:4b-q4_K_M/v1@7daf4f28",
+          "modelDigest": "d8b0f5e9760c"
+        }
+      ],
+      "judged": true,
+      "qualityRanking": {
+        "summary": [
+          "qwen3.5:4b-q4_K_M"
+        ],
+        "analyze": [
+          "qwen3.5:4b-q4_K_M"
+        ]
+      },
+      "leaderGaps": {},
+      "spotCheck": null
     }
   }
 }
