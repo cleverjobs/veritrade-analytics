@@ -57,8 +57,8 @@ Guiding principle (Kris, R2): **this is a PoC - balance the level of rigor per a
 
 ## Build-time findings that adjusted the plan
 
-Measured during P1/P2, recorded here so the deviations are traceable. Inputs for the Ollama probe were synthetic
-(`evals/results/ollama_probe.json`, native Metal, warm, n=5).
+Measured during the build (phases P1 to P5), recorded here so the deviations are traceable. Inputs for the Ollama
+probe were synthetic (`evals/results/ollama_probe.json`, native Metal, warm, n=5).
 
 - **Sources** (`02-source-probe.md`): AP News, Investing.com, Benzinga and Business Wire refuse a plain client at
   their CDN (Cloudflare / Akamai), so all four backups were promoted. Final 10: Yahoo Finance, CNBC, Motley Fool,
@@ -79,7 +79,8 @@ Measured during P1/P2, recorded here so the deviations are traceable. Inputs for
 - **Fetch cap** raised from 5 MB to 10 MB: CNN article pages are 5.7-6.6 MB decompressed.
 - **Sampling penalties zeroed**: the qwen3.5 Modelfiles ship `presence_penalty 1.5`, which still applies under
   greedy decoding. Few-shot answers end in `neutral` / `0`, so the penalty pushed generated labels away from
-  neutral (26 of 60 dev tweets disagreed with the logprob argmax; 0 of 60 with the penalty off). Every chat call
+  neutral (with the penalty on, the generated `qwen3.5:0.8b` label disagreed with its own first-token argmax on 84
+  of the 300 dev300 tweets for v2 and 62 for v4, [grid notes](../../../evals/results/grid/notes.md)). Every chat call
   now pins `presence_penalty 0`, `frequency_penalty 0`, `repeat_penalty 1`; `num_predict` still bounds runaway
   output.
 - **Length-cut generations are salvaged**: a summary or analyze output that hits `num_predict` returns its fields
@@ -89,6 +90,72 @@ Measured during P1/P2, recorded here so the deviations are traceable. Inputs for
   on the dev articles, mostly on the 60-word cap. Rather than relax the gate, the service caps every summary at
   3 sentences / 60 words at a sentence boundary, and the frozen prompts ask for 2-3 sentences of at most 50 words
   that name the primary entity first.
-- **Key-fact coverage threshold 0.60** (R6): a hand spot-check of 45 key facts on 10 dev articles agreed best
-  at a cosine of 0.60 (33/45); 0.75 marked no false "covered" but missed 20 stated facts. 0.60 is primary and
+- **Key-fact coverage threshold 0.60** (R6): a hand spot-check of 45 key facts on 10 dev articles
+  ([`spotcheck.dev.json`](../../../evals/results/summary/spotcheck.dev.json)) matched 33 of 45 flags at a cosine
+  of 0.60, a near tie with 0.55 (34 of 45, one more false "covered"); 0.75 marked no false "covered" but missed 20
+  stated facts. 0.60 is primary and
   0.75 is reported as a conservative bound; the Opus judge remains the selection signal.
+- **Docker-cpu pass 1 was biased by Ollama's prompt cache**: the pass ran the bundled app over HTTP (n=10 warm per
+  cell), and each JSON cell re-sent prompts its SSE twin had just evaluated on the same articles, so its prompt eval
+  read 118-171 ms. `container_reload` in `evals/src/veritrade_evals/latency.py` now stops the model inside the
+  bundled container (`docker exec ... ollama stop`) before every warm phase, mirroring the native suite's unload.
+- **Docker-cpu pass 2 was invalidated by host contention**: unrelated workloads on the same Mac pushed the load
+  average to 50-64 (6.89 at the native preflight, [`preflight.json`](../../../evals/results/latency/preflight.json)),
+  `qwen3.5:0.8b` decode went from about 31 ms to about 2.8 s per token, and 4 `/analyze` requests timed out. The
+  bundled Ollama runs llama.cpp with 14 threads on a 14-vCPU Docker VM over a 14-core host, and its spin-barrier
+  threads stall whenever the host takes cores. The samples of both passes were discarded and are not committed.
+  - Pass 1's valid rows (the SSE rows, plus `/signal`'s JSON row, which has no SSE twin), indicative only
+    (native-metal p50 from [`latency.md`](../../../evals/results/latency/latency.md) in brackets): `/signal` 0.8b
+    lede p50 2,657 ms (178); `/summary` 4B SSE TTFT 8,768 ms (1,128), complete 14,405 ms (2,199); `/analyze` 4B
+    SSE time to signal 8,644 ms (1,098), TTFT 9,147 ms (1,292), complete 12,106 ms (2,584). CPU-only Docker is
+    roughly 5-15x slower than Metal on this machine, which is why native Ollama is the macOS default (Q1) and the
+    bundled profile is for Linux and CI.
+<!-- PENDING:docker-cpu one line: date and load average of the quiet-host re-run and its per-endpoint docker-cpu p50 / TTFT against native, linking evals/results/latency/latency.md -->
+- **`OLLAMA_CPUS` is a quota, not a thread count**: compose's `cpus:` caps CPU time but does not lower llama.cpp's
+  thread count, so a quota below the visible core count can make CPU inference slower, not just capped. A `cpuset`
+  or `num_thread` is the fix ([90-optional-backlog.md](90-optional-backlog.md)).
+
+## Selection outcome
+
+`uv run python -m veritrade_evals select` applied the Q2 / R6 / R7 rules to the committed results, and
+`select --write` set `[defaults]` in [`models.toml`](../../../backend/src/veritrade/data/models.toml) and the pull
+list in [`deploy/bundled.env`](../../../deploy/bundled.env). Rules and per-candidate verdicts are in
+[`selection.md`](../../../evals/results/selection/selection.md); latency is native-metal, warm, excluding fetch
+([`latency.md`](../../../evals/results/latency/latency.md)). Every endpoint had an accuracy-eligible candidate inside
+its budget, so no Pareto knee was needed.
+
+| Endpoint | Winner, frozen config | Rule that picked it | Accuracy (dev) | Latency p50 |
+|---|---|---|---|---|
+| `/signal` | `qwen3.5:0.8b-q8_0`, v2-label, label logprobs with `directional_tau` 0.28, lede | Best dev300 F0.5 among candidates with dev300 inversions <= 2%, an articles-dev inversion CI reaching 2%, and lede p50 <= 500 ms | dev300 F0.5 0.730 [0.651, 0.795]; articles 0.685 | 178 ms |
+| `/summary` | `qwen3.5:4b-q4_K_M`, prompt v2 | Deterministic pass rate >= 0.8 and both stream budgets, then Opus judge faithfulness | Faithfulness 4.40 vs 3.97 for `qwen3.5:2b-q4_K_M`, paired gap 0.43 [0.07, 0.77] ([summary eval](../../../evals/results/summary/summary.md)) | TTFT 1,128 ms, complete 2,199 ms |
+| `/analyze` | `qwen3.5:4b-q4_K_M`, v1, ordinal \|s\| >= 1, sentiment-first | As `/signal`, with TTFT p50 <= 1.5 s and complete p50 <= 4 s | dev300 F0.5 0.752 [0.664, 0.834]; articles 0.880 | Signal 1,098 ms, TTFT 1,292 ms, complete 2,584 ms |
+
+- **Bundle (R8)**: the winners alone, `qwen3.5:0.8b-q8_0` and `qwen3.5:4b-q4_K_M`, are 4.34 GB of model files
+  against the 10 GB cap, because one 4B file serves both `/summary` and `/analyze`; no fallback combination was
+  needed.
+- **The `/signal` trade-off**: `clef-flash:9b-q8_0` has the best dev300 F0.5 (0.874 [0.811, 0.937]) but misses the
+  500 ms lede budget (p50 659 ms), and its 10.58 GB file alone exceeds the 10 GB bundle cap; `nimble:9b-q4_K_M`
+  (0.843, 1,061 ms) misses too. The selected `qwen3.5:0.8b-q8_0` scores 0.730 at 178 ms. On the article dev set it
+  catches 10 of 20 directional articles against 17 for clef-flash, with one inversion each
+  ([articles dev](../../../evals/results/articles_dev/summary.md)). The budget was reported, never moved (R7). Both
+  9B decision models stay on the allowlist and can be chosen per request with the `model` parameter on native
+  Ollama.
+- **The winner's articles-dev inversion**: that one inversion is 1 of 14 directional calls (7.1%). The rule passes
+  it because at n=30 the 95% CI reaches down to 0%; the point estimate alone would fail the 2% cap, so the holdout
+  is the real check.
+- **Provisional defaults replaced**: the budget-feasible defaults set after the P2 probe (`/summary`
+  `qwen3.5:2b-q4_K_M`, `/analyze` `ministral-3:3b`, see `defaults_untouched` in
+  [`frozen.json`](../../../evals/results/frozen.json)) gave way to `qwen3.5:4b-q4_K_M` on both. The probe's
+  synthetic inputs gave about 1.6k-token prompts, where the 4B model missed TTFT; the dev articles after the served
+  cascade give an 825-token `/summary` prompt at p50 ([`latency.json`](../../../evals/results/latency/latency.json);
+  about 718 tokens of `full` article text, [03](03-extraction.md)), and there it meets both budgets.
+- **Split vs combined**: split mode delivers the signal at 178 ms; the combined `/analyze` stream delivers it at
+  1,098 ms, about six times later, but scores higher on the article dev set (0.880 [0.791, 0.989] vs
+  0.685 [0.473, 0.833], overlapping CIs at n=30) and is close on dev300 (0.752 vs 0.730).
+
+**Holdout check.** The frozen configs run once on the test splits (`articles_test`, `tfns_val`, `fpb_allagree`,
+`finentity_single`), with `qwen3.5:9b-q4_K_M` as a holdout-only quality ceiling, and Opus judges the winners'
+summaries on the test articles. Nothing is re-tuned on these numbers; results go to `evals/results/holdout/` and
+[04-evals.md](04-evals.md#8-holdout).
+<!-- PENDING:holdout per-endpoint winner F0.5 [95% CI] and inversion rate on articles_test and tfns_val, the cross-domain fpb_allagree / finentity_single scores, and the qwen3.5:9b ceiling, each against its dev number -->
+<!-- PENDING:holdout Opus judge faithfulness and coverage of the /summary and /analyze winners on the 60 test articles, against the dev 4.40 / 4.47 -->

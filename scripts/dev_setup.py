@@ -20,7 +20,12 @@ MODEL_SETS = {
 }
 OLLAMA_URL = "http://localhost:11434"
 # brew services only reads launchd env, so these must go through launchctl.
-LAUNCHD_ENV = {"OLLAMA_MAX_LOADED_MODELS": "3", "OLLAMA_KEEP_ALIVE": "30m"}
+LAUNCHD_ENV = {
+    "OLLAMA_MAX_LOADED_MODELS": "3",
+    "OLLAMA_KEEP_ALIVE": "30m",
+    "OLLAMA_FLASH_ATTENTION": "1",
+    "OLLAMA_KV_CACHE_TYPE": "q8_0",
+}
 
 
 def run(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess[str]:
