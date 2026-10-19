@@ -52,9 +52,9 @@ async def test_identical_request_is_served_from_the_result_cache(
     api: httpx.AsyncClient, router: respx.MockRouter, ollama: FakeOllama, page: Page
 ) -> None:
     first = SignalResponse.model_validate((await api.post("/api/signal", json={"url": page.url})).json())
-    calls = ollama.inference_calls
+    calls, probes = ollama.inference_calls, ollama.ps.call_count
     second = SignalResponse.model_validate((await api.post("/api/signal", json={"url": page.url})).json())
-    assert ollama.inference_calls == calls
+    assert (ollama.inference_calls, ollama.ps.call_count) == (calls, probes)
     assert router.routes[page.source].call_count == 1
     assert second.signal == first.signal
     assert second.meta == first.meta.model_copy(update={"cached": True})
@@ -97,6 +97,7 @@ async def test_stream_replays_a_cached_result(api: httpx.AsyncClient, ollama: Fa
     meta = MetaEvent.model_validate(events[0][1])
     assert meta.meta.cached is True
     assert meta.cache == CacheInfo(fetch="hit", result="hit")
+    assert meta.cold_start is None
     assert SentimentEvent.model_validate(events[1][1]).signal == stored.signal
     assert events[2][1] == {"text": SUMMARY}
     done = AnalyzeDoneEvent.model_validate(events[3][1]).result

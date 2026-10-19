@@ -19,6 +19,8 @@ export interface MetaEventData {
   parse_ms: number;
   extract_ms: number;
   cache: CacheInfo;
+  /** True when the model has to be loaded before its first token; null when unknown. */
+  cold_start?: boolean | null;
 }
 
 export interface SentimentEventData {

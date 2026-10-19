@@ -17,7 +17,7 @@ from veritrade.inference.confidence import (
 )
 from veritrade.inference.ollama import parse_logprobs
 from veritrade.inference.schemas import LabelOut, OrdinalOut
-from veritrade.inference.types import ChatResult, Sentiment, TokenLogprob
+from veritrade.inference.types import ChatResult, Sentiment, TokenLogprob, Verdict
 from veritrade.models_registry import ModelSpec
 
 from .conftest import lp, plain
@@ -81,6 +81,30 @@ def test_directional_tau_only_overrides_a_neutral_argmax(
     verdict = ProbabilityPolicy(0.5, directional_tau=0.3).decide(probabilities)
     assert (verdict.sentiment, verdict.abstained, verdict.policy) == (expected, abstained, "probability")
     assert verdict.probabilities == pytest.approx(probabilities)
+
+
+NEUTRAL_LEAN: dict[Sentiment, float] = {"neutral": 0.6, "bullish": 0.3, "bearish": 0.1}
+
+
+@pytest.mark.parametrize(
+    ("verdict", "expected"),
+    [
+        pytest.param(ProbabilityPolicy(0.8).decide(NEUTRAL_LEAN), ("neutral", True, 0.8, None), id="no-tau"),
+        pytest.param(
+            ProbabilityPolicy(0.5, 0.28).decide(NEUTRAL_LEAN), ("bullish", False, 0.5, 0.28), id="tau-reached"
+        ),
+        pytest.param(
+            LabelLogprobPolicy(0.0, 0.35).threshold(NEUTRAL_LEAN),
+            ("neutral", False, 0.0, 0.35),
+            id="label-logprob-tau-missed",
+        ),
+        pytest.param(OrdinalPolicy(2).decide(1), ("neutral", True, 2.0, None), id="ordinal"),
+    ],
+)
+def test_verdicts_carry_the_frozen_rule_they_were_held_to(
+    verdict: Verdict, expected: tuple[str, bool, float, float | None]
+) -> None:
+    assert (verdict.sentiment, verdict.abstained, verdict.threshold, verdict.directional_tau) == expected
 
 
 def test_directional_tau_ties_between_directions_go_bullish() -> None:

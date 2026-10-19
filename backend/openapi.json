@@ -426,6 +426,18 @@
       "InferenceTimings": {
         "additionalProperties": false,
         "properties": {
+          "cold_start": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "True when the model was not loaded in Ollama (or was loaded with another context size) as the request arrived, so the inference time includes loading it; null when unknown.",
+            "title": "Cold Start"
+          },
           "eval_ms": {
             "anyOf": [
               {
@@ -539,6 +551,21 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "signal_rules": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SignalRule"
+            },
+            "description": "Frozen confidence rule for each endpoint of this model that returns a signal (signal, analyze). A label-logprob rule still falls back to ordinal on a label collision; the listed rule is the primary one.",
+            "propertyNames": {
+              "enum": [
+                "signal",
+                "summary",
+                "analyze"
+              ]
+            },
+            "title": "Signal Rules",
+            "type": "object"
           },
           "size_bytes": {
             "anyOf": [
@@ -751,6 +778,18 @@
             ],
             "title": "Confidence"
           },
+          "directional_tau": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When set, a neutral lead still yields the likelier directional class once that class reaches this probability.",
+            "title": "Directional Tau"
+          },
           "policy": {
             "enum": [
               "probability",
@@ -802,6 +841,18 @@
             ],
             "title": "Sentiment",
             "type": "string"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Frozen cutoff this call was held to: the minimum winning-class probability (probability, label-logprob) or the minimum |score| (ordinal).",
+            "title": "Threshold"
           }
         },
         "required": [
@@ -810,6 +861,41 @@
           "policy"
         ],
         "title": "SignalResult",
+        "type": "object"
+      },
+      "SignalRule": {
+        "additionalProperties": false,
+        "properties": {
+          "directional_tau": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Directional Tau"
+          },
+          "policy": {
+            "enum": [
+              "probability",
+              "label-logprob",
+              "ordinal"
+            ],
+            "title": "Policy",
+            "type": "string"
+          },
+          "threshold": {
+            "title": "Threshold",
+            "type": "number"
+          }
+        },
+        "required": [
+          "policy",
+          "threshold"
+        ],
+        "title": "SignalRule",
         "type": "object"
       },
       "SummaryRequest": {

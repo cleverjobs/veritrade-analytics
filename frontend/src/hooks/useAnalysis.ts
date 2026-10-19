@@ -59,7 +59,7 @@ function handleEvent(
   const tag = { runId: ctx.runId, lane, atMs: ctx.at() };
   switch (event.type) {
     case "meta":
-      ctx.dispatch({ type: "meta", ...tag, meta: event.data.meta });
+      ctx.dispatch({ type: "meta", ...tag, meta: event.data.meta, coldStart: event.data.cold_start ?? null });
       return;
     case "sentiment":
       ctx.dispatch({

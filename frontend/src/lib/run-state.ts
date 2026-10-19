@@ -10,6 +10,8 @@ export interface Lane {
   meta: ArticleMeta | null;
   timings: Timings | null;
   error: ApiError | null;
+  /** The model had to be loaded for this request; null when unknown or served from the result cache. */
+  coldStart: boolean | null;
   // Client clock: milliseconds since the run started, from performance.now().
   signalAtMs: number | null;
   firstTokenAtMs: number | null;
@@ -39,7 +41,7 @@ interface Tagged {
 
 export type RunAction =
   | { type: "start"; runId: number; mode: Mode; streaming: boolean; lanes: LaneId[] }
-  | ({ type: "meta"; meta: ArticleMeta } & Tagged)
+  | ({ type: "meta"; meta: ArticleMeta; coldStart?: boolean | null } & Tagged)
   | ({ type: "signal"; signal: SignalResult; entity: string | null; serverMs: number | null } & Tagged)
   | ({ type: "delta"; text: string } & Tagged)
   | ({
@@ -74,6 +76,7 @@ function newLane(id: LaneId): Lane {
     meta: null,
     timings: null,
     error: null,
+    coldStart: null,
     signalAtMs: null,
     firstTokenAtMs: null,
     endAtMs: null,
@@ -105,6 +108,7 @@ export function runReducer(state: RunState, action: RunAction): RunState {
     case "meta":
       return patchLane(state, action.lane, (lane) => ({
         meta: lane.meta ?? action.meta,
+        coldStart: action.coldStart ?? lane.coldStart,
         status: lane.status === "pending" ? "streaming" : lane.status,
       }));
     case "signal":
@@ -127,6 +131,7 @@ export function runReducer(state: RunState, action: RunAction): RunState {
         status: "done",
         meta: action.meta,
         timings: action.timings,
+        coldStart: action.timings.inference?.cold_start ?? lane.coldStart,
         endAtMs: action.atMs,
         signalAtMs: action.signal ? (lane.signalAtMs ?? action.atMs) : lane.signalAtMs,
       }));

@@ -14,10 +14,17 @@ const base: Omit<Timings, "inference" | "total_ms"> = {
 const generative: Timings = {
   ...base,
   total_ms: 1900,
-  inference: { wall_ms: 1680, ttft_ms: 400, load_ms: 20, prompt_eval_ms: 360, eval_ms: 1280 },
+  inference: {
+    wall_ms: 1680,
+    ttft_ms: 400,
+    load_ms: 20,
+    prompt_eval_ms: 360,
+    eval_ms: 1280,
+    cold_start: true,
+  },
 };
 
-const decision: Timings = { ...base, total_ms: 560, inference: { wall_ms: 340 } };
+const decision: Timings = { ...base, total_ms: 560, inference: { wall_ms: 340, cold_start: false } };
 
 describe("stageSegments", () => {
   it("lays stages end to end and fills the client remainder with other", () => {
@@ -92,9 +99,17 @@ describe("LatencyBar", () => {
     expect(summary.getByText("prompt eval").nextSibling).toHaveTextContent("360 ms");
     expect(summary.getByText("generation").nextSibling).toHaveTextContent("1.28 s");
     expect(summary.getByText("complete (client)").nextSibling).toHaveTextContent("2.00 s");
+    expect(summary.getByText("cold start").nextSibling).toHaveTextContent("yes, model loaded");
     const signal = within(screen.getByRole("heading", { name: "Signal" }).parentElement as HTMLElement);
     expect(signal.getByText("inference").nextSibling).toHaveTextContent("340 ms");
     expect(signal.getByText("cache").nextSibling).toHaveTextContent("fetch miss, result miss");
+    expect(signal.getByText("cold start").nextSibling).toHaveTextContent("no, already loaded");
+  });
+
+  it("leaves out the cold start row when it is unknown", () => {
+    const unknown: Timings = { ...decision, inference: { wall_ms: 340, cold_start: null } };
+    render(<LatencyBar lanes={[{ ...lanes[0], timings: unknown }]} />);
+    expect(screen.queryByText("cold start")).not.toBeInTheDocument();
   });
 
   it("shows a running lane before timings arrive", () => {

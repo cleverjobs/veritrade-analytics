@@ -44,7 +44,11 @@ function announcement(state: RunState): string {
   if (state.running && !state.signal) return "Analyzing...";
   const parts: string[] = [];
   if (state.signal) {
-    parts.push(`Signal ${capitalize(state.signal.sentiment)}${state.signal.abstained ? ", abstained" : ""}.`);
+    parts.push(
+      state.signal.abstained
+        ? "No signal: below this model's threshold."
+        : `Signal ${capitalize(state.signal.sentiment)}.`,
+    );
   }
   if (!state.running && state.summary) parts.push("Summary complete.");
   return parts.join(" ");
@@ -92,6 +96,8 @@ export function AnalyzeApp() {
                 model={signalLane.meta?.model}
                 timeToSignalMs={signalLane.signalAtMs}
                 serverMs={state.serverSignalMs}
+                coldStart={signalLane.coldStart}
+                loadMs={signalLane.timings?.inference?.load_ms}
               />
             ) : null}
             {summaryLane ? (
@@ -102,6 +108,9 @@ export function AnalyzeApp() {
                 model={summaryLane.meta?.model}
                 streaming={state.streaming}
                 firstTokenMs={summaryLane.firstTokenAtMs}
+                coldStart={summaryLane.coldStart}
+                loadMs={summaryLane.timings?.inference?.load_ms}
+                modelAnswered={summaryLane.signalAtMs !== null}
               />
             ) : null}
           </div>

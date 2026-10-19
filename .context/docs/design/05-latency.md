@@ -122,8 +122,23 @@ grow 4 to 5 times. Lede keeps `/signal` predictable as well as fast.
 
 - **Cold**: the model load adds 0.7 to 1.3 s over warm for the generative models (load p50 785 to 1,328 ms),
   0.9 to 1.2 s for `nimble` and 5.4 to 6.2 s for `clef-flash` (a 10.58 GB file); n=3, so indicative. A cold 4B
-  misses TTFT (2,132 ms for `/summary`). Every call sends `keep_alive` 30m, so only the first request after a
-  start or 30 idle minutes pays it.
+  misses TTFT (2,132 ms for `/summary`). Every call sends `keep_alive` 30m (and the Ollama env sets
+  `OLLAMA_KEEP_ALIVE=30m`), so only the first request after a start or 30 idle minutes pays it, or the first one
+  after Ollama unloads the model to make room for others (`OLLAMA_MAX_LOADED_MODELS` 3 native, 2 bundled). Ollama
+  also reloads a generative model that another client loaded with a different `num_ctx` from the 8,192 the
+  service asks for.
+- **Cold starts are flagged per request.** A residency probe (`Runtime.cold_start` and `needs_load` in
+  [`runtime.py`](../../../backend/src/veritrade/services/runtime.py)) reads Ollama's `/api/ps` while the article
+  is fetched. The model counts as cold when it is not listed or, for a generative model, when it is listed with
+  another `context_length`; decision models pick their own context size, so only residency counts for them. The
+  answer goes into `timings.inference.cold_start` and into the SSE `meta` event's `cold_start`, so a stream can say
+  the model is loading before its first token, and the UI marks the time to signal, the summary and the latency
+  bar as a cold start, with Ollama's `load_ms` when it reports one (decision models report none). The probe gives
+  up after `VT_OLLAMA_PROBE_TIMEOUT_S` (2 s) or on an Ollama error and leaves `cold_start` null; result-cache hits
+  run no inference and leave it null too.
+- **The committed numbers predate the probe.** On a fetch miss the probe overlaps the download. When the page is
+  already in memory, as on a fetch-cache hit or with this suite's in-memory fetcher, the request also waits for
+  one local `/api/ps` round trip, expected to be a few ms; that cost has not been measured.
 - **Parse and extract**: 1.2 to 1.6 ms and 1.6 to 2.5 ms at p50 in every cell, under 2% of even the fastest
   `/signal`, so the parser is not a latency lever (03: every parser yields the same body; `selectolax` is
   chosen for speed and footprint). The extractor matters through tokens instead: competent extractors send

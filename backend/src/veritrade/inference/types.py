@@ -56,3 +56,6 @@ class Verdict:
     confidence: float | None = None
     score: int | None = None
     probabilities: dict[Sentiment, float] | None = None
+    # The frozen rule the call was held to: min_p, or the |score| cutoff for the ordinal policy.
+    threshold: float | None = None
+    directional_tau: float | None = None

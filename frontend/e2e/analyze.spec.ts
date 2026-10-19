@@ -19,8 +19,9 @@ const ARTICLE_URL = process.env.E2E_ARTICLE_URL ?? fixtureUrl(FIXTURE_HOSTS.cnbc
 const DECISION_MODEL = process.env.E2E_DECISION_MODEL ?? "tev1:0.8b-q8_0";
 const EXTRACTOR = process.env.E2E_EXTRACTOR ?? "trafilatura";
 
-// Model-agnostic: any valid label passes, the point is the plumbing.
-const SENTIMENT = /^(Bullish|Bearish|Neutral)$/;
+// Model-agnostic: any valid label passes, the point is the plumbing. A call under the model's
+// frozen threshold reads "No signal".
+const SENTIMENT = /^(Bullish|Bearish|Neutral|No signal)$/;
 const LABELS = ["bullish", "bearish", "neutral"];
 
 async function open(page: Page, mode: "Split" | "Combined", streaming: boolean) {
@@ -88,6 +89,7 @@ test.describe("analyze page", () => {
     const signal = page.getByRole("region", { name: "Signal", exact: true });
     await expect(signal).toContainText(DECISION_MODEL);
     await expect(signal).toContainText("probability");
+    await expect(signal.getByTestId("signal-threshold")).toBeVisible();
     await expect(page.getByTestId("summary-status")).toHaveText("Complete");
     await expect(page.getByTestId("article-extraction")).toContainText(EXTRACTOR);
     await expectNoError(page);
@@ -106,6 +108,7 @@ test.describe("signal-only API with the decision model", () => {
 
       expect(LABELS).toContain(body.signal.sentiment);
       expect(body.signal.policy).toBe("probability");
+      expect(body.signal.threshold).toEqual(expect.any(Number));
       expect(Object.keys(body.signal.probabilities).sort()).toEqual([...LABELS].sort());
       expect(body.meta).toMatchObject({
         source,
@@ -115,6 +118,8 @@ test.describe("signal-only API with the decision model", () => {
         cached: false,
       });
       expect(body.timings.inference.wall_ms).toBeGreaterThan(0);
+      // null when the residency probe times out on a slow runner.
+      expect([true, false, null]).toContain(body.timings.inference.cold_start);
     });
   }
 });

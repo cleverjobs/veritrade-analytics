@@ -5,9 +5,19 @@ import { describe, expect, it, vi } from "vitest";
 
 import { AnalyzeApp } from "@/components/AnalyzeApp";
 import type { AnalyzeBody, SignalBody, SummaryBody } from "@/lib/api";
-import { ENTITY, FIXTURE_URL, SUMMARY_CHUNKS, SUMMARY_TEXT, signalResponse } from "@/mocks/fixtures";
+import {
+  ENTITY,
+  FIXTURE_URL,
+  SUMMARY_CHUNKS,
+  SUMMARY_TEXT,
+  abstainedDecision,
+  analyzeResponse,
+  metaEvent,
+  signalResponse,
+  timings,
+} from "@/mocks/fixtures";
 import { API, analyzeStreamChunks, errorResponse, summaryStreamChunks } from "@/mocks/handlers";
-import { gate, sseResponse } from "@/mocks/sse";
+import { gate, sseFrame, sseResponse } from "@/mocks/sse";
 
 import { setupMswServer } from "./msw";
 
@@ -47,28 +57,46 @@ describe("Analyze page", () => {
     const signalSelect = screen.getByLabelText("Signal model");
     await waitFor(() =>
       expect(optionLabels(signalSelect)).toEqual([
-        "Server default (nimble:9b-q4_K_M)",
-        "clef-flash:9b-q8_0",
-        "nimble:9b-q4_K_M (default)",
-        "tev1:0.8b-q8_0 (CI plumbing, unevaluated)",
-        "qwen3.5:0.8b-q8_0",
+        "Server default (nimble:9b-q4_K_M, p ≥ 0.97)",
+        "clef-flash:9b-q8_0 (p ≥ 0.80)",
+        "nimble:9b-q4_K_M (p ≥ 0.97) (default)",
+        "tev1:0.8b-q8_0 (p ≥ 0.50) (CI plumbing, unevaluated)",
+        "qwen3.5:0.8b-q8_0 (tau 0.28)",
       ]),
     );
-    expect(optionLabels(screen.getByLabelText("Summary model"))).toEqual([
+    expect(signalSelect).toHaveAccessibleDescription(
+      "In brackets, each model's frozen rule for a directional call. p ≥ x means the top class needs " +
+        "probability x or more; tau x means bullish or bearish is called at x even when neutral leads.",
+    );
+    expect(screen.getByTestId("signal-model-rule")).toHaveTextContent("Rule for nimble:9b-q4_K_M: p ≥ 0.97");
+    expect(screen.queryByTestId("summary-model-rule")).not.toBeInTheDocument();
+    const summarySelect = screen.getByLabelText("Summary model");
+    expect(optionLabels(summarySelect)).toEqual([
       "Server default (qwen3.5:4b-q4_K_M)",
       "qwen3.5:0.8b-q8_0",
       "qwen3.5:2b-q4_K_M",
       "qwen3.5:4b-q4_K_M (default)",
     ]);
+    expect(summarySelect).not.toHaveAttribute("aria-describedby");
 
     await user.click(screen.getByRole("radio", { name: /Combined/ }));
     const analyzeSelect = screen.getByLabelText("Analyze model");
-    expect(optionLabels(analyzeSelect)).toContain("ministral-3:3b");
+    expect(optionLabels(analyzeSelect)).toContain("Server default (qwen3.5:4b-q4_K_M, |score| ≥ 1)");
+    expect(optionLabels(analyzeSelect)).toContain("ministral-3:3b (|score| ≥ 1)");
+    expect(analyzeSelect).toHaveAccessibleDescription(
+      /\|score\| ≥ n means the -2\.\.\+2 score needs magnitude n/,
+    );
+    expect(screen.getByTestId("analyze-model-rule")).toHaveTextContent(
+      "Rule for qwen3.5:4b-q4_K_M: |score| ≥ 1",
+    );
     expect(within(analyzeSelect).getByRole("option", { name: /qwen3.5:9b-q4_K_M/ })).toBeDisabled();
     expect(screen.queryByLabelText("Signal scope")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("radio", { name: /Split/ }));
     await user.selectOptions(screen.getByLabelText("Signal model"), "clef-flash:9b-q8_0");
+    expect(screen.getByTestId("signal-model-rule")).toHaveTextContent(
+      "Rule for clef-flash:9b-q8_0: p ≥ 0.80",
+    );
     await user.selectOptions(screen.getByLabelText("Signal scope"), "full");
     await user.selectOptions(screen.getByLabelText("Extractor"), "trafilatura");
     expect(screen.getByLabelText("Parser")).toBeDisabled();
@@ -177,6 +205,109 @@ describe("Analyze page", () => {
     } finally {
       afterSentiment.open();
       afterDeltas.open();
+    }
+  });
+
+  it("shows a below-threshold call as No signal with the model's rule and a cold start", async () => {
+    server.use(
+      http.post(`${API}/signal`, async ({ request }) => {
+        const res = signalResponse((await request.json()) as SignalBody);
+        return HttpResponse.json({
+          ...res,
+          signal: abstainedDecision,
+          timings: timings({ wall_ms: 12_100, cold_start: true }, 12_300),
+        });
+      }),
+    );
+    const user = userEvent.setup();
+    render(<AnalyzeApp />);
+    await waitFor(() => expect(optionLabels(screen.getByLabelText("Signal model"))).toHaveLength(5));
+    await user.selectOptions(screen.getByLabelText("Signal model"), "clef-flash:9b-q8_0");
+    await submit(user);
+
+    const badge = await screen.findByTestId("signal-badge");
+    expect(badge).toHaveTextContent("No signal");
+    expect(badge).toHaveAttribute("data-sentiment", "neutral");
+    expect(screen.getByTestId("abstain-note")).toHaveTextContent(
+      "the top class (Bullish, 73.0%) is below this model's 80.0% threshold",
+    );
+    expect(screen.getByTestId("signal-threshold")).toHaveTextContent("call needs ≥ 80.0%");
+    expect(screen.getByTestId("signal-cold-start")).toHaveTextContent(
+      "Cold start includes loading the model into memory",
+    );
+    expect(screen.getByRole("status")).toHaveTextContent("No signal: below this model's threshold.");
+
+    await waitFor(() => expect(screen.getByTestId("summary-status")).toHaveTextContent("Complete"));
+    const laneDetail = (name: string) =>
+      within(screen.getByRole("heading", { name, level: 3 }).parentElement as HTMLElement);
+    const signalLane = laneDetail("Signal");
+    expect(signalLane.getByText("cold start").nextSibling).toHaveTextContent("yes, model loaded");
+    const summaryLane = laneDetail("Summary");
+    expect(summaryLane.getByText("cold start").nextSibling).toHaveTextContent("no, already loaded");
+    expect(screen.queryByTestId("summary-cold-start")).not.toBeInTheDocument();
+  });
+
+  it("combined streaming says the model is loading on a cold start, then reports the load time", async () => {
+    const afterMeta = gate();
+    const afterSentiment = gate();
+    server.use(
+      http.post(`${API}/analyze/stream`, async ({ request }) => {
+        const body = (await request.json()) as AnalyzeBody;
+        const [, sentiment, ...rest] = analyzeStreamChunks(body);
+        rest.pop();
+        const done = analyzeResponse(body);
+        const inference = {
+          wall_ms: 11_200,
+          ttft_ms: 8_900,
+          load_ms: 8_400,
+          eval_ms: 2_100,
+          cold_start: true,
+        };
+        return sseResponse(
+          (async function* () {
+            yield sseFrame("meta", metaEvent(done.meta, true));
+            await afterMeta.promise;
+            yield sentiment;
+            await afterSentiment.promise;
+            yield* rest;
+            yield sseFrame("done", { result: { ...done, timings: timings(inference, 11_500) } });
+          })(),
+        );
+      }),
+    );
+    const user = userEvent.setup();
+    render(<AnalyzeApp />);
+    try {
+      await user.click(screen.getByRole("radio", { name: /Combined/ }));
+      await submit(user);
+
+      await waitFor(() =>
+        expect(screen.getByTestId("summary-status")).toHaveTextContent(
+          "Loading the model into memory (cold start)...",
+        ),
+      );
+      expect(
+        screen.getByText("Waiting for the signal while the model loads into memory (cold start)..."),
+      ).toBeInTheDocument();
+
+      // The score came from the same generation, so the model is loaded before the first summary token.
+      afterMeta.open();
+      expect(await screen.findByTestId("signal-badge")).toHaveTextContent("Bullish");
+      expect(screen.getByTestId("summary-status")).toHaveTextContent("Waiting for the first token...");
+
+      afterSentiment.open();
+      await waitFor(() => expect(screen.getByTestId("summary-status")).toHaveTextContent("Complete"));
+      expect(screen.getByTestId("signal-threshold")).toHaveTextContent("|score| ≥ 1");
+      expect(screen.getByTestId("signal-cold-start")).toHaveTextContent(
+        "Cold start model loaded for this request (8.40 s)",
+      );
+      expect(screen.getByTestId("summary-cold-start")).toHaveTextContent(
+        "cold start: model loaded for this request (8.40 s)",
+      );
+      expect(screen.getByTestId("segment-analyze-load")).toBeInTheDocument();
+    } finally {
+      afterMeta.open();
+      afterSentiment.open();
     }
   });
 

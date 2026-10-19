@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
+import httpx
+
 from veritrade.config import Settings
-from veritrade.errors import LlmUnreachable
+from veritrade.errors import LlmUnreachable, VtError
 from veritrade.fetch import Fetcher, FetchResult, SingleFlightCache
 from veritrade.inference.ollama import OllamaClient
 from veritrade.inference.types import Endpoint
@@ -24,6 +26,19 @@ _TAGS_KEY = "tags"
 def tag_name(name: str) -> str:
     """Ollama lists an untagged model as name:latest."""
     return name if ":" in name else f"{name}:latest"
+
+
+def needs_load(spec: ModelSpec, entries: Iterable[Mapping[str, Any]]) -> bool:
+    """Whether Ollama must load the model before answering, given its /api/ps entries. Ollama reloads a
+    generative model on a num_ctx change; decision models pick their own context size."""
+    tag = tag_name(spec.name)
+    for entry in entries:
+        if tag not in {tag_name(str(entry.get(key) or "")) for key in ("name", "model")}:
+            continue
+        context = entry.get("context_length")
+        if spec.kind == "decision" or not isinstance(context, int) or context == spec.num_ctx:
+            return False
+    return True
 
 
 @dataclass(frozen=True, slots=True)
@@ -88,6 +103,15 @@ class Runtime:
         except TimeoutError as exc:
             raise LlmUnreachable("Ollama did not list its models in time") from exc
         return {tag_name(str(entry.get("name", ""))): _size(entry) for entry in entries}
+
+    async def cold_start(self, spec: ModelSpec) -> bool | None:
+        """None when Ollama cannot say in time; the request goes ahead either way."""
+        try:
+            async with asyncio.timeout(self.settings.ollama_probe_timeout_s):
+                entries = await self.ollama.ps()
+        except (TimeoutError, VtError, httpx.HTTPError):
+            return None
+        return needs_load(spec, entries)
 
 
 def _size(entry: Mapping[str, Any]) -> int | None:

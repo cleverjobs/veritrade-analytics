@@ -298,6 +298,11 @@ export interface components {
         };
         /** InferenceTimings */
         InferenceTimings: {
+            /**
+             * Cold Start
+             * @description True when the model was not loaded in Ollama (or was loaded with another context size) as the request arrived, so the inference time includes loading it; null when unknown.
+             */
+            cold_start?: boolean | null;
             /** Eval Ms */
             eval_ms?: number | null;
             /** Eval Tokens */
@@ -332,6 +337,13 @@ export interface components {
             kind: "generative" | "decision";
             /** Name */
             name: string;
+            /**
+             * Signal Rules
+             * @description Frozen confidence rule for each endpoint of this model that returns a signal (signal, analyze). A label-logprob rule still falls back to ordinal on a label collision; the listed rule is the primary one.
+             */
+            signal_rules?: {
+                [key: string]: components["schemas"]["SignalRule"];
+            };
             /** Size Bytes */
             size_bytes?: number | null;
         };
@@ -404,6 +416,11 @@ export interface components {
             /** Confidence */
             confidence?: number | null;
             /**
+             * Directional Tau
+             * @description When set, a neutral lead still yields the likelier directional class once that class reaches this probability.
+             */
+            directional_tau?: number | null;
+            /**
              * Policy
              * @enum {string}
              */
@@ -419,6 +436,23 @@ export interface components {
              * @enum {string}
              */
             sentiment: "bullish" | "bearish" | "neutral";
+            /**
+             * Threshold
+             * @description Frozen cutoff this call was held to: the minimum winning-class probability (probability, label-logprob) or the minimum |score| (ordinal).
+             */
+            threshold?: number | null;
+        };
+        /** SignalRule */
+        SignalRule: {
+            /** Directional Tau */
+            directional_tau?: number | null;
+            /**
+             * Policy
+             * @enum {string}
+             */
+            policy: "probability" | "label-logprob" | "ordinal";
+            /** Threshold */
+            threshold: number;
         };
         /** SummaryRequest */
         SummaryRequest: {

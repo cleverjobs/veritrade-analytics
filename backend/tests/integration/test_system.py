@@ -6,7 +6,7 @@ import httpx
 import pytest
 
 from veritrade import __version__
-from veritrade.api.contracts import HealthResponse, ModelsResponse
+from veritrade.api.contracts import HealthResponse, ModelsResponse, SignalRule
 from veritrade.models_registry import allowlist
 
 from .conftest import AppFactory
@@ -25,6 +25,10 @@ async def test_models_marks_installed_tags(api: httpx.AsyncClient, ollama: FakeO
     assert by_name["fake-ordinal:1b"].size_bytes is None
     assert by_name["fake-plumbing:1b"].evaluated is False
     assert by_name["fake-decision:1b"].endpoints == ["signal"]
+    assert by_name["fake-label:1b"].signal_rules == {
+        "signal": SignalRule(policy="label-logprob", threshold=0.5),
+        "analyze": SignalRule(policy="ordinal", threshold=1.0),
+    }
     assert body.defaults == {
         "signal": "fake-label:1b",
         "summary": "fake-label:1b",

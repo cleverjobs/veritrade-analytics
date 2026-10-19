@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ApiError } from "@/lib/api";
+import { ApiError, type Timings } from "@/lib/api";
 import { articleMeta, distinctErrors, initialRunState, runReducer, type RunAction } from "@/lib/run-state";
 import { articleMeta as metaFixture, bullishDecision, summaryResponse } from "@/mocks/fixtures";
 
@@ -85,6 +85,39 @@ describe("runReducer", () => {
     expect(state.signal).toEqual(bullishDecision);
     expect(state.lanes.find((l) => l.id === "signal")?.signalAtMs).toBe(420);
     expect(state.running).toBe(false);
+  });
+
+  it("takes the cold start from the meta event, then from the final timings", () => {
+    const done = summaryResponse();
+    const cold = { ...done.timings, inference: { wall_ms: 10_400, load_ms: 8400, cold_start: true } };
+    const streamed = play([
+      start,
+      { type: "meta", runId: 1, lane: "summary", atMs: 50, meta: done.meta, coldStart: true },
+    ]);
+    expect(streamed.lanes.find((l) => l.id === "summary")?.coldStart).toBe(true);
+    expect(streamed.lanes.find((l) => l.id === "signal")?.coldStart).toBeNull();
+
+    const finished = play([
+      start,
+      { type: "meta", runId: 1, lane: "summary", atMs: 50, meta: done.meta, coldStart: true },
+      { type: "done", runId: 1, lane: "summary", atMs: 900, meta: done.meta, timings: cold },
+      { type: "done", runId: 1, lane: "signal", atMs: 950, meta: done.meta, timings: done.timings },
+    ]);
+    expect(finished.lanes.map((l) => [l.id, l.coldStart])).toEqual([
+      ["signal", false],
+      ["summary", true],
+    ]);
+  });
+
+  it("keeps the cold start unknown for a result-cache hit", () => {
+    const done = summaryResponse();
+    const cached: Timings = { ...done.timings, inference: null, cache: { fetch: "hit", result: "hit" } };
+    const state = play([
+      start,
+      { type: "meta", runId: 1, lane: "summary", atMs: 5, meta: done.meta, coldStart: null },
+      { type: "done", runId: 1, lane: "summary", atMs: 20, meta: done.meta, timings: cached },
+    ]);
+    expect(state.lanes.find((l) => l.id === "summary")?.coldStart).toBeNull();
   });
 
   it("ignores events from a superseded run", () => {

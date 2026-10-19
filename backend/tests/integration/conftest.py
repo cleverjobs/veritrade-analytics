@@ -65,6 +65,8 @@ evaluated = false
 """
 
 AppFactory = Callable[..., AbstractAsyncContextManager[httpx.AsyncClient]]
+# Decision models choose their own context size, which never makes them cold.
+DECISION_CONTEXT = 16384
 
 
 @pytest.fixture
@@ -98,8 +100,10 @@ def router() -> Iterator[respx.MockRouter]:
 
 
 @pytest.fixture
-def ollama(router: respx.MockRouter) -> FakeOllama:
-    return FakeOllama(router, installed=("fake-label:1b", "fake-decision:1b"))
+def ollama(router: respx.MockRouter, registry: Registry) -> FakeOllama:
+    # The whole roster is loaded at its own context size, so requests are warm unless a test unloads one.
+    resident = {spec.name: spec.num_ctx or DECISION_CONTEXT for spec in registry.models}
+    return FakeOllama(router, installed=("fake-label:1b", "fake-decision:1b"), resident=resident)
 
 
 @pytest.fixture

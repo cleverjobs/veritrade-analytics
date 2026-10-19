@@ -194,6 +194,12 @@ export function LatencyBar({ lanes }: { lanes: LatencyLane[] }) {
                   <dd>{formatMs(lane.timings.inference.ttft_ms)}</dd>
                 </div>
               ) : null}
+              {typeof lane.timings?.inference?.cold_start === "boolean" ? (
+                <div>
+                  <dt>cold start</dt>
+                  <dd>{lane.timings.inference.cold_start ? "yes, model loaded" : "no, already loaded"}</dd>
+                </div>
+              ) : null}
               {laneSegments[i].map((segment) => (
                 <div key={segment.key}>
                   <dt>{STAGE_LABELS[segment.key]}</dt>

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 
 from veritrade.api.contracts import (
@@ -95,13 +96,20 @@ class Job:
             self.runtime.results.put(self.key, response)
 
     async def prepare(self) -> Prepared:
-        loaded = await load_article(
-            self.runtime,
-            self.url,
-            parser=self.request.parser,
-            extractor=self.request.extractor,
-            no_cache=self.request.no_cache,
-        )
+        # The residency probe runs alongside the fetch; a fetch error still propagates as itself, unwrapped.
+        probe = asyncio.create_task(self.runtime.cold_start(self.spec))
+        try:
+            loaded = await load_article(
+                self.runtime,
+                self.url,
+                parser=self.request.parser,
+                extractor=self.request.extractor,
+                no_cache=self.request.no_cache,
+            )
+        except BaseException:
+            probe.cancel()
+            raise
+        cold_start = await probe
         text = build_input(loaded.article, self.scope, self.spec.max_input_tokens)
         return Prepared(
             job=self,
@@ -109,6 +117,7 @@ class Job:
             text=text,
             meta=self._meta(loaded, text),
             cache=CacheInfo(fetch=loaded.fetch_status, result="bypass" if self.key is None else "miss"),
+            cold_start=cold_start,
         )
 
     def _meta(self, loaded: LoadedArticle, text: str) -> ArticleMeta:
@@ -144,9 +153,12 @@ class Prepared:
     text: str
     meta: ArticleMeta
     cache: CacheInfo
+    cold_start: bool | None
 
     def timings(self, inference: InferenceTimings | None) -> Timings:
         loaded = self.loaded
+        if inference is not None:
+            inference = inference.model_copy(update={"cold_start": self.cold_start})
         return Timings(
             total_ms=self.job.clock.elapsed_ms(),
             fetch_ms=loaded.fetch_ms,
@@ -165,6 +177,7 @@ class Prepared:
             parse_ms=article.parse_ms,
             extract_ms=article.extract_ms,
             cache=self.cache,
+            cold_start=self.cold_start,
         )
 
 
@@ -187,6 +200,8 @@ def signal_result(verdict: Verdict) -> SignalResult:
         confidence=verdict.confidence,
         score=verdict.score,
         probabilities=verdict.probabilities,
+        threshold=verdict.threshold,
+        directional_tau=verdict.directional_tau,
     )
 
 

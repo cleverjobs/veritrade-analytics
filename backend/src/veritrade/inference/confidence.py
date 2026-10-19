@@ -58,6 +58,8 @@ def _threshold(
                 confidence=probabilities[side],
                 score=score,
                 probabilities=probabilities,
+                threshold=min_p,
+                directional_tau=tau,
             )
     confidence = probabilities[top]
     abstained = confidence < min_p
@@ -68,6 +70,8 @@ def _threshold(
         confidence=confidence,
         score=score,
         probabilities=probabilities,
+        threshold=min_p,
+        directional_tau=tau,
     )
 
 
@@ -240,7 +244,11 @@ class OrdinalPolicy:
         raw = score_sentiment(score)
         abstained = raw != "neutral" and abs(score) < self.t
         return Verdict(
-            sentiment="neutral" if abstained else raw, abstained=abstained, policy=self.name, score=score
+            sentiment="neutral" if abstained else raw,
+            abstained=abstained,
+            policy=self.name,
+            score=score,
+            threshold=float(self.t),
         )
 
 

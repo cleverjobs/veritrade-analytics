@@ -52,15 +52,23 @@
   border-style: dashed;
 }
 
-.abstainTag {
-  font-size: 0.8rem;
+.tag {
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--warn);
   background: var(--warn-bg);
   border-radius: 4px;
-  padding: 0.1rem 0.4rem;
+  padding: 0.05rem 0.35rem;
+  white-space: nowrap;
+}
+
+.cold {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--muted);
+  font-size: 0.85em;
 }
 
 .entity {
@@ -118,16 +126,58 @@
 }
 
 .probTrack {
+  position: relative;
   height: 0.6rem;
   background: var(--surface-2);
   border-radius: 999px;
-  overflow: hidden;
 }
 
 .probFill {
   display: block;
   height: 100%;
+  border-radius: inherit;
   background: var(--neutral);
+}
+
+/* The surface-colored halo keeps the line readable over any fill in both themes. */
+.probMark,
+.markSwatch {
+  width: 2px;
+  border-radius: 1px;
+  background: var(--text);
+  box-shadow: 0 0 0 1px var(--surface);
+}
+
+.probMark {
+  position: absolute;
+  top: -0.25rem;
+  bottom: -0.25rem;
+  margin-left: -1px;
+}
+
+.probMark[data-kind="tau"],
+.markSwatch[data-kind="tau"] {
+  background: var(--accent);
+}
+
+.markLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.markLegend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.markSwatch {
+  display: inline-block;
+  height: 0.9rem;
 }
 
 .probFill[data-sentiment="bullish"] {

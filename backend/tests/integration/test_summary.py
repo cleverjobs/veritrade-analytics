@@ -61,6 +61,20 @@ async def test_summary_stream_event_order(api: httpx.AsyncClient, page: Page) ->
     assert inference is not None
     assert inference.ttft_ms is not None
     assert meta.fetch_ms <= inference.ttft_ms <= done.timings.total_ms
+    assert meta.cold_start is inference.cold_start is False
+
+
+async def test_a_cold_stream_says_so_before_the_first_token(
+    api: httpx.AsyncClient, ollama: FakeOllama, page: Page
+) -> None:
+    del ollama.resident["fake-label:1b"]
+    response = await api.post("/api/summary/stream", json={"url": page.url})
+    events = sse_events(response.text)
+    assert [name for name, _ in events][:2] == ["meta", "summary_delta"]
+    assert MetaEvent.model_validate(events[0][1]).cold_start is True
+    inference = SummaryDoneEvent.model_validate(events[-1][1]).result.timings.inference
+    assert inference is not None
+    assert inference.cold_start is True
 
 
 async def test_summary_cut_at_the_output_limit_keeps_its_complete_sentences(

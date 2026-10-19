@@ -13,6 +13,49 @@ describe("SummaryPanel", () => {
     expect(screen.getByTestId("summary-truncated")).toHaveTextContent(/output limit.*cut short/);
   });
 
+  it("says the model is loading on a cold start, then reports the load time", () => {
+    const { rerender } = render(<SummaryPanel status="streaming" text="" streaming coldStart />);
+    expect(screen.getByTestId("summary-status")).toHaveTextContent(
+      "Loading the model into memory (cold start)...",
+    );
+    expect(screen.queryByTestId("summary-cold-start")).not.toBeInTheDocument();
+
+    rerender(<SummaryPanel status="streaming" text={TEXT} streaming coldStart />);
+    expect(screen.getByTestId("summary-status")).toHaveTextContent("Streaming...");
+    expect(screen.getByTestId("summary-cold-start")).toHaveTextContent(
+      "cold start: includes loading the model into memory",
+    );
+
+    rerender(
+      <SummaryPanel
+        status="done"
+        text={TEXT}
+        streaming
+        model="qwen3.5:4b-q4_K_M"
+        firstTokenMs={9_600}
+        coldStart
+        loadMs={8_400}
+      />,
+    );
+    expect(screen.getByTestId("summary-cold-start").parentElement).toHaveTextContent(
+      "Model qwen3.5:4b-q4_K_M · first token 9.60 s · cold start: model loaded for this request (8.40 s)",
+    );
+  });
+
+  it("stops saying the model is loading once the same generation returned the signal", () => {
+    render(<SummaryPanel status="streaming" text="" streaming coldStart modelAnswered />);
+    expect(screen.getByTestId("summary-status")).toHaveTextContent("Waiting for the first token...");
+    expect(screen.getByTestId("summary-cold-start")).toHaveTextContent(
+      "cold start: includes loading the model into memory",
+    );
+  });
+
+  it("keeps the usual wait message when the model is already loaded", () => {
+    render(<SummaryPanel status="streaming" text="" streaming coldStart={false} />);
+    expect(screen.getByTestId("summary-status")).toHaveTextContent("Waiting for the first token...");
+    expect(screen.queryByTestId("summary-cold-start")).not.toBeInTheDocument();
+  });
+
   it("shows no note for a complete summary or when there is no text", () => {
     const { rerender } = render(<SummaryPanel status="done" text={TEXT} truncated={false} streaming />);
     expect(screen.queryByTestId("summary-truncated")).not.toBeInTheDocument();

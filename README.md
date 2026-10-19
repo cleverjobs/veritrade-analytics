@@ -117,10 +117,15 @@ cd frontend && pnpm install && NEXT_PUBLIC_API_BASE=http://localhost:8000 pnpm d
   *Split* mode (default) fires `/api/signal` and `/api/summary` together, so the signal card renders first;
   *Combined* makes one `/api/analyze` call. **Streaming** (on by default) uses the SSE endpoints, off the JSON ones.
 - Pickers filled from `GET /api/models` choose a model per endpoint (models not pulled are disabled), the extractor
-  (10), the parser (4) and, in split mode, the scope.
-- Results: the signal card (label, abstention with the direction the model leaned, policy, confidence), the
-  streamed summary, the article line (source, extraction method) and a latency bar that puts each request's server
-  stage timings on one client time axis, with time-to-signal and first-token marks.
+  (10), the parser (4) and, in split mode, the scope. The signal and analyze pickers append each model's frozen
+  rule to its name, e.g. `clef-flash:9b-q8_0 (p ≥ 0.80)`, `qwen3.5:0.8b-q8_0 (tau 0.28)` or
+  `qwen3.5:4b-q4_K_M (|score| ≥ 1)` ([thresholds](#thresholds-and-no-signal)).
+- Results: the signal card (the label, or **No signal** with the numbers behind the abstention; policy, the
+  threshold the call was held to, confidence, and probability bars marked at the threshold and tau), the streamed
+  summary, the article line (source, extraction method) and a latency bar that puts each request's server stage
+  timings on one client time axis, with time-to-signal and first-token marks. A request that had to load its model
+  first is marked as a **cold start** on the time to signal, the summary and the latency bar, with the load time
+  when Ollama reports one ([cold starts](#latency-trade-offs)).
 
 ### The API
 
@@ -131,14 +136,15 @@ cd frontend && pnpm install && NEXT_PUBLIC_API_BASE=http://localhost:8000 pnpm d
 | `POST /api/summary/stream` | as `/api/summary` | SSE: `meta -> summary_delta* -> done` |
 | `POST /api/analyze` | as `/api/signal`, `scope` default `full` | `meta`, `signal`, `entity`, `summary`, `truncated`, `timings` |
 | `POST /api/analyze/stream` | as `/api/analyze` | SSE: `meta -> sentiment -> summary_delta* -> done` |
-| `GET /api/models` | - | Allowlist (kind, endpoints, installed, size), per-endpoint defaults, parsers, extractors, scopes |
+| `GET /api/models` | - | Allowlist (kind, endpoints, installed, size, `signal_rules`), per-endpoint defaults, parsers, extractors, scopes |
 | `GET /api/health` | - | `ok` / `degraded`, Ollama reachability and version, backend label (`native-metal` / `docker-cpu`) |
 
 Only `url` is required; `model` must be on the allowlist; `parser` and `extractor` default to `selectolax` and
 `cascade` (`GET /api/models` lists the 4 parsers and 10 extractors); `no_cache: true` bypasses both caches.
-`signal` holds `sentiment`, `abstained`, `policy` and, by policy, `confidence`, `score` (-2..2) or `probabilities`.
-`timings` splits each request into fetch, consent, parse, extract and inference (wall, TTFT, load, prompt eval,
-eval, tokens) and reports both cache outcomes.
+`signal` holds `sentiment`, `abstained`, `policy`, the frozen `threshold` (and `directional_tau`) the call was held
+to and, by policy, `confidence`, `score` (-2..2) or `probabilities`. `timings` splits each request into fetch,
+consent, parse, extract and inference (wall, TTFT, load, prompt eval, eval, tokens, `cold_start`) and reports both
+cache outcomes.
 
 ```bash
 URL='https://...'   # any public article URL
@@ -146,10 +152,11 @@ curl -s http://localhost:8000/api/signal -H 'content-type: application/json' -d 
 curl -sN http://localhost:8000/api/analyze/stream -H 'content-type: application/json' -d "{\"url\": \"$URL\"}"
 ```
 
-**SSE order.** `meta` (article meta, fetch / parse / extract timings) once extraction is done; on `/analyze/stream`
-one `sentiment` event as soon as the score closes (served field order: sentiment-first); `summary_delta` text
-chunks; `done` with the full JSON response. A failure before the stream opens is a JSON error with its HTTP status,
-after that one `error` event; a closed connection stops the upstream generation.
+**SSE order.** `meta` (article meta, fetch / parse / extract timings, `cold_start`) once extraction is done, so a
+stream can say the model is loading before its first token; on `/analyze/stream` one `sentiment` event as soon as
+the score closes (served field order: sentiment-first); `summary_delta` text chunks; `done` with the full JSON
+response. A failure before the stream opens is a JSON error with its HTTP status, after that one `error` event; a
+closed connection stops the upstream generation.
 
 **Errors** share one envelope, `{"error": {"code", "message", "hint", "retryable", "upstream_status"}}`
 ([`errors.py`](backend/src/veritrade/errors.py), [`contracts.py`](backend/src/veritrade/api/contracts.py)); other
@@ -163,6 +170,38 @@ FastAPI's standard 422 `{"detail": [...]}`.
 | 502 | `source_blocked`, `upstream_http`, `schema_violation` | Publisher refused (CDN bot wall, 401/403/429/451, with a hint to a syndicated copy); other upstream HTTP error; malformed model output |
 | 503 | `model_unavailable`, `llm_unreachable` | Model not pulled (the hint gives the `ollama pull` command); Ollama down |
 | 504 | `upstream_timeout`, `inference_timeout` | Fetch deadline (8 s); inference timeout (90 s) |
+
+### Thresholds and "No signal"
+
+Confidence rules are frozen per model and endpoint. The served source of truth is
+[`models.toml`](backend/src/veritrade/data/models.toml) (`policy`, `min_p`, `directional_tau`, `ordinal_t`),
+written by `veritrade_evals freeze`, with the evidence behind each value (dev300 and dev-article F0.5, inversions and
+coverage at that threshold) in [`frozen.json`](evals/results/frozen.json); the policies are explained in
+[04](.context/docs/design/04-evals.md#4-models-prompts-and-confidence-policies). Rules that `freeze` never wrote
+keep provisional values and are marked as such. As served:
+
+| Model | `/signal` rule | `/analyze` rule |
+|---|---|---|
+| `qwen3.5:0.8b-q8_0` (`/signal` default) | label-logprob, `min_p` 0, tau 0.28 | ordinal, \|score\| >= 1 (provisional, never evaluated on `/analyze`) |
+| `clef-flash:9b-q8_0` | probability, `min_p` 0.80 | - |
+| `nimble:9b-q4_K_M` | probability, `min_p` 0.97 | - |
+| `qwen3.5:4b-q4_K_M` (`/analyze` default), `ministral-3:3b`, `qwen3:4b-instruct-2507-q4_K_M` | - | ordinal, \|score\| >= 1 |
+| `qwen3.5:9b-q4_K_M` (holdout quality ceiling, untuned) | - | ordinal, \|score\| >= 1 (provisional) |
+| `tev1:0.8b-q8_0` (CI plumbing, never evaluated) | probability, `min_p` 0.50 (provisional) | - |
+
+- **Where to see them**: the signal and analyze pickers in the UI, which also repeat the selected model's rule
+  under the picker; the **Threshold** row on every signal card, plus threshold and tau marks on the probability
+  bars when the call has them; `GET /api/models`, whose `signal_rules` maps each signal endpoint of a model to its
+  `policy`, `threshold` and `directional_tau`; and every `signal` in a response, which carries the `threshold` and
+  `directional_tau` it was held to. A label-logprob rule falls back to ordinal \|score\| >= 1 on a first-token label
+  collision; `signal_rules` lists the primary rule.
+- **"No signal" is an abstention, by design** (precision over recall, Q2 and Q3): when the winning class is below
+  the model's frozen threshold, the service returns `sentiment: "neutral"` with `abstained: true` instead of a
+  directional call it is not confident in. The UI shows **No signal** and says why, e.g. "Abstained: the top class
+  (Bullish, 73.0%) is below this model's 80.0% threshold, so there is no directional call." A neutral with
+  `abstained: false` is a neutral verdict. With these rules only the 9B decision models abstain (dev300 coverage
+  72.9% for clef-flash, 26.3% for nimble), plus the CI plumbing model `tev1` below its provisional 0.50; the
+  defaults hold back by answering neutral ([design decisions](#design-decisions)).
 
 ## Architecture
 
@@ -182,7 +221,9 @@ that vets every resolved address and redirect hop, and bot walls, consent walls 
 Extraction (default `selectolax` + `cascade`: JSON-LD `articleBody`, then the per-source profile in
 [`sources.toml`](backend/src/veritrade/data/sources.toml), then a text-density fallback) cuts the `lede` or `full`
 input. Ollama gets the model's frozen prompt with a JSON schema, greedy decoding and `think: false`, and the
-model's confidence policy turns the answer into a label or an abstention (`backend/src/veritrade/`).
+model's confidence policy turns the answer into a label or an abstention against its frozen threshold
+(`backend/src/veritrade/`). While the page downloads, a `/api/ps` probe asks Ollama whether the model is already
+resident, so the response can flag a cold start.
 
 ## Design decisions
 
@@ -196,9 +237,10 @@ answers, is in [`01-decisions.md`](.context/docs/design/01-decisions.md).
   over bullish and bearish with inversions capped at 2% ([04](.context/docs/design/04-evals.md#1-objective-and-metrics)).
 - **Abstain rather than guess** (Q3): thresholds on decision-model class probabilities, on label-token probabilities
   (`/signal`, plus `directional_tau`) or on an ordinal -2..+2 score (`/analyze`, works mid-stream); every signal
-  reports `abstained`. The frozen defaults never abstain (dev300 coverage 100%): the 0.8B runs at `min_p` 0 with
-  tau 0.28 and `/analyze` at \|s\| >= 1 on integer scores, so they hold back by answering neutral; only the 9B
-  decision models abstain (dev300 coverage 72.9% and 26.3%).
+  reports `abstained` and the threshold it was held to ([per model](#thresholds-and-no-signal)). The frozen
+  defaults never abstain (dev300 coverage 100%): the 0.8B runs at `min_p` 0 with tau 0.28 and `/analyze` at
+  \|s\| >= 1 on integer scores, so they hold back by answering neutral; of the evaluated models only the 9B decision
+  models abstain (dev300 coverage 72.9% and 26.3%).
 - **Split and combined, both served** (Q8): a fast signal model next to a summariser, or one model for score, entity
   and summary; the UI switches and both were measured ([05](.context/docs/design/05-latency.md#split-against-combined)).
 - **The quick signal reads the lede** (Q4): headline plus opening paragraphs, body capped at 200 tokens; `/signal`
@@ -244,8 +286,18 @@ whose article input is capped at 2,000 tokens) against 825-1,074 at p50.
 - **Where the time goes.** `/signal` is prefill: the 0.8B spends 126 ms on prompt eval and 43 ms writing a 7-token
   answer. The 4B summariser prefills at about 800 tokens/s, so prompt eval is 1,029 of its 1,128 ms TTFT. Parse and
   extract take 1.2-1.6 and 1.6-2.5 ms, under 2% of the fastest `/signal`; the extractor matters through tokens
-  instead (704-822 `full` tokens for competent extractors, 2,116 for `strip-tags`). A cold model load adds 0.7-1.3 s,
-  paid only after a start or 30 idle minutes (`keep_alive` 30m).
+  instead (704-822 `full` tokens for competent extractors, 2,116 for `strip-tags`).
+- **Cold starts.** A model stays resident for 30 minutes after its last request (`keep_alive` 30m on every call,
+  `OLLAMA_KEEP_ALIVE=30m`), so only the first request after a start, 30 idle minutes, or Ollama unloading it to make
+  room for other models pays the load. The committed cold cells (n=3, so indicative) put it at 0.7-1.3 s over warm
+  for the generative models, 0.9-1.2 s for `nimble` and 5.4-6.2 s for `clef-flash`, a 10.58 GB file. A generative
+  model resident with another `num_ctx` is reloaded as well. The service detects both: a `/api/ps` residency
+  probe runs alongside the article fetch and sets `timings.inference.cold_start` and the SSE `meta` event's
+  `cold_start`, and the UI marks the request as a cold start, with Ollama's load time when it reports one (decision
+  models report none). The committed latency numbers predate the probe: on a fetch miss it overlaps the download,
+  but when the page is already in memory (a fetch-cache hit) it adds one local `/api/ps` round trip, expected to
+  be a few ms but not measured; it gives up after 2 s and leaves `cold_start` null
+  ([05](.context/docs/design/05-latency.md#cold-start-parse-and-extract)).
 - **Network and caches.** Fetch adds a median of the per-source medians of 148 ms, slowest 552 ms (GlobeNewswire),
   so a lede signal lands about 0.33 s after submit on a typical source (a rough sum of medians). A pooled HTTP/2
   client keeps connections alive for 60 s; the single-flight fetch cache (10 min, 512 entries, 200 MB; errors 60 s)
@@ -364,7 +416,7 @@ model: the winner's curse of tuning on 300 dev tweets.
 | Layer | Where | What it guards |
 |---|---|---|
 | Backend unit | `backend/tests/unit` | Extractors on skeleton fixtures under all four parsers, the SSRF guard (address classes, DNS rebinding, ports), block / consent / paywall detection, prompts, confidence policies, the stream scanner split at every byte offset, the Ollama client, the API contract |
-| Backend integration | `backend/tests/integration` | The ASGI app against fake publishers (skeleton pages) and a scripted Ollama: every endpoint in JSON and SSE, event order, single-flight and result caches, the error table, failures mid-stream, client disconnects |
+| Backend integration | `backend/tests/integration` | The ASGI app against fake publishers (skeleton pages) and a scripted Ollama: every endpoint in JSON and SSE, event order, single-flight and result caches, the error table, failures mid-stream, client disconnects, the cold-start probe (warm, cold, failing, hanging) |
 | Evals and scripts | `evals/tests/unit`, `scripts/tests` | Metrics, splits, grid, freeze, selection, the holdout guard, latency aggregation, the report, transcript redaction |
 | Frontend | `frontend/tests` | Vitest + Testing Library: SSE parser, components, and MSW integration (signal before the summary completes, JSON fallback, errors, abort on resubmit, benchmarks page) |
 | End to end | `frontend/e2e` | Playwright on the compose stack: bundled CPU Ollama with the CI models, an nginx fixture site answering for the 10 publisher hostnames, split and combined streaming, a decision model with a switched extractor, a signal check per source profile, the benchmarks page |

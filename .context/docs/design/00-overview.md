@@ -37,7 +37,10 @@ serves `qwen3.5:0.8b-q8_0` (dev300 F0.5 0.730, lede p50 178 ms), and `/summary` 
 bundled profile pulls just those two models, 4.34 GB. The 9B decision models score higher
 (`clef-flash:9b-q8_0` dev300 F0.5 0.874, mostly through recall: its bullish / bearish precision is 0.867 / 0.905
 against 0.914 / 0.918 for the 0.8B) but miss the 500 ms `/signal` budget (p50 659 ms), so the default trades recall
-for speed, and the 9B models stay selectable per request on native Ollama. Details:
+for speed, and the 9B models stay selectable per request on native Ollama. Each model's frozen threshold lives in
+[`models.toml`](../../../backend/src/veritrade/data/models.toml) (table in
+[04](04-evals.md#4-models-prompts-and-confidence-policies)); the UI pickers, every signal card and `GET /api/models`
+show it, and a call below it returns "No signal" (`neutral` with `abstained: true`). Details:
 [01 selection outcome](01-decisions.md#selection-outcome), [04-evals.md](04-evals.md), [05-latency.md](05-latency.md).
 
 The one-time holdout on unseen test splits ([`holdout.md`](../../../evals/results/holdout/holdout.md)) leaves the

@@ -11,6 +11,7 @@ export type AnalyzeResponse = Schemas["AnalyzeResponse"];
 export type ModelsResponse = Schemas["ModelsResponse"];
 export type HealthResponse = Schemas["HealthResponse"];
 export type ModelInfo = Schemas["ModelInfo"];
+export type SignalRule = Schemas["SignalRule"];
 export type ArticleMeta = Schemas["ArticleMeta"];
 export type SignalResult = Schemas["SignalResult"];
 export type Timings = Schemas["Timings"];

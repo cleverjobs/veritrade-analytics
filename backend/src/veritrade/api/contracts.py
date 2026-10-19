@@ -54,6 +54,11 @@ class InferenceTimings(_Strict):
     eval_ms: float | None = None
     prompt_tokens: int | None = None
     eval_tokens: int | None = None
+    cold_start: bool | None = Field(
+        None,
+        description="True when the model was not loaded in Ollama (or was loaded with another context size) "
+        "as the request arrived, so the inference time includes loading it; null when unknown.",
+    )
 
 
 class Timings(_Strict):
@@ -94,6 +99,16 @@ class SignalResult(_Strict):
     confidence: float | None = None
     score: int | None = Field(None, ge=-2, le=2)
     probabilities: dict[Sentiment, float] | None = None
+    threshold: float | None = Field(
+        None,
+        description="Frozen cutoff this call was held to: the minimum winning-class probability "
+        "(probability, label-logprob) or the minimum |score| (ordinal).",
+    )
+    directional_tau: float | None = Field(
+        None,
+        description="When set, a neutral lead still yields the likelier directional class once that class "
+        "reaches this probability.",
+    )
 
 
 # --- responses ------------------------------------------------------------------------------
@@ -133,6 +148,12 @@ class ErrorResponse(_Strict):
     error: ErrorBody
 
 
+class SignalRule(_Strict):
+    policy: PolicyName
+    threshold: float
+    directional_tau: float | None = None
+
+
 class ModelInfo(_Strict):
     name: str
     kind: ModelKind
@@ -140,6 +161,12 @@ class ModelInfo(_Strict):
     installed: bool
     size_bytes: int | None = None
     evaluated: bool = Field(True, description="False for plumbing-only models (e.g. the CI decision model).")
+    signal_rules: dict[Endpoint, SignalRule] = Field(
+        default_factory=dict,
+        description="Frozen confidence rule for each endpoint of this model that returns a signal (signal, "
+        "analyze). A label-logprob rule still falls back to ordinal on a label collision; the listed rule "
+        "is the primary one.",
+    )
 
 
 class ModelsResponse(_Strict):
@@ -170,6 +197,9 @@ class MetaEvent(_Strict):
     parse_ms: float
     extract_ms: float
     cache: CacheInfo
+    cold_start: bool | None = Field(
+        None, description="True when the model has to be loaded before its first token; null when unknown."
+    )
 
 
 class SentimentEvent(_Strict):

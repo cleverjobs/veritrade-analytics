@@ -112,6 +112,10 @@ class FakeOllama:
         default_factory=lambda: {"neutral": 0.06, "bullish": 0.9, "bearish": 0.04}
     )
     installed: tuple[str, ...] = ()
+    # Loaded models as /api/ps lists them: name -> context length.
+    resident: dict[str, int] = field(default_factory=dict)
+    # Raised or returned by every /api/ps call when set.
+    ps_failure: Exception | httpx.Response | None = None
     version: str = "0.40.6"
     delay: float = 0.001
     chunk_chars: int = 4
@@ -128,6 +132,7 @@ class FakeOllama:
         self.chat = self.router.post(f"{OLLAMA_URL}/api/chat").mock(side_effect=self._chat)
         self.systemone = self.router.post(f"{OLLAMA_URL}/v1/systemone").mock(side_effect=self._systemone)
         self.tags = self.router.get(f"{OLLAMA_URL}/api/tags").mock(side_effect=self._tags)
+        self.ps = self.router.get(f"{OLLAMA_URL}/api/ps").mock(side_effect=self._ps)
         self.version_route = self.router.get(f"{OLLAMA_URL}/api/version").mock(side_effect=self._version)
 
     @property
@@ -213,6 +218,18 @@ class FakeOllama:
         models = [
             {"name": name, "model": name, "size": 1_000_000 * (i + 1)}
             for i, name in enumerate(self.installed)
+        ]
+        return httpx.Response(200, json={"models": models})
+
+    def _ps(self, request: httpx.Request) -> httpx.Response:
+        self._check_up(request)
+        if isinstance(self.ps_failure, Exception):
+            raise self.ps_failure
+        if self.ps_failure is not None:
+            return self.ps_failure
+        models = [
+            {"name": name, "model": name, "context_length": context}
+            for name, context in self.resident.items()
         ]
         return httpx.Response(200, json={"models": models})
 
