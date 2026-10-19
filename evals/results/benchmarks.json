@@ -1,13 +1,13 @@
 {
  "version": 1,
  "sample": false,
- "generatedAt": "2026-10-19T12:02:00+00:00",
+ "generatedAt": "2026-10-19T13:02:40+00:00",
  "environment": {
   "chip": "Apple M4 Pro",
   "ramGb": 48,
   "ollamaVersion": "0.40.6",
   "backend": "native-metal",
-  "gitSha": "5f6bd982fe66d3415a215debcad09162bff5ba91"
+  "gitSha": "c70ea88bd969e9e320abaf4583a1175b0999981c"
  },
  "signal": [
   {
@@ -980,6 +980,66 @@
    "p95Ms": 4581.6,
    "ttftP50Ms": null,
    "timeToSignalP50Ms": 2579.7
+  },
+  {
+   "endpoint": "signal",
+   "model": "qwen3.5:0.8b-q8_0",
+   "scope": "lede",
+   "streaming": false,
+   "backend": "docker-cpu",
+   "n": 10,
+   "p50Ms": 2291.2,
+   "p95Ms": 3184.1,
+   "ttftP50Ms": null,
+   "timeToSignalP50Ms": 2291.2
+  },
+  {
+   "endpoint": "summary",
+   "model": "qwen3.5:4b-q4_K_M",
+   "scope": "full",
+   "streaming": true,
+   "backend": "docker-cpu",
+   "n": 10,
+   "p50Ms": 20820.1,
+   "p95Ms": 34194.8,
+   "ttftP50Ms": 10169.4,
+   "timeToSignalP50Ms": null
+  },
+  {
+   "endpoint": "summary",
+   "model": "qwen3.5:4b-q4_K_M",
+   "scope": "full",
+   "streaming": false,
+   "backend": "docker-cpu",
+   "n": 10,
+   "p50Ms": 16356.7,
+   "p95Ms": 23559.9,
+   "ttftP50Ms": null,
+   "timeToSignalP50Ms": null
+  },
+  {
+   "endpoint": "analyze",
+   "model": "qwen3.5:4b-q4_K_M",
+   "scope": "full",
+   "streaming": true,
+   "backend": "docker-cpu",
+   "n": 10,
+   "p50Ms": 30144.6,
+   "p95Ms": 40812.3,
+   "ttftP50Ms": 13105.8,
+   "timeToSignalP50Ms": 10427.5
+  },
+  {
+   "endpoint": "analyze",
+   "model": "qwen3.5:4b-q4_K_M",
+   "scope": "full",
+   "streaming": false,
+   "backend": "docker-cpu",
+   "n": 10,
+   "p50Ms": 36093.2,
+   "p95Ms": 45378.5,
+   "ttftP50Ms": null,
+   "timeToSignalP50Ms": 36093.2
   }
  ],
  "summary": [

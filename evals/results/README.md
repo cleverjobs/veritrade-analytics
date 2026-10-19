@@ -4,10 +4,10 @@ Everything here is numbers, ids, model names and hand-written notes: no article,
 
 Order of the pipeline: grid -> finalists -> freeze -> summary -> latency -> select -> holdout (once) -> report.
 
-## Status at 2026-10-19T12:02:00+00:00
+## Status at 2026-10-19T13:02:40+00:00
 
 - Selection: /signal `qwen3.5:0.8b-q8_0`, /summary `qwen3.5:4b-q4_K_M`, /analyze `qwen3.5:4b-q4_K_M`.
-- Benchmarks rows: signal 37, latency 16, summary 5, extraction 22.
+- Benchmarks rows: signal 37, latency 21, summary 5, extraction 22.
 - Holdout runs on record: 1 (`8dfd2f322299` complete).
 - Complete.
 
@@ -42,6 +42,7 @@ Order of the pipeline: grid -> finalists -> freeze -> summary -> latency -> sele
 | `latency/latency.md` | readable latency report |
 | `latency/preflight.json` | latency preflight: machine, Ollama version and service env, load, memory |
 | `latency/raw/20261018T200825Z.jsonl` | raw native latency samples of one preflight session (ids, numbers) |
+| `latency/raw/docker-cpu-20261018T200825Z.jsonl` | raw docker-cpu latency samples, one line per request (ids, numbers) |
 | `ollama_probe.json` | Ollama capability and latency probe on synthetic inputs (P2 sanity gate) |
 | `selection/selection.json` | per-endpoint winners, every candidate with numbers and verdict, R8 bundle |
 | `selection/selection.md` | readable selection report (`select`) |

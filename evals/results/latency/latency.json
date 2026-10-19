@@ -1,13 +1,13 @@
 {
  "version": 1,
- "generatedAt": "2026-10-19T05:54:28+00:00",
+ "generatedAt": "2026-10-19T13:01:49+00:00",
  "generatedBy": "uv run python -m veritrade_evals latency report",
  "session": "20261018T200825Z",
  "clean": true,
  "complete": true,
  "missing": [],
  "partial": [],
- "dockerSession": null,
+ "dockerSession": "docker-cpu-20261018T200825Z",
  "budgets": {
   "signalLedeP50Ms": 500.0,
   "ttftP50Ms": 1500.0,
@@ -1700,6 +1700,396 @@
      }
     ],
     "utilisation": 0.645
+   }
+  },
+  {
+   "key": "signal/qwen3.5:0.8b-q8_0/lede/json",
+   "endpoint": "signal",
+   "model": "qwen3.5:0.8b-q8_0",
+   "scope": "lede",
+   "streaming": false,
+   "backend": "docker-cpu",
+   "targets": {
+    "cold": 0,
+    "warm": 10
+   },
+   "partial": false,
+   "cold": {
+    "n": 0,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": null,
+    "totalInclFetchMs": null,
+    "ttftMs": null,
+    "signalMs": null,
+    "clientMs": null,
+    "stagesP50Ms": {
+     "fetch": null,
+     "parse": null,
+     "extract": null,
+     "wall": null,
+     "load": null,
+     "prompt_eval": null,
+     "eval": null
+    },
+    "tokensP50": {
+     "prompt": null,
+     "eval": null
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 10,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 2291.2,
+     "p95": 3184.1
+    },
+    "totalInclFetchMs": {
+     "p50": 3149.7,
+     "p95": 3878.2
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 2291.2,
+     "p95": 3184.1
+    },
+    "clientMs": {
+     "p50": 3152.9,
+     "p95": 3882.8
+    },
+    "stagesP50Ms": {
+     "fetch": 617.0,
+     "parse": 2.0,
+     "extract": 1.2,
+     "wall": 2288.3,
+     "load": 0.7,
+     "prompt_eval": 1980.9,
+     "eval": 268.9
+    },
+    "tokensP50": {
+     "prompt": 532.5,
+     "eval": 8.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "n/a"
+   }
+  },
+  {
+   "key": "summary/qwen3.5:4b-q4_K_M/full/stream",
+   "endpoint": "summary",
+   "model": "qwen3.5:4b-q4_K_M",
+   "scope": "full",
+   "streaming": true,
+   "backend": "docker-cpu",
+   "targets": {
+    "cold": 0,
+    "warm": 10
+   },
+   "partial": false,
+   "cold": {
+    "n": 0,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": null,
+    "totalInclFetchMs": null,
+    "ttftMs": null,
+    "signalMs": null,
+    "clientMs": null,
+    "stagesP50Ms": {
+     "fetch": null,
+     "parse": null,
+     "extract": null,
+     "wall": null,
+     "load": null,
+     "prompt_eval": null,
+     "eval": null
+    },
+    "tokensP50": {
+     "prompt": null,
+     "eval": null
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 10,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 20820.1,
+     "p95": 34194.8
+    },
+    "totalInclFetchMs": {
+     "p50": 21366.6,
+     "p95": 34956.4
+    },
+    "ttftMs": {
+     "p50": 10169.4,
+     "p95": 17977.4
+    },
+    "signalMs": null,
+    "clientMs": {
+     "p50": 21370.2,
+     "p95": 34959.3
+    },
+    "stagesP50Ms": {
+     "fetch": 525.2,
+     "parse": 1.4,
+     "extract": 0.8,
+     "wall": 20816.3,
+     "load": 0.5,
+     "prompt_eval": 9392.4,
+     "eval": 11931.7
+    },
+    "tokensP50": {
+     "prompt": 683.5,
+     "eval": 71.5
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "n/a"
+   }
+  },
+  {
+   "key": "summary/qwen3.5:4b-q4_K_M/full/json",
+   "endpoint": "summary",
+   "model": "qwen3.5:4b-q4_K_M",
+   "scope": "full",
+   "streaming": false,
+   "backend": "docker-cpu",
+   "targets": {
+    "cold": 0,
+    "warm": 10
+   },
+   "partial": false,
+   "cold": {
+    "n": 0,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": null,
+    "totalInclFetchMs": null,
+    "ttftMs": null,
+    "signalMs": null,
+    "clientMs": null,
+    "stagesP50Ms": {
+     "fetch": null,
+     "parse": null,
+     "extract": null,
+     "wall": null,
+     "load": null,
+     "prompt_eval": null,
+     "eval": null
+    },
+    "tokensP50": {
+     "prompt": null,
+     "eval": null
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 10,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 16356.7,
+     "p95": 23559.9
+    },
+    "totalInclFetchMs": {
+     "p50": 16906.5,
+     "p95": 24321.9
+    },
+    "ttftMs": null,
+    "signalMs": null,
+    "clientMs": {
+     "p50": 16909.1,
+     "p95": 24325.6
+    },
+    "stagesP50Ms": {
+     "fetch": 475.7,
+     "parse": 1.6,
+     "extract": 1.6,
+     "wall": 16352.9,
+     "load": 0.8,
+     "prompt_eval": 7519.7,
+     "eval": 8099.8
+    },
+    "tokensP50": {
+     "prompt": 683.5,
+     "eval": 71.5
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "n/a"
+   }
+  },
+  {
+   "key": "analyze/qwen3.5:4b-q4_K_M/full/stream",
+   "endpoint": "analyze",
+   "model": "qwen3.5:4b-q4_K_M",
+   "scope": "full",
+   "streaming": true,
+   "backend": "docker-cpu",
+   "targets": {
+    "cold": 0,
+    "warm": 10
+   },
+   "partial": false,
+   "cold": {
+    "n": 0,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": null,
+    "totalInclFetchMs": null,
+    "ttftMs": null,
+    "signalMs": null,
+    "clientMs": null,
+    "stagesP50Ms": {
+     "fetch": null,
+     "parse": null,
+     "extract": null,
+     "wall": null,
+     "load": null,
+     "prompt_eval": null,
+     "eval": null
+    },
+    "tokensP50": {
+     "prompt": null,
+     "eval": null
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 10,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 30144.6,
+     "p95": 40812.3
+    },
+    "totalInclFetchMs": {
+     "p50": 30913.5,
+     "p95": 41511.7
+    },
+    "ttftMs": {
+     "p50": 13105.8,
+     "p95": 22497.6
+    },
+    "signalMs": {
+     "p50": 10427.5,
+     "p95": 19426.7
+    },
+    "clientMs": {
+     "p50": 30916.4,
+     "p95": 41515.3
+    },
+    "stagesP50Ms": {
+     "fetch": 540.2,
+     "parse": 1.6,
+     "extract": 1.2,
+     "wall": 30140.5,
+     "load": 0.7,
+     "prompt_eval": 9435.1,
+     "eval": 20465.4
+    },
+    "tokensP50": {
+     "prompt": 821.5,
+     "eval": 107.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "n/a"
+   }
+  },
+  {
+   "key": "analyze/qwen3.5:4b-q4_K_M/full/json",
+   "endpoint": "analyze",
+   "model": "qwen3.5:4b-q4_K_M",
+   "scope": "full",
+   "streaming": false,
+   "backend": "docker-cpu",
+   "targets": {
+    "cold": 0,
+    "warm": 10
+   },
+   "partial": false,
+   "cold": {
+    "n": 0,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": null,
+    "totalInclFetchMs": null,
+    "ttftMs": null,
+    "signalMs": null,
+    "clientMs": null,
+    "stagesP50Ms": {
+     "fetch": null,
+     "parse": null,
+     "extract": null,
+     "wall": null,
+     "load": null,
+     "prompt_eval": null,
+     "eval": null
+    },
+    "tokensP50": {
+     "prompt": null,
+     "eval": null
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "warm": {
+    "n": 10,
+    "errors": 0,
+    "errorCodes": {},
+    "totalMs": {
+     "p50": 36093.2,
+     "p95": 45378.5
+    },
+    "totalInclFetchMs": {
+     "p50": 36709.5,
+     "p95": 45733.4
+    },
+    "ttftMs": null,
+    "signalMs": {
+     "p50": 36093.2,
+     "p95": 45378.5
+    },
+    "clientMs": {
+     "p50": 36712.1,
+     "p95": 45736.3
+    },
+    "stagesP50Ms": {
+     "fetch": 644.1,
+     "parse": 2.0,
+     "extract": 1.3,
+     "wall": 36089.0,
+     "load": 0.7,
+     "prompt_eval": 9347.6,
+     "eval": 22233.7
+    },
+    "tokensP50": {
+     "prompt": 821.5,
+     "eval": 107.0
+    },
+    "truncated": 0,
+    "orderViolations": 0
+   },
+   "budget": {
+    "status": "n/a"
    }
   }
  ]
